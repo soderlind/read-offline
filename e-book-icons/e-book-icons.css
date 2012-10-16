@@ -1,0 +1,19 @@
+.pdf, a[href $=".pdf"], 
+.epub, a[href $=".epub"], 
+.mobi, a[href $=".mobi"], 
+.azw, a[href $=".azw"] {
+	padding: 0 0 1px 20px;
+	min-height:16px;
+}
+ 
+.pdf, a[href $=".pdf"] {
+	background: url(document-pdf.png) no-repeat 0 50%;
+	}
+ 
+.epub, a[href $=".epub"] {
+	background: url(document-epub.png) no-repeat 0 50%;
+	}
+ 
+.mobi, .azw, a[href $=".mobi"], a[href $=".azw"] {
+	background: url(document-mobi.png) no-repeat 0 50%;
+}
