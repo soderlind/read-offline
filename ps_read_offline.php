@@ -3,7 +3,7 @@
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Download a post or page as pdf, epub, or mobi  (see settings). 
-Version: 0.1.0
+Version: 0.1.1
 Author: Per Soderlind
 Author URI: http://soderlind.no
 */
@@ -31,6 +31,8 @@ Credits:
 
 if (!class_exists('ps_read_offline')) {
 	class ps_read_offline {
+	
+		var $version = '0.1.1';
 		/**
 		* @var string The options string name for this plugin
 		*/
@@ -180,8 +182,7 @@ if (!class_exists('ps_read_offline')) {
 
 		
 		function _version() {
-			$default_headers = get_plugin_data( __FILE__, false, false);
-			return $default_headers['Version'];
+			return $this->version;
 		}
 		
 		/**
