@@ -128,6 +128,9 @@ div.readoffline-embed-text {
 
 == Changelog ==
 
+= 0.1.1 =
+* bugfix
+
 = 0.1.0 =
 * Added the Read Offline shortcode
 * Added, in Settings->Read Offline, option to add Read Offline to top and/or bottom of post and page
