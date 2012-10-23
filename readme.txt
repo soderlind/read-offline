@@ -16,10 +16,11 @@ Read Offline allows you to download and read posts and pages offline. You can do
 
 This is an early version, please [post bugs and feature requests](http://soderlind.no/archives/2012/10/01/read-offline/#respond)
 
-= Implemented so far = 
+= Features = 
 
 *   Settings page (Settings->Read Offline)
-*   Read offline widget
+*   Read Offline widget
+*   Read Offline shortcode
 *   You can download a pdf, epub or mobi file containing the current post or page (you have to add the Read Offline widget to see the download links)
 *   The download filename is based on the posts slug (`$post->post_name`)
 *   Add meta data to the file
@@ -29,25 +30,24 @@ This is an early version, please [post bugs and feature requests](http://soderli
     *   Publisher (ePub)
     *   Identifier (uPub)
     *   Source URL (ePub)
-
-= I plan to implement = 
-
-*   Option: Move the files into a .zip file and only present the link to this .zip file
 *   Option: Add download links to the top and bottom of a post or page.
+
+= To-do = 
+
 *   Option: Add a custom style to the file
 *   Create read-offline.pot for easy translation
 *   more ? Please [post a comment](http://soderlind.no/archives/2012/10/01/read-offline/#respond) if you have any suggestions
 
 = Credits = 
 
-The plugin is using the following libraries
+Libraries
 
 *  [Epub](http://www.phpclasses.org/package/6115), License: GNU LGPL, Attribution required for commercial implementations, requested for everything else.
 *  [Zip](http://www.phpclasses.org/package/6110), License: GNU LGPL, Attribution required for commercial implementations, requested for everything else. 
 *  [phpMobi](https://github.com/raiju/phpMobi), License: Apache license (version 2.0)
 *  [mpdf](http://www.mpdf1.com/mpdf/index.php), License: GNU General Public License version 2 
 
-The plugin is using the following icons
+Icons
 
 *  PDF icon from the [Fugue Icons set](http://p.yusukekamiyamane.com/) by Yusuke Kamiyamane, released under a [Creative Commons attribution license](http://creativecommons.org/licenses/by/3.0/)
 *  [ePub and mobi icons](http://smithsrus.com/e-book-download-icons/) by Doug Smith, also released under a [Creative Commons attribution license](http://creativecommons.org/licenses/by/3.0/)
@@ -58,7 +58,79 @@ The plugin is using the following icons
 1. Upload the extracted `read-online` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 
+== Use ==
+
+There are 3 ways you can add the Read Offline link
+
+1. At the top or bottom of each post and/or page (See Settings->Read Offline)
+1. Using the Read Offline widget
+1. Using the `[readoffline]` shortcode
+
+The `[readoffline]` shortcode has the following parameters
+
+* format="epub", default: format="pdf,epub,mobi"
+* text="Read %title offline:", default: text="". `%title%` will be replaced with the post or page title 
+* icononly="true", default="false"
+
+Examples
+
+* `[readoffline]` is the same as `[readoffline text="" format="pdf,epub,mobi" icononly="false"]`
+* `[readoffline text="Download %title%:" format="epub"]`
+
+== Style ==
+
+You can modify the look using the included style sheet, read-offline.css:
+
+`
+div.readoffline-shortcode {
+	margin-bottom: 10px;
+	font-size: .8em !important;
+}
+
+.readoffline-shortcode div {
+	padding: 0 0 1px 20px;
+	display: inline;
+}
+
+div.readoffline-shortcode-text {
+	padding-left: 0;	
+}
+
+.readoffline-embed {
+	margin-bottom: 10px;
+	font-size: .8em !important;
+}
+
+.readoffline-embed div {
+	padding: 0 0 1px 20px;
+	display: inline;
+}
+
+div.readoffline-embed-text {
+	padding-left: 0;	
+}
+
+.readoffline-widget {
+
+}
+
+
+.readoffline-widget div {
+	display: inline;
+}
+`
+
+== Screenshots ==
+
+1. Example post
+2. Read Offline widget
+3. Read Offline settings page
+
 == Changelog ==
+
+= 0.1.0 =
+* Added the Read Offline shortcode
+* Added, in Settings->Read Offline, option to add Read Offline to top and/or bottom of post and page
 
 = 0.0.2 =
 * Filename based on the posts slug

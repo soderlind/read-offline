@@ -14,9 +14,11 @@ require('../../../wp-load.php');
 			$docformat = strtolower($_GET['read-offline']);			
 			$author = get_the_author_meta('display_name',$post->post_author);
 	
+			$html = '<h1 class="entry-title">' . get_the_title($post->ID) . '</h1>';
 			$content = $post->post_content;
-			$html = apply_filters('the_content', $content);
-			
+			$content = preg_replace("/\[\\/?readoffline(\\s+.*?\]|\])/i", "", $content); // remove all [readonline] shortcodes
+			$html .= apply_filters('the_content', $content);
+
 			switch ($docformat) {
 				case 'epub':
 					require_once "library/epub/Epub.inc.php";

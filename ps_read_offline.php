@@ -3,13 +3,16 @@
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Download a post or page as pdf, epub, or mobi  (see settings). 
-Version: 0.0.2
+Version: 0.1.0
 Author: Per Soderlind
 Author URI: http://soderlind.no
 */
 /*
 
 Changelog:
+v0.1.0:
+* Added the Read Offline shortcode
+* Added, in Settings->Read Offline, option to add Read Offline to top and/or bottom of post and page
 v0.0.2: 
 * Filename based on the posts slug
 * Added meta data
@@ -21,44 +24,9 @@ v0.0.1:
 Credits: 
 	This template is based on the template at http://pressography.com/plugins/wordpress-plugin-template/ 
 	My changes are documented at http://soderlind.no/archives/2010/03/04/wordpress-plugin-template/
+	
+
 */
-
-
-
-if (isset($_GET['ps_read_offline_javascript'])) {
-	//embed javascript
-	Header("content-type: application/x-javascript");
-	echo<<<ENDJS
-/**
-* @desc Read Offline
-* @author Per Soderlind - http://soderlind.no
-*/
-
-jQuery(document).ready(function(){
-	// add your jquery code here
-
-
-	//validate plugin option form
-  	jQuery("#ps_read_offline_options").validate({
-		rules: {
-			"ps_read_offline_option_format[]": {
-				required: true,
-				minlength: 1
-			}
-		},
-		messages: {
-			"ps_read_offline_option_format[]": {
-				// the ps_read_offline_lang object is define using wp_localize_script() in function ps_read_offline_script() 
-				required: ps_read_offline_lang.required,
-			}
-		},
-		errorLabelContainer: jQuery("#ps_read_offline_options div.error")
-	});
-});
-
-ENDJS;
-exit(0);
-} 
 
 
 if (!class_exists('ps_read_offline')) {
@@ -106,25 +74,114 @@ if (!class_exists('ps_read_offline')) {
 			$this->urlpath = plugins_url('', __FILE__);	
 			//Initialize the options
 			$this->getOptions();
-			//Admin menu
-			add_action("admin_menu", array(&$this,"admin_menu_link"));
 
-			//Actions
-			add_action('admin_enqueue_scripts', array(&$this,'ps_read_offline_admin_script')); // or wp_enqueue_scripts, login_enqueue_scripts
-			add_action('wp_enqueue_scripts', array(&$this,'ps_read_offline_wp_script')); // or wp_enqueue_scripts, login_enqueue_scripts
+			add_action("admin_menu", array(&$this,"admin_menu_link"));
+			add_action('admin_enqueue_scripts', array(&$this,'ps_read_offline_admin_script'));
+			add_action('the_content', array(&$this,'ps_read_offline_embed'));
+			add_action('wp_enqueue_scripts', array(&$this,'ps_read_offline_wp_script'));
+			add_shortcode('readoffline', array(&$this,'ps_read_offline_shortcode'));
 		}
 		
 		function ps_read_offline_admin_script() {
-			wp_enqueue_script('jquery'); // other scripts included with Wordpress: http://tinyurl.com/y875age
-			wp_enqueue_script('jquery-validate', 'http://ajax.microsoft.com/ajax/jquery.validate/1.6/jquery.validate.min.js', array('jquery')); // other/new versions: http://www.asp.net/ajaxlibrary/cdn.ashx
-			wp_enqueue_script('ps_read_offline_script', $this->url.'?ps_read_offline_javascript'); // embed javascript, see end of this file
-			wp_localize_script( 'ps_read_offline_script', 'ps_read_offline_lang', array(
+			wp_enqueue_script('jquery');
+			wp_enqueue_script('jquery-validate', 'http://ajax.microsoft.com/ajax/jquery.validate/1.6/jquery.validate.min.js', array('jquery'));
+			wp_enqueue_script('ps_read_offline', $this->urlpath.'/read-offline.js',array('jquery-validate'),$this->_version());
+			wp_localize_script( 'ps_read_offline', 'ps_read_offline_lang', array(
 				'required' => __('Please select a format below', $this->localizationDomain),
 			));
 		}
 		
 		function ps_read_offline_wp_script() {
-			wp_enqueue_style('ps_read_offline_style', $this->urlpath.'/e-book-icons/e-book-icons.css','1.0.9'); 
+			wp_enqueue_style('ps_read_offline_icons', $this->urlpath.'/e-book-icons/e-book-icons.css',array(),$this->_version());
+			wp_enqueue_style('ps_read_offline_style', $this->urlpath.'/read-offline.css',array(),$this->_version());
+		}
+		
+		function ps_read_offline_embed($content) {		
+			global $post;
+			
+			$placements = array_intersect(array("top_post","bottom_post","top_page","bottom_page"), $this->options['ps_read_offline_option_placement']);	
+			$formats = array_uintersect(					
+					array(
+						 'pdf'  => 'PDF'
+						,'epub' => 'ePub'
+						,'mobi' => 'mobi'
+					)
+					, $this->options['ps_read_offline_option_format']
+					, "strcasecmp"
+			);		
+			$readoffline ='<div class="readoffline-embed">';
+			$text = $this->options['ps_read_offline_option_link_header'];
+			$text = str_ireplace('%title%', $post->post_title,$text);
+			if ($text !== '') {
+					$readoffline .= sprintf('<div class="readoffline-embed-text">%s</div>',stripslashes($text));
+			}			
+			foreach ($formats as $type => $document_type) {
+				$str_info =  (in_array('yes',$this->options['ps_read_offline_option_iconsonly'])) ? '' : sprintf("%s %s",__('Download',$this->localizationDomain),$document_type);
+				$readoffline .= sprintf ('<div><a class="%s" href="%s?id=%s&read-offline=%s" title="%s %s.%s">%s</a></div>',
+					$type,plugins_url("download.php", __FILE__),$post->ID,$type,
+					__('Download',$this->localizationDomain),$post->post_name,$type,
+					$str_info
+				);
+			}
+			$readoffline .= "</div>";
+			if ((is_single() && array_search('top_post',$placements) !== false) || (is_page() && array_search('top_page',$placements) !== false) ) {
+				$content = $readoffline . $content;
+			}
+			if ((is_single() && array_search('bottom_post',$placements) !== false) || (is_page() && array_search('bottom_page',$placements) !== false) ) {
+				$content =  $content . $readoffline;
+			}	
+			return $content;
+		}
+		
+		
+		
+		function ps_read_offline_shortcode($atts) {
+			if (!is_single() && !is_page()) return;
+			global $post;
+			extract(shortcode_atts(array(
+				// default values
+				'format'   	=>	'pdf,epub,mobi'
+				,'text'		=>	''
+				,'icononly' => false
+			), $atts));
+
+			// do param testing	
+			$formats = array_intersect(array("pdf", "epub", "mobi"), explode(',', $format));		
+			$text = str_ireplace('%title%', $post->post_title,$text);
+
+			//
+			$formats = array_uintersect(					
+					array(
+						'pdf' => 'PDF'
+						,'epub' => 'ePub'
+						,'mobi' => 'mobi'
+					)
+					, $formats
+					, "strcasecmp"
+			);			
+			if (count($formats)>0) {
+				$ret ='<div class="readoffline-shortcode">';
+				if ($text !== '') {
+					$ret .= sprintf('<div class="readoffline-shortcode-text">%s</div>',$text);
+				}
+				foreach ($formats as $type => $document_type) {
+					$str_info = ($icononly) ? '' : sprintf("%s %s",__('Download',$this->localizationDomain),$document_type);
+					$ret .= sprintf ('<div><a class="%s" href="%s?id=%s&read-offline=%s" title="%s %s.%s">%s</a></div>',
+						$type,plugins_url("download.php", __FILE__),$post->ID,$type,
+						__('Download ',$this->localizationDomain),$post->post_name,$type,
+						$str_info
+					);
+				}
+				$ret .= "</div>";
+				return $ret;						
+			}
+			return;
+		}
+
+		
+		function _version() {
+			$default_headers = get_plugin_data( __FILE__, false, false);
+			return $default_headers['Version'];
 		}
 		
 		/**
@@ -133,7 +190,13 @@ if (!class_exists('ps_read_offline')) {
 		*/
 		function getOptions() {
 			if (isset($_GET['ps_read_offline_reset']) || !$theOptions = get_option($this->optionsName)) {
-				$theOptions = array('ps_read_offline_option_format'=> array('pdf','epub','mobi'),'ps_read_offline_option_zip' => array('no'),'ps_read_offline_option_placement'=>array('widget'));
+				$theOptions = array(
+					'ps_read_offline_option_format'=> array('pdf','epub','mobi'),
+					'ps_read_offline_option_zip' => array('no'),
+					'ps_read_offline_option_placement'=>array('widget'),
+					'ps_read_offline_option_iconsonly'=>array('no'),
+					'ps_read_offline_option_link_header'=>'Read Offline:'
+				);
 				update_option($this->optionsName, $theOptions);
 			}
 			$this->options = $theOptions;
@@ -141,8 +204,8 @@ if (!class_exists('ps_read_offline')) {
 		/**
 		* Saves the admin options to the database.
 		*/
-		function saveAdminOptions(){
-			return update_option($this->optionsName, $this->options);
+		function saveAdminOptions(){			
+			update_option($this->optionsName, $this->options);
 		}
 
 		/**
@@ -172,14 +235,15 @@ if (!class_exists('ps_read_offline')) {
 					die('Whoops! There was a problem with the data you posted. Please go back and try again.'); 
 				}
 				$this->options['ps_read_offline_option_format'] = $_POST['ps_read_offline_option_format'];				   
-				$this->options['ps_read_offline_option_zip'] = $_POST['ps_read_offline_option_zip'];
-				$this->options['ps_read_offline_option_placement'] = isset($_POST['ps_read_offline_option_placement']) ? $_POST['ps_read_offline_option_placement'] : 'widget';				   
+				$this->options['ps_read_offline_option_zip'] = isset($_POST['ps_read_offline_option_zip']) ? $_POST['ps_read_offline_option_zip'] : array('no');				   
+				$this->options['ps_read_offline_option_placement'] = isset($_POST['ps_read_offline_option_placement']) ? $_POST['ps_read_offline_option_placement'] : array('widget');				   
+				$this->options['ps_read_offline_option_iconsonly'] = isset($_POST['ps_read_offline_option_iconsonly']) ? $_POST['ps_read_offline_option_iconsonly'] : array('no');				   
+				$this->options['ps_read_offline_option_link_header'] = esc_attr($_POST['ps_read_offline_option_link_header']);	
 
 				$this->saveAdminOptions();
-				echo '<div class="updated"><p>Success! Your changes were sucessfully saved!</p></div>';
+				_e('<div class="updated"><p>Success! Your changes were sucessfully saved!</p></div>',$this->localizationDomain);
 			} ?>			
 
-					   
 			<div class="wrap">
 			<h2>Read Offline</h2>
 
@@ -205,35 +269,36 @@ if (!class_exists('ps_read_offline')) {
 										AddType application/x-mobipocket-ebook .mobi
 									</div>
 									</p>
-									Or you can zip the files (select 'yes' below) 
 								", $this->localizationDomain); ?>
 							</td> 
 						</tr>
 						<tr valign="top"> 
-							<th width="33%" scope="row"><?php _e('Zip the files?', $this->localizationDomain); ?></th> 
+							<th width="33%" scope="row"><?php _e('Download link placements', $this->localizationDomain); ?></th>
 							<td>
-								
-								<input name="ps_read_offline_option_zip[]" disabled="disabled" type="radio" id="ps_read_offline_option_zip_yes" value="yes" <?php if (in_array('yes',$this->options['ps_read_offline_option_zip'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_zip_yes"><?php _e('Yes', $this->localizationDomain);?></label>
-								<input name="ps_read_offline_option_zip[]" disabled="disabled" checked="checked" type="radio" id="ps_read_offline_option_zip_no" value="no" <?php if (in_array('no',$this->options['ps_read_offline_option_zip'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_zip_no"><?php _e('No', $this->localizationDomain);?></label><br />
-								
-								<br /><span class="setting-description"><?php _e("
-								<span style='color:red;'>Not implented in this version</span>
-								If you choose to zip the files, the files will be moved into one zip archive and only the link to this archive will be presented.
-								", $this->localizationDomain); ?>
+								<input name="ps_read_offline_option_placement[]" id="ps_read_offline_option_placement_top_post" type="checkbox" value="top_post" <?php if (in_array('top_post',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_top_post"><?php _e('At the top of the post', $this->localizationDomain);?></label><br />
+								<input name="ps_read_offline_option_placement[]" id="ps_read_offline_option_placement_bottom_post" type="checkbox" value="bottom_post" <?php if (in_array('bottom_post',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_bottom_post"><?php _e('On the botom of the post', $this->localizationDomain);?></label><br />
+								<input name="ps_read_offline_option_placement[]" id="ps_read_offline_option_placement_top_page" type="checkbox" value="top_page" <?php if (in_array('top_page',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_top_page"><?php _e('At the top of the page', $this->localizationDomain);?></label><br />
+								<input name="ps_read_offline_option_placement[]" id="ps_read_offline_option_placement_bottom_page" type="checkbox" value="bottom_page" <?php if (in_array('bottom_page',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_bottom_page"><?php _e('On the botom of the page', $this->localizationDomain);?></label><br />
+								<span class="setting-description"><?php _e("Also available via the the <a href='widgets.php'>Read Offline widget</a> and the <a href='http://soderlind.no/archives/2012/10/01/read-offline/#shortcode'>[readoffline] shortcode</a>.", $this->localizationDomain); ?>
 							</td> 
 						</tr>
 						<tr valign="top"> 
-							<th width="33%" scope="row"><?php _e('Download link placements', $this->localizationDomain); ?></th> 
+							<th width="33%" scope="row"><?php _e('Download link header:', $this->localizationDomain); ?></th>
 							<td>
-								<input name="ps_read_offline_option_placement[]" disabled="disabled" id="ps_read_offline_option_placement_top_post" type="checkbox" value="top_post" <?php if (in_array('top_post',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_top_post"><?php _e('At the top of the post', $this->localizationDomain);?></label><br />
-								<input name="ps_read_offline_option_placement[]" disabled="disabled" id="ps_read_offline_option_placement_bottom_post" type="checkbox" value="bottom_post" <?php if (in_array('bottom_post',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_bottom_post"><?php _e('On the botom of the post', $this->localizationDomain);?></label><br />
-								<input name="ps_read_offline_option_placement[]" disabled="disabled" id="ps_read_offline_option_placement_top_page" type="checkbox" value="top_page" <?php if (in_array('top_page',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_top_page"><?php _e('At the top of the page', $this->localizationDomain);?></label><br />
-								<input name="ps_read_offline_option_placement[]" disabled="disabled" id="ps_read_offline_option_placement_bottom_page" type="checkbox" value="bottom_page" <?php if (in_array('bottom_page',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_bottom_page"><?php _e('On the botom of the page', $this->localizationDomain);?></label><br />
-								<input name="ps_read_offline_option_placement[]" disabled="disabled" type="checkbox" value="widget"  checked="checked"/> <?php _e("In the <a href='widgets.php'>Read Offline widget</a>", $this->localizationDomain);?><br />
-								
-								<br /><span class="setting-description"><?php _e("<span style='color:red;'>In the 0.0.2, only the widget is implemented</span>", $this->localizationDomain); ?>
+								<input class="regular-text" name="ps_read_offline_option_link_header" id="ps_read_offline_option_link_header" type="text" value="<?php printf("%s", stripslashes($this->options['ps_read_offline_option_link_header'])); ?>" />
+								<br /><span class="setting-description"><?php _e("Use %title% to insert the post and page title", $this->localizationDomain); ?>
 							</td> 
 						</tr>
+						
+						<tr valign="top"> 
+							<th width="33%" scope="row"><?php _e('Download link, icons only?:', $this->localizationDomain); ?></th>
+							<td>
+								<input name="ps_read_offline_option_iconsonly[]" id="ps_read_offline_option_iconsonly_yes" type="radio" value="yes" <?php if (in_array('yes',$this->options['ps_read_offline_option_iconsonly'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_iconsonly_yes"><?php _e('Yes', $this->localizationDomain);?></label><br />
+								<input name="ps_read_offline_option_iconsonly[]" id="ps_read_offline_option_iconsonly_no" type="radio" value="no" <?php if (in_array('no',$this->options['ps_read_offline_option_iconsonly'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_iconsonly_no"><?php _e('No', $this->localizationDomain);?></label><br />
+								<br /><span class="setting-description"><?php _e("", $this->localizationDomain); ?>
+							</td> 
+						</tr>
+						
 					</table>
 					<p class="submit"> 
 						<input type="submit" name="ps_read_offline_save" class="button-primary" value="<?php _e('Save Changes', $this->localizationDomain); ?>" /> <a href="options-general.php?page=<?php echo basename(__FILE__);?>&ps_read_offline_reset" class="submit"><?php _e('Reset', $this->localizationDomain);?></a>
@@ -258,27 +323,35 @@ if (!class_exists('ps_read_offline')) {
 
 if (!class_exists('ps_read_offline_widget')) {
 	class ps_read_offline_widget extends WP_Widget {
+	
+		var $localizationDomain = "ps_read_offline";
+	
 		function __construct() {	
 			parent::__construct(
 				'read_offline_widget', // Base ID
 				'Read Offline', // Name
-				array( 'description' => __( 'Adds a download link for the current post and page. PDF, EPUB and MOBI is supported. Configurable in Settings->Read Offline', 'text_domain' ), ) // Args
+				array( 'description' => __( 'Adds a download link for the current post and page. PDF, EPUB and MOBI is supported. Configurable in Settings->Read Offline', $this->localizationDomain ), ) // Args
 			);	
 		}
 		function widget($args, $instance) {
 			global $post;
 			
-			if (!is_single()) return;
+			if (!is_single() && !is_page()) return;
 			
 			extract($args, EXTR_SKIP);
 			echo $before_widget;
 
+
 			$title = empty($instance['title']) ? ' ' : apply_filters('widget_title', $instance['title']);
+			$text = empty($instance['text']) ? ' ' : apply_filters('widget_text', $instance['text']);
 			
+			$icononly = ($instance['icononly'] == 'yes');
+
+			$text = str_ireplace('%title%', $post->post_title,$text);
 			if ( !empty( $title ) ) { 
 				echo $before_title . $title . $after_title; 
 			}
-			echo '<div id="read_offline">';
+			echo '<div class="readoffline-widget">';
 				$options = get_option('ps_read_offline_options');
 				$formats = array_uintersect(					
 					array(
@@ -289,40 +362,55 @@ if (!class_exists('ps_read_offline_widget')) {
 					, $options['ps_read_offline_option_format']
 					, "strcasecmp"
 				);
-				if (in_array('no', $options['ps_read_offline_option_zip'])) {
-					printf(__('Download for offline reading "%s":<br/>'),$post->post_title);
+				echo  $text, '<br/>';
+				
+				if ($icononly === true) {
+					foreach ($formats as $type => $document_type) {
+						printf ('<div><a class="%s" href="%s?id=%s&read-offline=%s" title="%s %s.%s"></a></div>',
+							$type,plugins_url("download.php", __FILE__),$post->ID,$type,
+							__('Download ',$this->localizationDomain),$post->post_name,$type
+						);
+					}
+				} else {					
 					echo "<ul>";
 					foreach ($formats as $type => $document_type) {
 						printf ('<li><a class="%s" href="%s?id=%s&read-offline=%s" title="%s %s.%s">%s%s</a></li>',
 							$type,plugins_url("download.php", __FILE__),$post->ID,$type,
-							__('Download '),$post->post_name,$type,
-							__('Download '),$document_type
+							__('Download ',$this->localizationDomain),$post->post_name,$type,
+							__('Download ',$this->localizationDomain),$document_type
 						);
 					}
 					echo "</ul>";
-				} else {			
-					$values = array_values($formats);				
-					$str_formats = (count($values) > 2) 
-						? implode(', ', array_slice($values, 0, count($values)-1)) . __(' and ') . implode(array_slice($values, -1)) 
-						: implode(__(' and '), $values);
-					
-					printf(__('<p><a href="%s">Download a .zip</a> file including "%s" in %s %s.</p>'),$post->ID, $post->post_title, $str_formats,(count($values)>1) ? 'formats' : 'format');
-				}			
+				}
 			echo '</div>';
 
 			echo $after_widget;
 		}
+		
 		function update($new_instance, $old_instance) {
 			$instance = $old_instance;
 			$instance['title'] = strip_tags($new_instance['title']);
+			$instance['text'] = strip_tags($new_instance['text']);
+			$instance['icononly'] = $new_instance['icononly'];
+			
 			return $instance;
 		}
+		
 		function form($instance) {
-			$instance = wp_parse_args( (array) $instance, array( 'title' => ''  ) );
+			$instance = wp_parse_args( (array) $instance, array( 'title' => '', 'text' => '', 'icononly' => 'no'  ));
 			$title = strip_tags($instance['title']);
-	?>
-			<p><label for="<?php echo $this->get_field_id('title'); ?>">Title: <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo attribute_escape($title); ?>" /></label></p>
-	<?php
+			$text = strip_tags($instance['text']);
+			$icononly = $instance['icononly'];		
+			printf('<p><label for="%s">%s <input class="widefat" id="%s" name="%s" type="text" value="%s" /></label></p>',$this->get_field_id('title'),__('Title:',$this->localizationDomain),$this->get_field_id('title'),$this->get_field_name('title'),attribute_escape($title));
+			printf('<p><label for="%s">%s <textarea class="widefat" id="%s" name="%s" >%s</textarea></label></p>',$this->get_field_id('text'),__('Text:',$this->localizationDomain),$this->get_field_id('text'),$this->get_field_name('text'),attribute_escape($text));
+			printf('
+				<p>Icons only?: 
+					<input class="radio" type="radio" %s id="%s_yes" name="%s" value="yes"/> <label for="%s_yes">%s</label> 
+					<input class="radio" type="radio" %s id="%s_no" name="%s" value="no"/> <label for="%s_no">%s</label>
+				</p>',
+					checked( $instance['icononly'], 'yes', false),$this->get_field_id( 'icononly' ),$this->get_field_name( 'icononly' ),$this->get_field_id( 'icononly' ),__('Yes'),
+					checked( $instance['icononly'], 'no', false), $this->get_field_id( 'icononly' ),$this->get_field_name( 'icononly' ),$this->get_field_id( 'icononly' ),__('No')
+			);	
 		}
 	} // end class
 	add_action( 'widgets_init', create_function( '', 'register_widget( "ps_read_offline_widget" );' ) );
