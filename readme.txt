@@ -128,6 +128,9 @@ div.readoffline-embed-text {
 
 == Changelog ==
 
+= 0.1.2 =
+* Fix typo in download.php, was including   "Epub.inc.php",  correct is "EPub.inc.php".
+
 = 0.1.1 =
 * bugfix
 

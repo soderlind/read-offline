@@ -21,7 +21,7 @@ require('../../../wp-load.php');
 
 			switch ($docformat) {
 				case 'epub':
-					require_once "library/epub/Epub.inc.php";
+					require_once "library/epub/EPub.inc.php";
 					
 					$epub = new EPub();
 					$epub->setTitle($post->post_title); //setting specific options to the EPub library

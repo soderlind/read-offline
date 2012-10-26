@@ -3,13 +3,17 @@
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Download a post or page as pdf, epub, or mobi  (see settings). 
-Version: 0.1.1
+Version: 0.1.2
 Author: Per Soderlind
 Author URI: http://soderlind.no
 */
 /*
 
 Changelog:
+v0.1.2
+* Fix typo in download.php, was including  "Epub.inc.php",  correct is "EPub.inc.php".
+v0.1.1
+* bugfix
 v0.1.0:
 * Added the Read Offline shortcode
 * Added, in Settings->Read Offline, option to add Read Offline to top and/or bottom of post and page
