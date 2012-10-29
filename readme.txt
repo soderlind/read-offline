@@ -128,6 +128,10 @@ div.readoffline-embed-text {
 
 == Changelog ==
 
+= 0.1.3 =
+* epub will now validate against http://www.epubconversion.com/ePub-validator-iBook.jsp
+* Added language variable to the epub file, ISO 639-1 two letter tag based on the WordPress get_locale()
+
 = 0.1.2 =
 * Fix typo in download.php, was including   "Epub.inc.php",  correct is "EPub.inc.php".
 

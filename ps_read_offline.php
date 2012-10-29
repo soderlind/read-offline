@@ -3,13 +3,16 @@
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Download a post or page as pdf, epub, or mobi  (see settings). 
-Version: 0.1.2
+Version: 0.1.3
 Author: Per Soderlind
 Author URI: http://soderlind.no
 */
 /*
 
 Changelog:
+v0.1.3
+* epub will now validate against http://www.epubconversion.com/ePub-validator-iBook.jsp
+* Added language variable to the epub file, ISO 639-1 two letter tag based on the WordPress get_locale()
 v0.1.2
 * Fix typo in download.php, was including  "Epub.inc.php",  correct is "EPub.inc.php".
 v0.1.1
@@ -104,7 +107,7 @@ if (!class_exists('ps_read_offline')) {
 		
 		function ps_read_offline_embed($content) {		
 			global $post;
-			
+
 			$placements = array_intersect(array("top_post","bottom_post","top_page","bottom_page"), $this->options['ps_read_offline_option_placement']);	
 			$formats = array_uintersect(					
 					array(
