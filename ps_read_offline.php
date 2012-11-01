@@ -3,13 +3,15 @@
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Download a post or page as pdf, epub, or mobi  (see settings). 
-Version: 0.1.3
+Version: 0.1.4
 Author: Per Soderlind
 Author URI: http://soderlind.no
 */
 /*
 
 Changelog:
+v0.1.4
+* Added permalink support (/read-offline/"postid"/"post-name"."type"), how-to: http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/
 v0.1.3
 * epub will now validate against http://www.epubconversion.com/ePub-validator-iBook.jsp
 * Added language variable to the epub file, ISO 639-1 two letter tag based on the WordPress get_locale()
@@ -73,23 +75,31 @@ if (!class_exists('ps_read_offline')) {
 		* PHP 5 Constructor
 		*/		
 		function __construct(){
-			//Language Setup
 			$locale = get_locale();
 			$mo = plugin_dir_path(__FILE__) . 'languages/' . $this->localizationDomain . '-' . $locale . '.mo';	
 			load_textdomain($this->localizationDomain, $mo);
 
-			//"Constants" setup
 			$this->url = plugins_url(basename(__FILE__), __FILE__);
-			$this->urlpath = plugins_url('', __FILE__);	
+			$this->urlpath = plugins_url('', __FILE__);
 			//Initialize the options
 			$this->getOptions();
-
+			
+			//admin			
 			add_action("admin_menu", array(&$this,"admin_menu_link"));
 			add_action('admin_enqueue_scripts', array(&$this,'ps_read_offline_admin_script'));
+
+			// user
 			add_action('the_content', array(&$this,'ps_read_offline_embed'));
 			add_action('wp_enqueue_scripts', array(&$this,'ps_read_offline_wp_script'));
 			add_shortcode('readoffline', array(&$this,'ps_read_offline_shortcode'));
+
+			// permalink hooks:
+			add_filter('generate_rewrite_rules', array(&$this,'ps_read_offline_rewrite_rule'));
+			add_filter( 'query_vars', array(&$this,'ps_read_offline_query_vars'));
+			add_action("parse_request", array(&$this,"ps_read_offline_parse_request"));
+			add_filter('admin_init', array(&$this, 'ps_read_offline_flush_rewrite_rules'));
 		}
+		
 		
 		function ps_read_offline_admin_script() {
 			wp_enqueue_script('jquery');
@@ -107,7 +117,8 @@ if (!class_exists('ps_read_offline')) {
 		
 		function ps_read_offline_embed($content) {		
 			global $post;
-
+			if (!is_object($post)) return;
+			
 			$placements = array_intersect(array("top_post","bottom_post","top_page","bottom_page"), $this->options['ps_read_offline_option_placement']);	
 			$formats = array_uintersect(					
 					array(
@@ -126,8 +137,8 @@ if (!class_exists('ps_read_offline')) {
 			}			
 			foreach ($formats as $type => $document_type) {
 				$str_info =  (in_array('yes',$this->options['ps_read_offline_option_iconsonly'])) ? '' : sprintf("%s %s",__('Download',$this->localizationDomain),$document_type);
-				$readoffline .= sprintf ('<div><a class="%s" href="%s?id=%s&read-offline=%s" title="%s %s.%s">%s</a></div>',
-					$type,plugins_url("download.php", __FILE__),$post->ID,$type,
+				$readoffline .= sprintf ('<div><a class="%s" href="%s" title="%s %s.%s">%s</a></div>',
+					$type,$this->ps_read_offline_url($post->ID,$post->post_name,$type),
 					__('Download',$this->localizationDomain),$post->post_name,$type,
 					$str_info
 				);
@@ -147,6 +158,7 @@ if (!class_exists('ps_read_offline')) {
 		function ps_read_offline_shortcode($atts) {
 			if (!is_single() && !is_page()) return;
 			global $post;
+			if (!is_object($post)) return;
 			extract(shortcode_atts(array(
 				// default values
 				'format'   	=>	'pdf,epub,mobi'
@@ -175,8 +187,8 @@ if (!class_exists('ps_read_offline')) {
 				}
 				foreach ($formats as $type => $document_type) {
 					$str_info = ($icononly) ? '' : sprintf("%s %s",__('Download',$this->localizationDomain),$document_type);
-					$ret .= sprintf ('<div><a class="%s" href="%s?id=%s&read-offline=%s" title="%s %s.%s">%s</a></div>',
-						$type,plugins_url("download.php", __FILE__),$post->ID,$type,
+					$ret .= sprintf ('<div><a class="%s" href="%s" title="%s %s.%s">%s</a></div>',
+						$type,$this->ps_read_offline_url($post->ID,$post->post_name,$type),
 						__('Download ',$this->localizationDomain),$post->post_name,$type,
 						$str_info
 					);
@@ -191,6 +203,118 @@ if (!class_exists('ps_read_offline')) {
 		function _version() {
 			return $this->version;
 		}
+		
+		function ps_read_offline_url($id,$name,$format) {
+			//$rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
+			if ( get_option('permalink_structure')) {
+				return sprintf("/read-offline/%s/%s.%s",$id,$name,$format);
+			} else {
+				return sprintf("/index.php?read_offline_id=%s&read_offline_name=%s&&read_offline_format=%s",$id,$name,$format);			
+			}
+		}
+
+// rewrite rules		
+		
+		function ps_read_offline_rewrite_rule( $wp_rewrite ) {
+			$new_rules = array( 
+				 'read-offline/([^/]+)/([^\.]+).(pdf|epub|mobi)$' => sprintf("index.php?read_offline_id=%s&read_offline_name=%s&&read_offline_format=%s",$wp_rewrite->preg_index(1),$wp_rewrite->preg_index(2),$wp_rewrite->preg_index(3))
+			);
+			
+			$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;    		
+    		return $wp_rewrite->rules;
+		}
+
+		function ps_read_offline_query_vars( $query_vars ) {
+			$query_vars[] = 'read_offline_id';
+			$query_vars[] = 'read_offline_name';
+			$query_vars[] = 'read_offline_format';
+			return $query_vars;
+		}
+
+		function ps_read_offline_parse_request($wp_query) {
+
+			if (isset($wp_query->query_vars['read_offline_id'])) {
+
+				$id = $wp_query->query_vars['read_offline_id'];
+				$p = get_post($id);
+				
+				if (is_object($p) && $p->post_status == 'publish') {
+					$docformat = strtolower($wp_query->query_vars['read_offline_format']);			
+					$author = get_the_author_meta('display_name',$p->post_author);
+			
+					$html = '<h1 class="entry-title">' . get_the_title($p->ID) . '</h1>';
+					$content = $p->post_content;
+					$content = preg_replace("/\[\\/?readoffline(\\s+.*?\]|\])/i", "", $content); // remove all [readonline] shortcodes
+					$html .= apply_filters('the_content', $content);
+		
+					switch ($docformat) {
+						case 'epub':
+							require_once "library/epub/EPub.inc.php";
+
+							$epub = new EPub();
+							$epub->setTitle($p->post_title); //setting specific options to the EPub library
+							$epub->setIdentifier($p->guid, EPub::IDENTIFIER_URI); 
+							$iso6391 = ( '' == get_locale() ) ? 'en' : strtolower( substr(get_locale(), 0, 2) ); // only ISO 639-1	
+							$epub->setLanguage($iso6391);									
+							$epub->setAuthor($author, "Lastname, First names");
+							$epub->setPublisher(get_bloginfo( 'name' ), get_bloginfo( 'url' ));
+							$epub->setSourceURL($p->guid);
+							$cssData = "";
+							$epub->addCSSFile("styles.css", "css1", $cssData);
+							
+							$content_start =
+								"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+								. "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+								. "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+								. "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+								. "<head>"
+								. "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n"
+								. "<link rel=\"stylesheet\" type=\"text/css\" href=\"styles.css\" />\n"
+								. "<title>" . $p->post_title . "</title>\n"
+								. "</head>\n"
+								. "<body>\n";
+							
+							$content_end = "\n</body>\n</html>\n";
+							
+							$epub->addChapter("Body", "Body.html", $content_start . $html . $content_end);
+							$epub->finalize();
+							$zipData = $epub->sendBook($p->post_name);
+						break;
+						case 'mobi':
+							require_once "library/mobi/Mobi.inc.php";
+		
+							$mobi = new MOBI();
+							$options = array(
+								"title"=> $p->post_title,
+								"author"=> $author,
+								"subject"=> (count(wp_get_post_categories($id))) ? implode(' ,',array_map("get_cat_name", wp_get_post_categories($id))) : "Unknown subject"
+							);
+							$mobi->setOptions($options);				
+							$mobi->setData($html);
+							$zipData = $mobi->download($p->post_name . ".mobi");					
+						break;
+						case 'pdf':
+							require_once "library/mpdf/mpdf.inc.php";
+		
+							$pdf = new mPDF();
+							$pdf->SetTitle($p->post_title);
+							$pdf->SetAuthor($author);
+							$pdf->WriteHTML($html);
+							$pdf->Output($p->post_name . ".pdf", 'D');
+						break;
+					}
+					exit();						
+				}
+			}
+		}
+		
+		function ps_read_offline_flush_rewrite_rules() {
+			if ( ! isset( $rules['read-offline/([^/]+)/([^\.]+).(pdf|epub|mobi)$'] ) ) {
+				global $wp_rewrite;
+	   			$wp_rewrite->flush_rules();
+			}
+    	}
+		
 		
 		/**
 		* @desc Retrieves the plugin options from the database.
@@ -374,16 +498,16 @@ if (!class_exists('ps_read_offline_widget')) {
 				
 				if ($icononly === true) {
 					foreach ($formats as $type => $document_type) {
-						printf ('<div><a class="%s" href="%s?id=%s&read-offline=%s" title="%s %s.%s"></a></div>',
-							$type,plugins_url("download.php", __FILE__),$post->ID,$type,
+						printf ('<div><a class="%s" href="%s" title="%s %s.%s"></a></div>',
+							$type,$this->ps_read_offline_url($post->ID,$post->post_name,$type),
 							__('Download ',$this->localizationDomain),$post->post_name,$type
 						);
 					}
 				} else {					
 					echo "<ul>";
 					foreach ($formats as $type => $document_type) {
-						printf ('<li><a class="%s" href="%s?id=%s&read-offline=%s" title="%s %s.%s">%s%s</a></li>',
-							$type,plugins_url("download.php", __FILE__),$post->ID,$type,
+						printf ('<li><a class="%s" href="%s" title="%s %s.%s">%s%s</a></li>',
+							$type,$this->ps_read_offline_url($post->ID,$post->post_name,$type),
 							__('Download ',$this->localizationDomain),$post->post_name,$type,
 							__('Download ',$this->localizationDomain),$document_type
 						);
@@ -394,6 +518,17 @@ if (!class_exists('ps_read_offline_widget')) {
 
 			echo $after_widget;
 		}
+		
+		
+		function ps_read_offline_url($id,$name,$format) {
+			$rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
+			if ( isset($rules)) {
+				return sprintf("/read-offline/%s/%s.%s",$id,$name,$format);
+			} else {
+				return sprintf("/index.php?read_offline_id=%s&read_offline_name=%s&&read_offline_format=%s",$id,$name,$format);			
+			}
+		}
+		
 		
 		function update($new_instance, $old_instance) {
 			$instance = $old_instance;

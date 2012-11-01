@@ -128,6 +128,10 @@ div.readoffline-embed-text {
 
 == Changelog ==
 
+= 0.1.4 = 
+* Added permalink support (/read-offline/"postid"/"post-name"."type"). I've written [a how-to guide at soderlind.no](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)
+* removed the obsolete download.php
+
 = 0.1.3 =
 * epub will now validate against http://www.epubconversion.com/ePub-validator-iBook.jsp
 * Added language variable to the epub file, ISO 639-1 two letter tag based on the WordPress get_locale()
