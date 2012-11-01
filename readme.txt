@@ -30,6 +30,7 @@ This is an early version, please [post bugs and feature requests](http://soderli
     *   Publisher (ePub)
     *   Identifier (uPub)
     *   Source URL (ePub)
+    *   Language (ePub)
 *   Option: Add download links to the top and bottom of a post or page.
 *   Permalink support (/read-offline/"postid"/"post-name"."type"). I've written [a how-to add permalink to plugins guide at soderlind.no](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)
 
