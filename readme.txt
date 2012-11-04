@@ -33,11 +33,13 @@ This is an early version, please [post bugs and feature requests](http://soderli
     *   Language (ePub)
 *   Option: Add download links to the top and bottom of a post or page.
 *   Permalink support (/read-offline/"postid"/"post-name"."type"). I've written [a how-to add permalink to plugins guide at soderlind.no](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)
+*   Option: Add a custom style to the ePub file
+*   languages/read-offline.po for easy translation.
 
 = To-do = 
 
-*   Option: Add a custom style to the file
-*   Create read-offline.pot for easy translation
+*   [Bookmark posts](http://soderlind.no/archives/2012/10/01/read-offline/#comment-209934)
+*	Export post / page as Word (.docx)
 *   more ? Please [post a comment](http://soderlind.no/archives/2012/10/01/read-offline/#respond) if you have any suggestions
 
 = Credits = 
