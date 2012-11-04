@@ -1,0 +1,151 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Read Offline\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-11-04 11:50+0100\n"
+"PO-Revision-Date: 2012-11-04 11:53+0100\n"
+"Last-Translator: Per Søderlind <per@soderlind.no>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: download.php:102
+msgid "Error: Could not fetch and cache URL"
+msgstr ""
+
+#: download.php:103
+msgid "You might need to exclude this file in WP Minify options."
+msgstr ""
+
+#: ps_read_offline.php:109
+msgid "Please select a format below"
+msgstr ""
+
+#: ps_read_offline.php:139
+#: ps_read_offline.php:142
+#: ps_read_offline.php:189
+msgid "Download"
+msgstr ""
+
+#: ps_read_offline.php:192
+#: ps_read_offline.php:512
+#: ps_read_offline.php:520
+#: ps_read_offline.php:521
+msgid "Download "
+msgstr ""
+
+#: ps_read_offline.php:356
+msgid "Settings"
+msgstr ""
+
+#: ps_read_offline.php:378
+msgid "<div class=\"updated\"><p>Success! Your changes were sucessfully saved!</p></div>"
+msgstr ""
+
+#: ps_read_offline.php:390
+msgid "Formats available for your visitors"
+msgstr ""
+
+#: ps_read_offline.php:394
+msgid "PDF"
+msgstr ""
+
+#: ps_read_offline.php:395
+msgid "ePub"
+msgstr ""
+
+#: ps_read_offline.php:396
+msgid "mobi"
+msgstr ""
+
+#: ps_read_offline.php:398
+msgid ""
+"\n"
+"\t\t\t\t\t\t\t\t\tIf direct linking to ePub and mobi doesn't work, add the following to your .htaccess file:\n"
+"\t\t\t\t\t\t\t\t\t<p>\n"
+"\t\t\t\t\t\t\t\t\t<div style='font-family:\"Courier New\", Courier, monospace;'>\n"
+"\t\t\t\t\t\t\t\t\t\tAddType application/epub+zip .epub<br/>\n"
+"\t\t\t\t\t\t\t\t\t\tAddType application/x-mobipocket-ebook .mobi\n"
+"\t\t\t\t\t\t\t\t\t</div>\n"
+"\t\t\t\t\t\t\t\t\t</p>\n"
+"\t\t\t\t\t\t\t\t"
+msgstr ""
+
+#: ps_read_offline.php:410
+msgid "Download link placements"
+msgstr ""
+
+#: ps_read_offline.php:412
+msgid "At the top of the post"
+msgstr ""
+
+#: ps_read_offline.php:413
+msgid "On the botom of the post"
+msgstr ""
+
+#: ps_read_offline.php:414
+msgid "At the top of the page"
+msgstr ""
+
+#: ps_read_offline.php:415
+msgid "On the botom of the page"
+msgstr ""
+
+#: ps_read_offline.php:416
+msgid "Also available via the the <a href='widgets.php'>Read Offline widget</a> and the <a href='http://soderlind.no/archives/2012/10/01/read-offline/#shortcode'>[readoffline] shortcode</a>."
+msgstr ""
+
+#: ps_read_offline.php:420
+msgid "Download link header:"
+msgstr ""
+
+#: ps_read_offline.php:423
+msgid "Use %title% to insert the post and page title"
+msgstr ""
+
+#: ps_read_offline.php:428
+msgid "Download link, icons only?:"
+msgstr ""
+
+#: ps_read_offline.php:430
+#: ps_read_offline.php:563
+msgid "Yes"
+msgstr ""
+
+#: ps_read_offline.php:431
+#: ps_read_offline.php:564
+msgid "No"
+msgstr ""
+
+#: ps_read_offline.php:436
+msgid "ePub Style Sheet:"
+msgstr ""
+
+#: ps_read_offline.php:439
+msgid "Add custom css to the ePub document"
+msgstr ""
+
+#: ps_read_offline.php:445
+msgid "Save Changes"
+msgstr ""
+
+#: ps_read_offline.php:445
+msgid "Reset"
+msgstr ""
+
+#: ps_read_offline.php:474
+msgid "Adds a download link for the current post and page. PDF, EPUB and MOBI is supported. Configurable in Settings->Read Offline"
+msgstr ""
+
+#: ps_read_offline.php:556
+msgid "Title:"
+msgstr ""
+
+#: ps_read_offline.php:557
+msgid "Text:"
+msgstr ""
+

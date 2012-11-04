@@ -3,13 +3,16 @@
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Download a post or page as pdf, epub, or mobi  (see settings). 
-Version: 0.1.4
+Version: 0.1.5
 Author: Per Soderlind
 Author URI: http://soderlind.no
 */
 /*
 
 Changelog:
+v0.1.5
+* In Settings->Read Offline, added the option to add custom css to EPub
+* Added languages/read-offline.po for easy translation.
 v0.1.4
 * Added permalink support (/read-offline/"postid"/"post-name"."type"), how-to: http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/
 v0.1.3
@@ -54,7 +57,7 @@ if (!class_exists('ps_read_offline')) {
 		/**
 		* @var string $localizationDomain Domain used for localization
 		*/
-		var $localizationDomain = "ps_read_offline";
+		var $localizationDomain = "read-offline";
 
 		/**
 		* @var string $url The url to this plugin
@@ -232,36 +235,35 @@ if (!class_exists('ps_read_offline')) {
 		}
 
 		function ps_read_offline_parse_request($wp_query) {
-
+			global $post;
 			if (isset($wp_query->query_vars['read_offline_id'])) {
 
 				$id = $wp_query->query_vars['read_offline_id'];
-				$p = get_post($id);
+				$post = get_page($id);
 				
-				if (is_object($p) && $p->post_status == 'publish') {
+				if (is_object($post) && $post->post_status == 'publish') {
 					$docformat = strtolower($wp_query->query_vars['read_offline_format']);			
-					$author = get_the_author_meta('display_name',$p->post_author);
+					$author = get_the_author_meta('display_name',$post->post_author);
 			
-					$html = '<h1 class="entry-title">' . get_the_title($p->ID) . '</h1>';
-					$content = $p->post_content;
+					$html = '<h1 class="entry-title">' . get_the_title($post->ID) . '</h1>';
+					$content = $post->post_content;
 					$content = preg_replace("/\[\\/?readoffline(\\s+.*?\]|\])/i", "", $content); // remove all [readonline] shortcodes
 					$html .= apply_filters('the_content', $content);
-		
+
 					switch ($docformat) {
 						case 'epub':
 							require_once "library/epub/EPub.inc.php";
 
 							$epub = new EPub();
-							$epub->setTitle($p->post_title); //setting specific options to the EPub library
-							$epub->setIdentifier($p->guid, EPub::IDENTIFIER_URI); 
+							$epub->setTitle($post->post_title); //setting specific options to the EPub library
+							$epub->setIdentifier($post->guid, EPub::IDENTIFIER_URI); 
 							$iso6391 = ( '' == get_locale() ) ? 'en' : strtolower( substr(get_locale(), 0, 2) ); // only ISO 639-1	
 							$epub->setLanguage($iso6391);									
 							$epub->setAuthor($author, "Lastname, First names");
 							$epub->setPublisher(get_bloginfo( 'name' ), get_bloginfo( 'url' ));
-							$epub->setSourceURL($p->guid);
-							$cssData = "";
-							$epub->addCSSFile("styles.css", "css1", $cssData);
-							
+							$epub->setSourceURL($post->guid);
+							$cssData = (isset($this->options['ps_read_offline_epub_css'])) ? $this->options['ps_read_offline_epub_css'] : "";
+							$epub->addCSSFile("styles.css", "css1", $cssData);						
 							$content_start =
 								"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 								. "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
@@ -270,7 +272,7 @@ if (!class_exists('ps_read_offline')) {
 								. "<head>"
 								. "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n"
 								. "<link rel=\"stylesheet\" type=\"text/css\" href=\"styles.css\" />\n"
-								. "<title>" . $p->post_title . "</title>\n"
+								. "<title>" . $post->post_title . "</title>\n"
 								. "</head>\n"
 								. "<body>\n";
 							
@@ -278,29 +280,29 @@ if (!class_exists('ps_read_offline')) {
 							
 							$epub->addChapter("Body", "Body.html", $content_start . $html . $content_end);
 							$epub->finalize();
-							$zipData = $epub->sendBook($p->post_name);
+							$zipData = $epub->sendBook($post->post_name);
 						break;
 						case 'mobi':
 							require_once "library/mobi/Mobi.inc.php";
 		
 							$mobi = new MOBI();
 							$options = array(
-								"title"=> $p->post_title,
+								"title"=> $post->post_title,
 								"author"=> $author,
 								"subject"=> (count(wp_get_post_categories($id))) ? implode(' ,',array_map("get_cat_name", wp_get_post_categories($id))) : "Unknown subject"
 							);
 							$mobi->setOptions($options);				
 							$mobi->setData($html);
-							$zipData = $mobi->download($p->post_name . ".mobi");					
+							$zipData = $mobi->download($post->post_name . ".mobi");					
 						break;
 						case 'pdf':
 							require_once "library/mpdf/mpdf.inc.php";
 		
 							$pdf = new mPDF();
-							$pdf->SetTitle($p->post_title);
+							$pdf->SetTitle($post->post_title);
 							$pdf->SetAuthor($author);
 							$pdf->WriteHTML($html);
-							$pdf->Output($p->post_name . ".pdf", 'D');
+							$pdf->Output($post->post_name . ".pdf", 'D');
 						break;
 					}
 					exit();						
@@ -327,7 +329,8 @@ if (!class_exists('ps_read_offline')) {
 					'ps_read_offline_option_zip' => array('no'),
 					'ps_read_offline_option_placement'=>array('widget'),
 					'ps_read_offline_option_iconsonly'=>array('no'),
-					'ps_read_offline_option_link_header'=>'Read Offline:'
+					'ps_read_offline_option_link_header'=>'Read Offline:',
+					'ps_read_offline_epub_css' => ''
 				);
 				update_option($this->optionsName, $theOptions);
 			}
@@ -371,6 +374,7 @@ if (!class_exists('ps_read_offline')) {
 				$this->options['ps_read_offline_option_placement'] = isset($_POST['ps_read_offline_option_placement']) ? $_POST['ps_read_offline_option_placement'] : array('widget');				   
 				$this->options['ps_read_offline_option_iconsonly'] = isset($_POST['ps_read_offline_option_iconsonly']) ? $_POST['ps_read_offline_option_iconsonly'] : array('no');				   
 				$this->options['ps_read_offline_option_link_header'] = esc_attr($_POST['ps_read_offline_option_link_header']);	
+				$this->options['ps_read_offline_epub_css'] = $_POST['ps_read_offline_epub_css'];	
 
 				$this->saveAdminOptions();
 				_e('<div class="updated"><p>Success! Your changes were sucessfully saved!</p></div>',$this->localizationDomain);
@@ -401,7 +405,7 @@ if (!class_exists('ps_read_offline')) {
 										AddType application/x-mobipocket-ebook .mobi
 									</div>
 									</p>
-								", $this->localizationDomain); ?>
+								", $this->localizationDomain); ?></span>
 							</td> 
 						</tr>
 						<tr valign="top"> 
@@ -411,14 +415,14 @@ if (!class_exists('ps_read_offline')) {
 								<input name="ps_read_offline_option_placement[]" id="ps_read_offline_option_placement_bottom_post" type="checkbox" value="bottom_post" <?php if (in_array('bottom_post',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_bottom_post"><?php _e('On the botom of the post', $this->localizationDomain);?></label><br />
 								<input name="ps_read_offline_option_placement[]" id="ps_read_offline_option_placement_top_page" type="checkbox" value="top_page" <?php if (in_array('top_page',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_top_page"><?php _e('At the top of the page', $this->localizationDomain);?></label><br />
 								<input name="ps_read_offline_option_placement[]" id="ps_read_offline_option_placement_bottom_page" type="checkbox" value="bottom_page" <?php if (in_array('bottom_page',$this->options['ps_read_offline_option_placement'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_placement_bottom_page"><?php _e('On the botom of the page', $this->localizationDomain);?></label><br />
-								<span class="setting-description"><?php _e("Also available via the the <a href='widgets.php'>Read Offline widget</a> and the <a href='http://soderlind.no/archives/2012/10/01/read-offline/#shortcode'>[readoffline] shortcode</a>.", $this->localizationDomain); ?>
+								<span class="setting-description"><?php _e("Also available via the the <a href='widgets.php'>Read Offline widget</a> and the <a href='http://soderlind.no/archives/2012/10/01/read-offline/#shortcode'>[readoffline] shortcode</a>.", $this->localizationDomain); ?></span>
 							</td> 
 						</tr>
 						<tr valign="top"> 
 							<th width="33%" scope="row"><?php _e('Download link header:', $this->localizationDomain); ?></th>
 							<td>
 								<input class="regular-text" name="ps_read_offline_option_link_header" id="ps_read_offline_option_link_header" type="text" value="<?php printf("%s", stripslashes($this->options['ps_read_offline_option_link_header'])); ?>" />
-								<br /><span class="setting-description"><?php _e("Use %title% to insert the post and page title", $this->localizationDomain); ?>
+								<br /><span class="setting-description"><?php _e("Use %title% to insert the post and page title", $this->localizationDomain); ?></span>
 							</td> 
 						</tr>
 						
@@ -427,7 +431,14 @@ if (!class_exists('ps_read_offline')) {
 							<td>
 								<input name="ps_read_offline_option_iconsonly[]" id="ps_read_offline_option_iconsonly_yes" type="radio" value="yes" <?php if (in_array('yes',$this->options['ps_read_offline_option_iconsonly'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_iconsonly_yes"><?php _e('Yes', $this->localizationDomain);?></label><br />
 								<input name="ps_read_offline_option_iconsonly[]" id="ps_read_offline_option_iconsonly_no" type="radio" value="no" <?php if (in_array('no',$this->options['ps_read_offline_option_iconsonly'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_iconsonly_no"><?php _e('No', $this->localizationDomain);?></label><br />
-								<br /><span class="setting-description"><?php _e("", $this->localizationDomain); ?>
+								<br /><span class="setting-description"><?php _e("", $this->localizationDomain); ?></span>
+							</td> 
+						</tr>
+						<tr valign="top"> 
+							<th width="33%" scope="row"><?php _e('ePub Style Sheet:', $this->localizationDomain); ?></th>
+							<td>
+								<textarea style="width:95%;height:200px;" cols="50" wrap="hard" name="ps_read_offline_epub_css" id="ps_read_offline_epub_css"><?php echo $this->options['ps_read_offline_epub_css'];?></textarea>
+								<br /><span class="setting-description"><?php _e("Add custom css to the ePub document", $this->localizationDomain); ?></span>
 							</td> 
 						</tr>
 						

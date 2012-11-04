@@ -130,6 +130,10 @@ div.readoffline-embed-text {
 
 == Changelog ==
 
+= 0.1.5 =
+* In Settings->Read Offline, added the option to add custom css to EPub
+* Added languages/read-offline.po for easy translation.
+
 = 0.1.4 = 
 * Added permalink support (/read-offline/"postid"/"post-name"."type"). I've written [a how-to add permalink to plugins guide at soderlind.no](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)
 * removed the obsolete download.php
