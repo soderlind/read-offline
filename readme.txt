@@ -23,7 +23,7 @@ This is an early version, please [post bugs and feature requests](http://soderli
 *   Read Offline shortcode
 *   You can download a pdf, epub or mobi file containing the current post or page (you have to add the Read Offline widget to see the download links)
 *   The download filename is based on the posts slug (`$post->post_name`)
-*   Add meta data to the file
+*   Adds meta data to the file
     *   Title (PDF, ePub and mobi)
     *   Author (PDF, ePub and mobi)
     *   Subject (mobi)
