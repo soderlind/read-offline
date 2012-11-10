@@ -3,13 +3,15 @@
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Download a post or page as pdf, epub, or mobi  (see settings). 
-Version: 0.1.5
+Version: 0.1.6
 Author: Per Soderlind
 Author URI: http://soderlind.no
 */
 /*
 
 Changelog:
+v0.1.6
+*  Added the option to add custom css to PDF
 v0.1.5
 * In Settings->Read Offline, added the option to add custom css to EPub
 * Added languages/read-offline.po for easy translation.
@@ -249,6 +251,7 @@ if (!class_exists('ps_read_offline')) {
 					$content = $post->post_content;
 					$content = preg_replace("/\[\\/?readoffline(\\s+.*?\]|\])/i", "", $content); // remove all [readonline] shortcodes
 					$html .= apply_filters('the_content', $content);
+					$cssData = (isset($this->options['ps_read_offline_epub_css'])) ? $this->options['ps_read_offline_epub_css'] : "";
 
 					switch ($docformat) {
 						case 'epub':
@@ -262,7 +265,7 @@ if (!class_exists('ps_read_offline')) {
 							$epub->setAuthor($author, "Lastname, First names");
 							$epub->setPublisher(get_bloginfo( 'name' ), get_bloginfo( 'url' ));
 							$epub->setSourceURL($post->guid);
-							$cssData = (isset($this->options['ps_read_offline_epub_css'])) ? $this->options['ps_read_offline_epub_css'] : "";
+							
 							$epub->addCSSFile("styles.css", "css1", $cssData);						
 							$content_start =
 								"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
@@ -301,6 +304,10 @@ if (!class_exists('ps_read_offline')) {
 							$pdf = new mPDF();
 							$pdf->SetTitle($post->post_title);
 							$pdf->SetAuthor($author);
+							
+							if ($cssData != "") {
+								$pdf->WriteHTML($cssData,1);	// The parameter 1 tells that this is css/style only and no body/html/text
+							}
 							$pdf->WriteHTML($html);
 							$pdf->Output($post->post_name . ".pdf", 'D');
 						break;
@@ -435,7 +442,7 @@ if (!class_exists('ps_read_offline')) {
 							</td> 
 						</tr>
 						<tr valign="top"> 
-							<th width="33%" scope="row"><?php _e('ePub Style Sheet:', $this->localizationDomain); ?></th>
+							<th width="33%" scope="row"><?php _e('ePub/PDF Style Sheet:', $this->localizationDomain); ?></th>
 							<td>
 								<textarea style="width:95%;height:200px;" cols="50" wrap="hard" name="ps_read_offline_epub_css" id="ps_read_offline_epub_css"><?php echo $this->options['ps_read_offline_epub_css'];?></textarea>
 								<br /><span class="setting-description"><?php _e("Add custom css to the ePub document", $this->localizationDomain); ?></span>
