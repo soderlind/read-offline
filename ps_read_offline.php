@@ -3,13 +3,15 @@
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Download a post or page as pdf, epub, or mobi  (see settings). 
-Version: 0.1.6
+Version: 0.1.7
 Author: Per Soderlind
 Author URI: http://soderlind.no
 */
 /*
 
 Changelog:
+v0.1.7
+*  Fixed a small bug
 v0.1.6
 *  Added the option to add custom css to PDF
 v0.1.5
@@ -141,7 +143,7 @@ if (!class_exists('ps_read_offline')) {
 					$readoffline .= sprintf('<div class="readoffline-embed-text">%s</div>',stripslashes($text));
 			}			
 			foreach ($formats as $type => $document_type) {
-				$str_info =  (in_array('yes',$this->options['ps_read_offline_option_iconsonly'])) ? '' : sprintf("%s %s",__('Download',$this->localizationDomain),$document_type);
+				$str_info =  (isset($this->options['ps_read_offline_option_iconsonly']) && in_array('yes',$this->options['ps_read_offline_option_iconsonly'])) ? '' : sprintf("%s %s",__('Download',$this->localizationDomain),$document_type);
 				$readoffline .= sprintf ('<div><a class="%s" href="%s" title="%s %s.%s">%s</a></div>',
 					$type,$this->ps_read_offline_url($post->ID,$post->post_name,$type),
 					__('Download',$this->localizationDomain),$post->post_name,$type,
@@ -251,6 +253,9 @@ if (!class_exists('ps_read_offline')) {
 					$content = $post->post_content;
 					$content = preg_replace("/\[\\/?readoffline(\\s+.*?\]|\])/i", "", $content); // remove all [readonline] shortcodes
 					$html .= apply_filters('the_content', $content);
+					
+					
+					
 					$cssData = (isset($this->options['ps_read_offline_epub_css'])) ? $this->options['ps_read_offline_epub_css'] : "";
 
 					switch ($docformat) {

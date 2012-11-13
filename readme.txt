@@ -132,6 +132,8 @@ div.readoffline-embed-text {
 
 == Changelog ==
 
+= 0.1.7 =
+*  Fixed a small bug
 = 0.1.6 =
 *  Added the option to add custom css to PDF
 
