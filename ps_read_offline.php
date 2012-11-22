@@ -3,13 +3,15 @@
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Download a post or page as pdf, epub, or mobi  (see settings). 
-Version: 0.1.7
+Version: 0.1.8.1
 Author: Per Soderlind
 Author URI: http://soderlind.no
 */
 /*
 
 Changelog:
+v0.1.8
+* Added Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the Asynchronous version of Google Analytics: http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html
 v0.1.7
 *  Fixed a small bug
 v0.1.6
@@ -48,7 +50,7 @@ Credits:
 if (!class_exists('ps_read_offline')) {
 	class ps_read_offline {
 	
-		var $version = '0.1.1';
+		var $version = '0.1.8.1';
 		/**
 		* @var string The options string name for this plugin
 		*/
@@ -102,24 +104,31 @@ if (!class_exists('ps_read_offline')) {
 
 			// permalink hooks:
 			add_filter('generate_rewrite_rules', array(&$this,'ps_read_offline_rewrite_rule'));
-			add_filter( 'query_vars', array(&$this,'ps_read_offline_query_vars'));
+			add_filter('query_vars', array(&$this,'ps_read_offline_query_vars'));
 			add_action("parse_request", array(&$this,"ps_read_offline_parse_request"));
 			add_filter('admin_init', array(&$this, 'ps_read_offline_flush_rewrite_rules'));
 		}
 		
 		
-		function ps_read_offline_admin_script() {
+		function ps_read_offline_admin_script($hook) {
+			if ('settings_page_ps_read_offline' != $hook ) return;
 			wp_enqueue_script('jquery');
 			wp_enqueue_script('jquery-validate', 'http://ajax.microsoft.com/ajax/jquery.validate/1.6/jquery.validate.min.js', array('jquery'));
-			wp_enqueue_script('ps_read_offline', $this->urlpath.'/read-offline.js',array('jquery-validate'),$this->_version());
-			wp_localize_script( 'ps_read_offline', 'ps_read_offline_lang', array(
-				'required' => __('Please select a format below', $this->localizationDomain),
+			wp_enqueue_script('ps_read_offline', $this->urlpath.'/library/js/read-offline-admin.js',array('jquery-validate'),$this->_version());
+			wp_localize_script( 'ps_read_offline', 'oJs_ps_read_offline', array(
+				'str_required' => __('Please select a format below', $this->localizationDomain)
 			));
 		}
 		
 		function ps_read_offline_wp_script() {
 			wp_enqueue_style('ps_read_offline_icons', $this->urlpath.'/e-book-icons/e-book-icons.css',array(),$this->_version());
 			wp_enqueue_style('ps_read_offline_style', $this->urlpath.'/read-offline.css',array(),$this->_version());
+			
+			// google analytics track event
+			if (in_array('yes',$this->options['ps_read_offline_trackevent'])) {
+				wp_enqueue_script('ps_read_offline', $this->urlpath.'/library/js/read-offline-wp.js',array('jquery'),$this->_version());
+			}
+			
 		}
 		
 		function ps_read_offline_embed($content) {		
@@ -246,15 +255,17 @@ if (!class_exists('ps_read_offline')) {
 				$post = get_page($id);
 				
 				if (is_object($post) && $post->post_status == 'publish') {
+				
 					$docformat = strtolower($wp_query->query_vars['read_offline_format']);			
-					$author = get_the_author_meta('display_name',$post->post_author);
-			
+					$author_firstlast = sprintf("%s %s",get_the_author_meta('user_firstname',$post->post_author),get_the_author_meta('user_lastname',$post->post_author));
+					$author_lastfirst = sprintf("%s, %s",get_the_author_meta('user_firstname',$post->post_author),get_the_author_meta('user_lastname',$post->post_author));
+					
 					$html = '<h1 class="entry-title">' . get_the_title($post->ID) . '</h1>';
 					$content = $post->post_content;
 					$content = preg_replace("/\[\\/?readoffline(\\s+.*?\]|\])/i", "", $content); // remove all [readonline] shortcodes
 					$html .= apply_filters('the_content', $content);
 					
-					
+
 					
 					$cssData = (isset($this->options['ps_read_offline_epub_css'])) ? $this->options['ps_read_offline_epub_css'] : "";
 
@@ -263,13 +274,18 @@ if (!class_exists('ps_read_offline')) {
 							require_once "library/epub/EPub.inc.php";
 
 							$epub = new EPub();
+							
+							$epub->setGenerator('Read Offline '. $this->version . 'by Per Soderlind, http://wordpress.org/extend/plugins/read-offline/');
+							
 							$epub->setTitle($post->post_title); //setting specific options to the EPub library
 							$epub->setIdentifier($post->guid, EPub::IDENTIFIER_URI); 
 							$iso6391 = ( '' == get_locale() ) ? 'en' : strtolower( substr(get_locale(), 0, 2) ); // only ISO 639-1	
 							$epub->setLanguage($iso6391);									
-							$epub->setAuthor($author, "Lastname, First names");
+							$epub->setAuthor($author_firstlast, $author_lastfirst); // "Firstname, Lastname", "Lastname, First names"
 							$epub->setPublisher(get_bloginfo( 'name' ), get_bloginfo( 'url' ));
 							$epub->setSourceURL($post->guid);
+							
+							$epub->setRights('bla bla bla');
 							
 							$epub->addCSSFile("styles.css", "css1", $cssData);						
 							$content_start =
@@ -285,6 +301,8 @@ if (!class_exists('ps_read_offline')) {
 								. "<body>\n";
 							
 							$content_end = "\n</body>\n</html>\n";
+							
+							$epub->setCoverImage("wp-content/themes/twentyten/images/headers/path.jpg");
 							
 							$epub->addChapter("Body", "Body.html", $content_start . $html . $content_end);
 							$epub->finalize();
@@ -317,6 +335,7 @@ if (!class_exists('ps_read_offline')) {
 							$pdf->Output($post->post_name . ".pdf", 'D');
 						break;
 					}
+
 					exit();						
 				}
 			}
@@ -328,8 +347,7 @@ if (!class_exists('ps_read_offline')) {
 	   			$wp_rewrite->flush_rules();
 			}
     	}
-		
-		
+
 		/**
 		* @desc Retrieves the plugin options from the database.
 		* @return array
@@ -342,6 +360,7 @@ if (!class_exists('ps_read_offline')) {
 					'ps_read_offline_option_placement'=>array('widget'),
 					'ps_read_offline_option_iconsonly'=>array('no'),
 					'ps_read_offline_option_link_header'=>'Read Offline:',
+					'ps_read_offline_trackevent' => array('no'),
 					'ps_read_offline_epub_css' => ''
 				);
 				update_option($this->optionsName, $theOptions);
@@ -385,8 +404,10 @@ if (!class_exists('ps_read_offline')) {
 				$this->options['ps_read_offline_option_zip'] = isset($_POST['ps_read_offline_option_zip']) ? $_POST['ps_read_offline_option_zip'] : array('no');				   
 				$this->options['ps_read_offline_option_placement'] = isset($_POST['ps_read_offline_option_placement']) ? $_POST['ps_read_offline_option_placement'] : array('widget');				   
 				$this->options['ps_read_offline_option_iconsonly'] = isset($_POST['ps_read_offline_option_iconsonly']) ? $_POST['ps_read_offline_option_iconsonly'] : array('no');				   
+				$this->options['ps_read_offline_trackevent'] = isset($_POST['ps_read_offline_trackevent']) ? $_POST['ps_read_offline_trackevent'] : array('no');				   
 				$this->options['ps_read_offline_option_link_header'] = esc_attr($_POST['ps_read_offline_option_link_header']);	
 				$this->options['ps_read_offline_epub_css'] = $_POST['ps_read_offline_epub_css'];	
+
 
 				$this->saveAdminOptions();
 				_e('<div class="updated"><p>Success! Your changes were sucessfully saved!</p></div>',$this->localizationDomain);
@@ -436,8 +457,7 @@ if (!class_exists('ps_read_offline')) {
 								<input class="regular-text" name="ps_read_offline_option_link_header" id="ps_read_offline_option_link_header" type="text" value="<?php printf("%s", stripslashes($this->options['ps_read_offline_option_link_header'])); ?>" />
 								<br /><span class="setting-description"><?php _e("Use %title% to insert the post and page title", $this->localizationDomain); ?></span>
 							</td> 
-						</tr>
-						
+						</tr>						
 						<tr valign="top"> 
 							<th width="33%" scope="row"><?php _e('Download link, icons only?:', $this->localizationDomain); ?></th>
 							<td>
@@ -445,6 +465,14 @@ if (!class_exists('ps_read_offline')) {
 								<input name="ps_read_offline_option_iconsonly[]" id="ps_read_offline_option_iconsonly_no" type="radio" value="no" <?php if (in_array('no',$this->options['ps_read_offline_option_iconsonly'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_option_iconsonly_no"><?php _e('No', $this->localizationDomain);?></label><br />
 								<br /><span class="setting-description"><?php _e("", $this->localizationDomain); ?></span>
 							</td> 
+						<tr valign="top"> 
+							<th width="33%" scope="row"><?php _e('Google Analytics, track downloads:', $this->localizationDomain); ?></th>
+							<td>
+								<input name="ps_read_offline_trackevent[]" id="ps_read_offline_trackevent_yes" type="radio" value="yes" <?php if (in_array('yes',$this->options['ps_read_offline_trackevent'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_trackevent_yes"><?php _e('Yes', $this->localizationDomain);?></label><br />
+								<input name="ps_read_offline_trackevent[]" id="ps_read_offline_trackevent_no" type="radio" value="no" <?php if (in_array('no',$this->options['ps_read_offline_trackevent'])) echo ' checked="checked" ';?>/> <label for="ps_read_offline_trackevent_no"><?php _e('No', $this->localizationDomain);?></label><br />
+								<br /><span class="setting-description"><?php _e("Track read-offline events, you can find these under Content » Events in your Google Analytics reports. Assumes you’re using the <a href=\"http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html\">Asynchronous version of Google Analytics</a>", $this->localizationDomain); ?></span>
+							</td> 
+						</tr>
 						</tr>
 						<tr valign="top"> 
 							<th width="33%" scope="row"><?php _e('ePub/PDF Style Sheet:', $this->localizationDomain); ?></th>
@@ -452,8 +480,7 @@ if (!class_exists('ps_read_offline')) {
 								<textarea style="width:95%;height:200px;" cols="50" wrap="hard" name="ps_read_offline_epub_css" id="ps_read_offline_epub_css"><?php echo $this->options['ps_read_offline_epub_css'];?></textarea>
 								<br /><span class="setting-description"><?php _e("Add custom css to the ePub document", $this->localizationDomain); ?></span>
 							</td> 
-						</tr>
-						
+						</tr>						
 					</table>
 					<p class="submit"> 
 						<input type="submit" name="ps_read_offline_save" class="button-primary" value="<?php _e('Save Changes', $this->localizationDomain); ?>" /> <a href="options-general.php?page=<?php echo basename(__FILE__);?>&ps_read_offline_reset" class="submit"><?php _e('Reset', $this->localizationDomain);?></a>
@@ -549,6 +576,14 @@ if (!class_exists('ps_read_offline_widget')) {
 				return sprintf("/read-offline/%s/%s.%s",$id,$name,$format);
 			} else {
 				return sprintf("/index.php?read_offline_id=%s&read_offline_name=%s&&read_offline_format=%s",$id,$name,$format);			
+			}
+		}
+		
+		function ps_read_offline_ga_tacking($dotracking,$type,$name) {
+			if (in_array('yes',$dotracking)) {
+				return sprintf("onclick=\"if (typeof _gaq !== 'undefined' && _gaq !== null) {_gaq.push(['_trackEvent', 'read-offline','%s','%s']);}return true;\"",$type,$name);
+			} else {
+				return "";
 			}
 		}
 		
