@@ -34,6 +34,7 @@ This is an early version, please [post bugs and feature requests](http://soderli
 *   Option: Add download links to the top and bottom of a post or page.
 *   Permalink support (/read-offline/"postid"/"post-name"."type"). I've written a "[how-to add a permalink to your plugin](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)" guide at soderlind.no
 *   Option: Add a custom style to the ePub / PDF file
+*   Added Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
 *   languages/read-offline.po for easy translation.
 
 = To-do = 
