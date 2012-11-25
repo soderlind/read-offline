@@ -3,13 +3,15 @@
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Download a post or page as pdf, epub, or mobi  (see settings). 
-Version: 0.1.8.1
+Version: 0.1.9
 Author: Per Soderlind
 Author URI: http://soderlind.no
 */
 /*
 
 Changelog:
+v0.1.9
+* Fixed a bug in permalinks that gave 404 for blogs in a subdirectory. Also removed code that gave error when downloading an ePub.
 v0.1.8
 * Added Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the Asynchronous version of Google Analytics: http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html
 v0.1.7
@@ -50,7 +52,7 @@ Credits:
 if (!class_exists('ps_read_offline')) {
 	class ps_read_offline {
 	
-		var $version = '0.1.8.1';
+		var $version = '0.1.9';
 		/**
 		* @var string The options string name for this plugin
 		*/
@@ -223,9 +225,9 @@ if (!class_exists('ps_read_offline')) {
 		function ps_read_offline_url($id,$name,$format) {
 			//$rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
 			if ( get_option('permalink_structure')) {
-				return sprintf("/read-offline/%s/%s.%s",$id,$name,$format);
+				return sprintf("%s/read-offline/%s/%s.%s",home_url(),$id,$name,$format);
 			} else {
-				return sprintf("/index.php?read_offline_id=%s&read_offline_name=%s&&read_offline_format=%s",$id,$name,$format);			
+				return sprintf("%s/index.php?read_offline_id=%s&read_offline_name=%s&&read_offline_format=%s",home_url(),$id,$name,$format);			
 			}
 		}
 
@@ -302,7 +304,7 @@ if (!class_exists('ps_read_offline')) {
 							
 							$content_end = "\n</body>\n</html>\n";
 							
-							$epub->setCoverImage("wp-content/themes/twentyten/images/headers/path.jpg");
+							//$epub->setCoverImage("wp-content/themes/twentyten/images/headers/path.jpg");
 							
 							$epub->addChapter("Body", "Body.html", $content_start . $html . $content_end);
 							$epub->finalize();
@@ -573,9 +575,9 @@ if (!class_exists('ps_read_offline_widget')) {
 		function ps_read_offline_url($id,$name,$format) {
 			$rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
 			if ( isset($rules)) {
-				return sprintf("/read-offline/%s/%s.%s",$id,$name,$format);
+				return sprintf("%s/read-offline/%s/%s.%s",home_url(),$id,$name,$format);
 			} else {
-				return sprintf("/index.php?read_offline_id=%s&read_offline_name=%s&&read_offline_format=%s",$id,$name,$format);			
+				return sprintf("%s/index.php?read_offline_id=%s&read_offline_name=%s&&read_offline_format=%s",home_url(),$id,$name,$format);			
 			}
 		}
 		

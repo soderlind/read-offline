@@ -133,6 +133,8 @@ div.readoffline-embed-text {
 
 == Changelog ==
 
+= 0.1.9 =
+* Fixed a bug in permalinks that gave 404 for blogs in a subdirectory. Also removed code that gave error when downloading an ePub.
 = 0.1.8 =
 * Added Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
 = 0.1.7 =
