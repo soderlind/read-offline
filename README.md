@@ -52,13 +52,13 @@ There are 2 ways you can add the Read Offline link
 ## Screenshots ##
 
 ###1. Read Offline -> General Options###
-![Read Offline -> General Options](wp-assets/screenshot-1.png)
+![Read Offline -> General Options](wp-assets/screenshot-1.jpg)
 
 ###2. Read Offline -> PDF###
-![Read Offline -> PDF](wp-assets/screenshot-2.png)
+![Read Offline -> PDF](wp-assets/screenshot-2.jpg)
 
 ###3. Read Offline -> Print###
-![Read Offline -> Print](wp-assets/screenshot-3.png)
+![Read Offline -> Print](wp-assets/screenshot-3.jpg)
 
 
 ## Changelog ##
