@@ -1,0 +1,23 @@
+div.readoffline-shortcode {
+	margin-bottom: 10px;
+	font-size: .8em !important;
+}
+
+.readoffline-shortcode div {
+	padding: 0 0 1px 20px;
+	display: inline;
+}
+
+div.readoffline-shortcode-text {
+	padding-left: 0;	
+}
+
+
+.readoffline-widget {
+
+}
+
+
+.readoffline-widget div {
+	display: inline;
+}

@@ -1,0 +1,46 @@
+.readoffline-embed {
+	margin-bottom: 10px;
+	font-size: .8em !important;
+}
+
+.readoffline-embed div {
+	padding: 0 0 1px 20px;
+	display: inline;
+}
+
+div.readoffline-embed-text {
+	padding-left: 0;
+	font-weight: bold; 
+}
+
+.pdf, a[href $=".pdf"],
+.epub, a[href $=".epub"],
+.mobi, a[href $=".mobi"],
+.print, a[href $=".print"],
+.docx, a[href $=".docx"],
+.azw, a[href $=".azw"] {
+	padding: 0 0 1px 20px;
+	min-height:16px;
+	text-decoration:  none !important;
+	border: 0;
+}
+
+.pdf, a[href $=".pdf"] {
+	background: url(document-pdf.png) no-repeat 0 50%;
+}
+
+.print, a[href $=".print"] {
+	background: url(document-print.png) no-repeat 0 50%;
+}
+
+.epub, a[href $=".epub"] {
+	background: url(document-epub.png) no-repeat 0 50%;
+}
+
+.docx, a[href $=".docx"] {
+	background: url(document-docx.png) no-repeat 0 50%;
+}
+
+.mobi, .azw, a[href $=".mobi"], a[href $=".azw"] {
+	background: url(document-mobi.png) no-repeat 0 50%;
+}
