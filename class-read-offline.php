@@ -9,7 +9,7 @@ class Read_Offline {
 	public static $options;
 
 	public $url;
-	public static $temp_folder;
+	public static $temp_root;
 
 	private static $instance;
 
@@ -31,9 +31,8 @@ class Read_Offline {
 		self::$plugin_path = plugin_dir_path( __FILE__ );
 		self::$options = get_option( 'Read_Offline_Admin_Settings' );
 
-		if (true === wp_mkdir_p(WP_CONTENT_DIR . '/cache/read-offline-tmp')) {
-			self::$temp_folder = WP_CONTENT_DIR . '/cache/read-offline-tmp';
-		}
+
+		$this->_create_tmp_directories();
 
 	}
 
@@ -93,4 +92,27 @@ class Read_Offline {
 
 	    return $the_excerpt;
 	}
+
+	private function _create_tmp_directories() {
+
+		// remove old tmp directory, created in v0.2.0
+		// global $wp_filesystem;
+		// if( $wp_filesystem->is_dir(WP_CONTENT_DIR . '/cache/read-offline-tmp')) {   
+		// 	$wp_filesystem->rmdir(WP_CONTENT_DIR . '/cache/read-offline-tmp');
+		// }
+
+		if (true === ( wp_mkdir_p(WP_CONTENT_DIR . '/cache/read-offline/tmp'))  && (true == (wp_mkdir_p(WP_CONTENT_DIR . '/cache/read-offline/font') )))  {
+
+			self::$temp_root = WP_CONTENT_DIR . '/cache/read-offline';
+		} else {
+			return add_action( 'admin_notices', function(){
+			    $msg[] = '<div class="error"><p>';
+			    $msg[] = '<strong>Read Offline</strong>: ';
+			    $msg[] = sprintf( __( 'Unable to create directory %s. Is its parent directory writable by the server?','read-offline' ), WP_CONTENT_DIR . '/cache/read-offline' );
+			    $msg[] = '</p></div>';
+			    echo implode( PHP_EOL, $msg );
+			});
+		}
+	}
+
 }

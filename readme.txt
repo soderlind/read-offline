@@ -4,7 +4,7 @@ Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
 Tested up to: 4.1
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,12 @@ There are 2 ways you can add the Read Offline link
 3. Read Offline -> Print
 
 == Changelog ==
+= 0.2.1 =
+* New Feature: Read Offline->Print->Print Style  = "The site theme style"
+* Biugfixs
+   * PDF: Page numbering
+   * ePub: ePub-> Add cover page. Missing cover page gave error.
+   * Minor fixes.
 = 0.2.0 =
 * **Complete rewrite**. NOTE, I haven't added support for the `[readoffline]` shortcodes in this version, it will be added in 0.3.0
 * Added more PDF features

@@ -10,22 +10,10 @@ if ( ! class_exists( 'AdminPageFramework' ) ) {
 // extend the class
 class Read_Offline_Admin_Settings extends AdminPageFramework {
 
-
-
-    // public function __construct() {
-
-    //     //add_filter( "content_top_Read_Offline_Settings", array( $this, 'replyToInsertPluginTitle' ) );
-    //     //add_filter( "content_top_Read_Offline_Settings", array( $this, 'replyToInsertDonationButton' ) );
-    //     //add_filter( "style_common_Read_Offline_Settings", array( $this, 'replyToAddStyle' ) );
-
-    // }
-
     public function start_Read_Offline_Admin_Settings() {  // start_{extended class name} - this method gets automatically triggered at the end of the class constructor.
 
        if (! class_exists('RevealerCustomFieldType'))
            include_once(dirname( __FILE__ ) . '/library/admin/RevealerCustomFieldType.php');
- // //     if (! class_exists('Read_Offline_Settings_RevealerCustomFieldType'))
- //         include_once(dirname( __FILE__ ) . '/library/Read_Offline_Settings_RevealerCustomFieldType.php');
 
        if (! class_exists('AceCustomFieldType'))
            include_once(dirname( __FILE__ ) . '/library/admin/AceCustomFieldType.php');
@@ -43,7 +31,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
         return  "<div class='plugin_icon' style='height:64px;width:64px;float:left;'>"
                   .  "<div class='dashicons dashicons-book' style='font-size:64px;'></div>"
               . "</div>"
-              . "<div class='page_title'>"
+              . "<div class='page_title' style=':flex;'>"
                   . "<h1>Read Offline</h1>"
               . "</div>"
               . $sContent;
@@ -854,6 +842,29 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                 'hidden'           => true,
                 'help'             => __( 'Help text', 'read-offline' ),
              )
+            // array( // Reset Submit button
+            //     'field_id'      => 'submit_button_reset',
+            //     'section_id'    => 'pdf_css',
+            //     'title'         => __( 'Reset Button', 'admin-page-framework-demo' ),
+            //     'type'          => 'submit',
+            //     'label_min_width'   => 0,
+            //     'label'         => __( 'Reset', 'admin-page-framework-demo' ),
+            //     'reset'         => 'pdf_css',
+            //     'error_message' => 'hepp',
+            //     'default'       => 'msg',
+            //     'attributes'    => array(
+            //         'class' => 'button button-secondary',
+            //         'style'    => 'float: right;',
+            //         'fieldset' => array(
+            //             'style' => 'float: right;'
+            //         ),
+            //         'field'     => array(
+            //             'style' => 'float: none;'
+            //         ),
+            //     ),
+            //     'description'   => __( 'If you press this button, a confirmation message will appear and then if you press it again, it resets the option.', 'admin-page-framework-demo' ),
+            // ),
+            // array()
         );
 
        $this->addSettingSections(
@@ -1017,7 +1028,26 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                 'title'            => __('Cover Art', 'read-offline' ),
                 'type'             => 'image',
                'help'              => __( 'Help text', 'read-offline' ),
-             ),
+            ),
+            array(  // Single set of radio buttons
+                'field_id'         => 'style',
+                'section_id'       => 'epub',
+                'title'            => __( 'Print Style', 'read-offline' ),
+                //'description'      => __( 'Choose one from the radio buttons.', 'read-offline' ),
+                'type'             => 'revealer',
+                'label'            => array(
+                      '0'                  => __( 'None', 'read-offline' ),
+                      //'theme_style'        => __( 'The site theme style', 'read-offline' ),
+                      '#fieldrow-epub_css' => __( 'Custom CSS (added below)', 'read-offline' ),
+                ),
+                'default'          => '0',
+                'attributes'       => array(
+                    'select'               => array(
+                        'style'                    =>  'width: 200px;',
+                    ),
+                ),
+               'help'              => __( 'Help text', 'read-offline' ),
+            ),
             array(  // Text Area
                 'field_id'         => 'css',
                 'section_id'       => 'epub',
@@ -1029,12 +1059,13 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                     'style'                 => 'width:100%;max-width:600px;height:100%;max-height:200px;',
                 ),
                 'options'          => array(
-                  // 'language'            => 'css', // available languages https://github.com/ajaxorg/ace/tree/master/lib/ace/mode
+                  'language'               => 'css', // available languages https://github.com/ajaxorg/ace/tree/master/lib/ace/mode
                   // 'theme'               => 'chrome', //available themes https://github.com/ajaxorg/ace/tree/master/lib/ace/theme
                   'gutter'                 => true,
                   // 'readonly'            => false
                 ),
-               'help'              => __( 'Help text', 'read-offline' ),
+                'hidden'           => true,
+                'help'              => __( 'Help text', 'read-offline' ),
              )
         );
 
@@ -1177,11 +1208,30 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                 ),
                 'hidden'           => true,
              ),
+            array(  // Single set of radio buttons
+                'field_id'         => 'style',
+                'section_id'       => 'print',
+                'title'            => __( 'Print Style', 'read-offline' ),
+                //'description'      => __( 'Choose one from the radio buttons.', 'read-offline' ),
+                'type'             => 'revealer',
+                'label'            => array(
+                      '0'                          => __( 'None', 'read-offline' ),
+                      'theme_style'                => __( 'The site theme style', 'read-offline' ),
+                      '#fieldrow-print_css' => __( 'Custom CSS (added below)', 'read-offline' ),
+                ),
+                'default'          => '0',
+                'attributes'       => array(
+                    'select'               => array(
+                        'style'                    =>  'width: 200px;',
+                    ),
+                ),
+               'help'              => __( 'Help text', 'read-offline' ),
+             ),
             array(  // Text Area
                 'field_id'         => 'css',
-                'section_id'       => 'print',
-                'title'            => __('Print Style', 'read-offline' ),
-                'description'      => __('Type a text string here.', 'read-offline' ),
+                //'section_id'       => 'print',
+                //'title'            => __('Print Style', 'read-offline' ),
+                //'description'      => __('Type a text string here.', 'read-offline' ),
                 'type'             => 'ace',
                 'default'          => file_get_contents(plugin_dir_path( __FILE__ ) . 'templates/print/custom-print.css'),
                 'attributes'       =>  array(
@@ -1193,7 +1243,8 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                   'gutter'                 => true,
                   // 'readonly'            => false
                 ),
-               'help'              => __( 'Help text', 'read-offline' ),
+                'hidden'           => true,
+                'help'             => __( 'Help text', 'read-offline' ),
              )
         );
 

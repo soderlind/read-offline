@@ -62,6 +62,13 @@ There are 2 ways you can add the Read Offline link
 
 
 ## Changelog ##
+### 0.2.1 ###
+* New Feature: Read Offline->Print->Print Style = "The site theme style"
+* Biugfixs
+   * PDF: Page numbering
+   * ePub: ePub-> Add cover page. Missing cover page gave error.
+   * Minor fixes.
+
 ### 0.2.0 ###
 * **Complete rewrite**. NOTE, I haven't added support for the `[readoffline]` shortcodes in this version, it will be added in 0.3.0
 * Added more PDF features
@@ -76,12 +83,16 @@ There are 2 ways you can add the Read Offline link
    * Add print header text
    * Custom print style
 * Updated libraries should give better UTF-8 support for PDF, ePub and mobi.
+
 ### 0.1.9 ###
 * Fixed a bug in permalinks that gave 404 for blogs in a subdirectory. Also removed code that gave error when downloading an ePub.
+
 ### 0.1.8 ###
 * Added Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
+
 ### 0.1.7 ###
 *  Fixed a small bug
+
 ### 0.1.6 ###
 *  Added the option to add custom css to PDF
 

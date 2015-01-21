@@ -67,20 +67,28 @@ class Read_Offline_Parser extends Read_Offline {
 					switch ($docformat) {
 						case 'print':
 							$print_header = "";
-							$print_style  = "";
+							$print_css  = "";
 							if ('0' != parent::$options['print']['header'] ) {
 								$print_header = sprintf('BODY:before {  display: block;  content: "%s";  margin-bottom: 10px;  border: 1px solid #bbb;  padding: 3px 5px;  font-style: italic;}'
 									, $this->_parse_header_footer($post, parent::$options['print']['headertext'], true)
 								);
 
 							}
-							if (isset(parent::$options['print']['css'])) {
-								$print_style = ( '' != parent::$options['print']['css']) ? parent::$options['print']['css'] : '';
+
+							$print_style = $this->_get_child_array_key('print',parent::$options['print']['style']);
+							switch ($print_style) {
+								case 'theme_style':
+									$print_css = file_get_contents(get_stylesheet_uri());
+									break;
+
+								case 'css':
+									$print_css = ( '' != parent::$options['print']['css']) ? parent::$options['print']['css'] : '';
+									break;
 							}
 							printf('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>%s</title><style type="text/css" media="print">%s%s</style></head><body>%s</body></html>'
 								, get_the_title($post->ID)
+								, $print_css
 								, $print_header
-								, $print_style
 								, $html
 							);
 							break;
@@ -101,13 +109,24 @@ class Read_Offline_Parser extends Read_Offline {
 							$epub->setPublisher(get_bloginfo( 'name' ), get_bloginfo( 'url' ));
 							$epub->setSourceURL($post->guid);
 
-							if (isset(parent::$options['epub']['epub_cover_image'])) {
+							if ('' != parent::$options['epub']['epub_cover_image'] ) {
 								$epub->setCoverImage(parent::$options['epub']['epub_cover_image']);
 							}
 							$epub->setDate(get_the_date( 'U', $post->ID ));
 							$epub->setRights(parent::$options['copyright']['message']);
 
-							$print_css = (isset(parent::$options['epub']['css']) ) ? parent::$options['epub']['css'] : "";
+
+							$print_css = "";
+							$print_style = $this->_get_child_array_key('epub',parent::$options['epub']['style']);
+							switch ($print_style) {
+								case 'theme_style':
+									//$print_css = file_get_contents(get_stylesheet_uri());
+									break;
+
+								case 'css':
+									$print_css = ( '' != parent::$options['print']['css']) ? parent::$options['print']['css'] : '';
+									break;
+							}
 							if ("" != $print_css ) {
 								$epub->addCSSFile("styles.css", "css1", $print_css);
 							}
@@ -176,7 +195,9 @@ class Read_Offline_Parser extends Read_Offline {
 							$zipData = $mobi->download($post->post_name . ".mobi");
 						break;
 						case 'pdf':
-							define("_MPDF_TEMP_PATH", parent::$temp_folder);
+							define("_MPDF_TEMP_PATH",  parent::$temp_root . '/tmp');
+							define('_MPDF_TTFONTDATAPATH',parent::$temp_root . '/font'); 	// should be writeable
+
 							require_once "library/mpdf60/mpdf.php";
 
 							$paper_format = sprintf("'%s-%s'",
@@ -453,6 +474,8 @@ class Read_Offline_Parser extends Read_Offline {
 								$pdf->showWatermarkImage = false;
 								$pdf->showWatermarkText  = false;
 							}
+
+							$toc = $this->_get_child_array_key('pdf_layout',parent::$options['pdf_layout']['add_toc']);
 							$pdf->AddPageByArray(array(
 							    'suppress' => 'off', // don't supress headers
 							    'ohname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
@@ -463,13 +486,13 @@ class Read_Offline_Parser extends Read_Offline {
 							    'ehvalue' => ('0' != $header ) ? 1 : 0,
 							    'ofvalue' => ('0' != $footer ) ? 1 : 0,
 							    'efvalue' => ('0' != $footer ) ? 1 : 0,
-							    'resetpagenum' => 2,
+							    'resetpagenum' =>  ('0' != $toc) ? 2 : 1,
 						    ));
 
 						    /**
 						     * Table og contents
 						     */
-						    $toc = $this->_get_child_array_key('pdf_layout',parent::$options['pdf_layout']['add_toc']);
+						    
 						    if ('0' !== $toc ) {
 						    	$toc_start = ('0' == parent::$options['pdf_layout']['toc'][0]) ? 1 : parent::$options['pdf_layout']['toc'][0];
 						    	$toc_stop  = ('0' == parent::$options['pdf_layout']['toc'][1]) ? 2 : parent::$options['pdf_layout']['toc'][1];
