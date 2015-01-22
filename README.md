@@ -62,6 +62,10 @@ There are 2 ways you can add the Read Offline link
 
 
 ## Changelog ##
+
+### 0.2.2 ###
+* Added localization (that is, added missing `load_plugin_textdomain()`). 
+
 ### 0.2.1 ###
 * New Feature: Read Offline->Print->Print Style = "The site theme style"
 * Biugfixs

@@ -4,7 +4,7 @@ Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: lorem ipsum dolores est
 Author: Per Soderlind
-Version: 0.2.1
+Version: 0.2.2
 Author URI: http://soderlind.no
 Text Domain: read-offline
 Domain Path: /languages
@@ -39,6 +39,13 @@ if (get_option( 'Read_Offline_Admin_Settings' )) {
 		return add_action( 'admin_notices', 'read_offline_admin_notice_update_options' );
 	}
 }
+
+/**
+ * Load language file
+ */
+add_action('plugins_loaded', function(){
+	load_plugin_textdomain( 'read-offline', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+});
 
 
 function read_offline_admin_notice_php_version () {
