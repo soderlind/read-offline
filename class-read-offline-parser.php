@@ -195,8 +195,9 @@ class Read_Offline_Parser extends Read_Offline {
 							$zipData = $mobi->download($post->post_name . ".mobi");
 						break;
 						case 'pdf':
-							define("_MPDF_TEMP_PATH",  parent::$temp_root . '/tmp');
-							define('_MPDF_TTFONTDATAPATH',parent::$temp_root . '/font'); 	// should be writeable
+							define("_MPDF_TEMP_PATH",  parent::$temp_root . '/tmp/');
+							define('_MPDF_TTFONTDATAPATH',parent::$temp_root . '/font/');
+							// _MPDF_SYSTEM_TTFONTS - us when implementing font management
 
 							require_once "library/mpdf60/mpdf.php";
 
@@ -206,7 +207,7 @@ class Read_Offline_Parser extends Read_Offline {
 							);
 
 							$pdf = new mPDF(
-								'UTF-8', // $mode=''
+								'', // $mode=''
 								$paper_format, // $format='A4'
 								0,  // $default_font_size=0
 								'', // $default_font=''
@@ -218,6 +219,55 @@ class Read_Offline_Parser extends Read_Offline {
 								9,  // $mgf=9 - margin footer
 								parent::$options['pdf_layout']['paper_orientation'] // $orientation='P'
 							);
+							// $pdf->fontdata = array(	"dejavusanscondensed" => array(
+							// 		'R' => "DejaVuSansCondensed.ttf",
+							// 		'B' => "DejaVuSansCondensed-Bold.ttf",
+							// 		'I' => "DejaVuSansCondensed-Oblique.ttf",
+							// 		'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
+							// 	)
+							// );
+
+
+							$pdf->fontdata = array(
+								"dejavusanscondensed" => array(
+									'R' => "DejaVuSansCondensed.ttf",
+									'B' => "DejaVuSansCondensed-Bold.ttf",
+									'I' => "DejaVuSansCondensed-Oblique.ttf",
+									'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
+									'useOTL' => 0xFF,
+									'useKashida' => 75,
+									),
+								"dejavusans" => array(
+									'R' => "DejaVuSans.ttf",
+									'B' => "DejaVuSans-Bold.ttf",
+									'I' => "DejaVuSans-Oblique.ttf",
+									'BI' => "DejaVuSans-BoldOblique.ttf",
+									'useOTL' => 0xFF,
+									'useKashida' => 75,
+									),
+								"dejavuserif" => array(
+									'R' => "DejaVuSerif.ttf",
+									'B' => "DejaVuSerif-Bold.ttf",
+									'I' => "DejaVuSerif-Italic.ttf",
+									'BI' => "DejaVuSerif-BoldItalic.ttf",
+									),
+								"dejavuserifcondensed" => array(
+									'R' => "DejaVuSerifCondensed.ttf",
+									'B' => "DejaVuSerifCondensed-Bold.ttf",
+									'I' => "DejaVuSerifCondensed-Italic.ttf",
+									'BI' => "DejaVuSerifCondensed-BoldItalic.ttf",
+									),
+								"dejavusansmono" => array(
+									'R' => "DejaVuSansMono.ttf",
+									'B' => "DejaVuSansMono-Bold.ttf",
+									'I' => "DejaVuSansMono-Oblique.ttf",
+									'BI' => "DejaVuSansMono-BoldOblique.ttf",
+									'useOTL' => 0xFF,
+									'useKashida' => 75,
+									)
+								);
+
+//$pdf->sans_fonts = array('dejavusanscondensed','sans','sans-serif');
 
 							$pdf->SetTitle($post->post_title);
 							$pdf->SetAuthor($author_firstlast);
@@ -225,13 +275,17 @@ class Read_Offline_Parser extends Read_Offline {
 							$pdf->SetKeywords($keywords);
 							$pdf->SetCreator(parent::$options['copyright']['message']);
 
-
-
+//							$pdf->autoScriptToLang = true;
+//							$pdf->baseScript = 1;
+//							$pdf->autoVietnamese = true;
+//							$pdf->autoArabic = true;
+							$pdf->autoLangToFont = true;
 
 							$pdf->ignore_invalid_utf8 = true;
 							$pdf->useSubstitutions=false;
 							$pdf->simpleTables = true;
-							//$pdf-$keep_table_proportions = true;
+							$pdf->h2bookmarks = array('H1'=>0, 'H2'=>1, 'H3'=>2);
+							$pdf->title2annots=true;
 
 							/**
 							 * Watermark
@@ -492,7 +546,7 @@ class Read_Offline_Parser extends Read_Offline {
 						    /**
 						     * Table og contents
 						     */
-						    
+
 						    if ('0' !== $toc ) {
 						    	$toc_start = ('0' == parent::$options['pdf_layout']['toc'][0]) ? 1 : parent::$options['pdf_layout']['toc'][0];
 						    	$toc_stop  = ('0' == parent::$options['pdf_layout']['toc'][1]) ? 2 : parent::$options['pdf_layout']['toc'][1];
@@ -505,7 +559,6 @@ class Read_Offline_Parser extends Read_Offline {
 						    		$toc_arr[sprintf('H%s',$i)] = $j++;
 						    	}
 							    $pdf->h2toc       = $toc_arr;
-								$pdf->h2bookmarks = $toc_arr;
 								$pdf->TOCpagebreakByArray(array(
 								    // 'tocfont' => '',
 								    // 'tocfontsize' => '',

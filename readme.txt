@@ -4,7 +4,7 @@ Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
 Tested up to: 4.1
-Stable tag: 0.2.1
+Stable tag: 0.2.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,8 @@ There are 2 ways you can add the Read Offline link
 3. Read Offline -> Print
 
 == Changelog ==
+= 0.2.3 =
+* Reduced mPDF library size by 90% (!!), incl removing fonts. Only [DejaVu fonts](http://dejavu-fonts.org/) are included. Will add font management (i.e. option to add fonts) in later version. Please [tell me](https://github.com/soderlind/read-offline/issues/new) if this breaks the plugin.
 = 0.2.2 =
 * Added localization (that is, added missing `load_plugin_textdomain()`)
 = 0.2.1 =

@@ -31,7 +31,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
         return  "<div class='plugin_icon' style='height:64px;width:64px;float:left;'>"
                   .  "<div class='dashicons dashicons-book' style='font-size:64px;'></div>"
               . "</div>"
-              . "<div class='page_title' style=':flex;'>"
+              . "<div class='page_title' style='display:block;padding: 10px 0;'>"
                   . "<h1>Read Offline</h1>"
               . "</div>"
               . $sContent;
@@ -481,20 +481,20 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                     ),
                     'help'         => __( 'Help text', 'read-offline' ),
                ),
-            ),
-            array(
-                'field_id'         => 'pdfa',
-                'section_id'       => 'pdf_layout',
-                'title'            => __('PDF/A?','read-offline'),
-                'type'             => 'radio',
-                'label'            => array(
-                    '1' => __( 'Yes', 'read-offline' ),
-                    '0' => __( 'No', 'read-offline' ),
-                ),
-                //'description'      => __("Don't use PDFA if you don't have to", 'read-offline'),
-                'default'          => '0',  // banana
-                'help'             => __( 'Help text', 'read-offline' ),
-           )
+            )
+           //  array(
+           //      'field_id'         => 'pdfa',
+           //      'section_id'       => 'pdf_layout',
+           //      'title'            => __('PDF/A?','read-offline'),
+           //      'type'             => 'radio',
+           //      'label'            => array(
+           //          '1' => __( 'Yes', 'read-offline' ),
+           //          '0' => __( 'No', 'read-offline' ),
+           //      ),
+           //      //'description'      => __("Don't use PDFA if you don't have to", 'read-offline'),
+           //      'default'          => '0',  // banana
+           //      'help'             => __( 'Help text', 'read-offline' ),
+           // )
          );
       /*
        $this->addSettingSections(
@@ -1275,9 +1275,9 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
             "<a href='admin.php?page=read_offline_pdf'>PDF</a>",
             "<a href='admin.php?page=read_offline_epub'>ePub</a>",
             "<a href='admin.php?page=read_offline_mobi'>mobi</a>",
-            "<a href='admin.php?page=read_offline_docx'>DocX</a>",
+           // "<a href='admin.php?page=read_offline_docx'>DocX</a>",
             "<a href='admin.php?page=read_offline_print'>Print</a>",
-            "<a href='admin.php?page=read_offline_faq'>About</a>",
+           // "<a href='admin.php?page=read_offline_faq'>About</a>",
             "Please <a href='https://github.com/soderlind/read-offline/issues'>report issues</a> at GitHub"
         );
 

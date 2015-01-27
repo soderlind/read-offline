@@ -30,9 +30,12 @@ class Read_Offline {
 		//$this->url = plugin_dir_url( __FILE__ );
 		self::$plugin_path = plugin_dir_path( __FILE__ );
 		self::$options = get_option( 'Read_Offline_Admin_Settings' );
-
-
-		$this->_create_tmp_directories();
+		if (is_admin()) {
+			add_action( 'admin_init', array($this, 'read_offline_update' ));
+		}
+		self::$temp_root = WP_CONTENT_DIR . '/cache/read-offline';
+		//$this->read_offline_update();
+		//$this->_create_tmp_directories();
 
 	}
 
@@ -93,25 +96,57 @@ class Read_Offline {
 	    return $the_excerpt;
 	}
 
+	public function read_offline_update() {
+
+		$options = get_option( "Read_Offline" );
+		$version = (isset($options['version'])) ? $options['version'] : '0';
+
+		if ( $version != self::$plugin_version ) {
+			$options['version'] = self::$plugin_version;
+
+			$this->_remove_tmp_directories();
+
+			update_option( "Read_Offline", $options );
+		}
+		$this->_create_tmp_directories();
+	}
+
 	private function _create_tmp_directories() {
+		global $wp_filesystem;
+		if( ! $wp_filesystem || ! is_object($wp_filesystem) )
+			WP_Filesystem();
+		if( ! is_object($wp_filesystem) )
+			wp_die('WP_Filesystem Error:' . print_r($wp_filesystem,true));
 
-		// remove old tmp directory, created in v0.2.0
-		// global $wp_filesystem;
-		// if( $wp_filesystem->is_dir(WP_CONTENT_DIR . '/cache/read-offline-tmp')) {   
-		// 	$wp_filesystem->rmdir(WP_CONTENT_DIR . '/cache/read-offline-tmp');
-		// }
 
-		if (true === ( wp_mkdir_p(WP_CONTENT_DIR . '/cache/read-offline/tmp'))  && (true == (wp_mkdir_p(WP_CONTENT_DIR . '/cache/read-offline/font') )))  {
+		$directories = array(WP_CONTENT_DIR . '/cache/read-offline/tmp', WP_CONTENT_DIR . '/cache/read-offline/font');
 
-			self::$temp_root = WP_CONTENT_DIR . '/cache/read-offline';
-		} else {
-			return add_action( 'admin_notices', function(){
-			    $msg[] = '<div class="error"><p>';
-			    $msg[] = '<strong>Read Offline</strong>: ';
-			    $msg[] = sprintf( __( 'Unable to create directory %s. Is its parent directory writable by the server?','read-offline' ), WP_CONTENT_DIR . '/cache/read-offline' );
-			    $msg[] = '</p></div>';
-			    echo implode( PHP_EOL, $msg );
-			});
+		foreach ($directories as $directory) {
+			if (! wp_mkdir_p ($directory) ) {
+				return add_action( 'admin_notices', function(){
+				    $msg[] = '<div class="error"><p>';
+				    $msg[] = '<strong>Read Offline</strong>: ';
+				    $msg[] = sprintf( __( 'Unable to create directory %s. Is its parent directory writable by the server?','read-offline' ), $directory );
+				    $msg[] = '</p></div>';
+				    echo implode( PHP_EOL, $msg );
+				});
+			}
+		}
+	}
+
+
+	private function _remove_tmp_directories() {
+		global $wp_filesystem;
+		if( ! $wp_filesystem || ! is_object($wp_filesystem) )
+			WP_Filesystem();
+		if( ! is_object($wp_filesystem) )
+			wp_die('WP_Filesystem Error:' . print_r($wp_filesystem,true));
+
+		$directories = array(WP_CONTENT_DIR . '/cache/read-offline', WP_CONTENT_DIR . '/cache/read-offline-tmp');
+		foreach ($directories as $directory) {
+			if (true !== $wp_filesystem->rmdir( $directory , true )) {
+			    wp_die('hepp');
+			}
 		}
 	}
 
