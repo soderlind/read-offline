@@ -31,7 +31,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
         return  "<div class='plugin_icon' style='height:64px;width:64px;float:left;'>"
                   .  "<div class='dashicons dashicons-book' style='font-size:64px;'></div>"
               . "</div>"
-              . "<div class='page_title' style='display:block;padding: 10px 0;'>"
+              . "<div class='page_title'>"
                   . "<h1>Read Offline</h1>"
               . "</div>"
               . $sContent;
@@ -68,9 +68,10 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                   . "
 
           .page_title {
-              display: inline-block;
+              display: block; /* inline-block; */
               margin-top: 1em;
-              margin-bottom: 1em;
+              margin-bottom: 0.5em;
+              padding-top: 1.5em;
           }
           .page_title h1{
               margin: 0;
@@ -1261,7 +1262,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
         $this->addSubMenuLink(
             array(
                 'title'            => '<span class="warning">' . __( 'Please report issues', 'read-offline' ) . '</span>',
-                'href'             => 'https://github.com/soderlind/read-offline/issues',
+                'href'             => 'https://github.com/soderlind/read-offline/issues/new',
                 'capability'       => null,
                 'order'            => null,
                 'show_page_heading_tab' => false
@@ -1278,7 +1279,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
            // "<a href='admin.php?page=read_offline_docx'>DocX</a>",
             "<a href='admin.php?page=read_offline_print'>Print</a>",
            // "<a href='admin.php?page=read_offline_faq'>About</a>",
-            "Please <a href='https://github.com/soderlind/read-offline/issues'>report issues</a> at GitHub"
+            "Please <a href='https://github.com/soderlind/read-offline/issues/new'>report issues</a> at GitHub"
         );
 
 
