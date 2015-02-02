@@ -84,10 +84,18 @@ class Read_Offline_UX extends Read_Offline {
 
 		// POST TYPE CHECK
 
-		if ( is_single() && isset($placements['top']) ) {
+		$post_types = array_keys(array_intersect_assoc(
+			array(
+				 'post' => 1
+				,'page' => 1
+			)
+			, parent::$options['where']['post_types']
+		));
+
+		if ( is_singular( $post_types ) && isset($placements['top']) ) {
 			$content = $readoffline . $content;
 		}
-		if ( is_single() && isset($placements['bottom']) ) {
+		if ( is_singular( $post_types ) && isset($placements['bottom']) ) {
 			$content =  $content . $readoffline;
 		}
 

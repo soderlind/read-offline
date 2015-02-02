@@ -1,5 +1,8 @@
 ## Changelog ##
 
+### 0.2.6 ###
+* Read Offline now works with Pages
+
 ### 0.2.5 ###
 * Solved a bug that prevented a user from adding a custom css to PDF
 

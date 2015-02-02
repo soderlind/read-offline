@@ -1294,7 +1294,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 
         //update_option( 'Read_Offline_Admin_Settings', '' );
 
-        //printf("<pre>%s</pre>", print_r(get_current_screen(),true));
+        //printf("<pre>%s</pre>", print_r(get_option( 'Read_Offline_Admin_Settings' ),true));
 
         //echo $this->oDebug->getArray( get_option( 'Read_Offline_Admin_Settings' ) );
     }
