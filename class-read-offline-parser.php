@@ -124,7 +124,7 @@ class Read_Offline_Parser extends Read_Offline {
 									break;
 
 								case 'css':
-									$print_css = ( '' != parent::$options['print']['css']) ? parent::$options['print']['css'] : '';
+									$print_css = ( '' != parent::$options['epub']['css']) ? parent::$options['epub']['css'] : '';
 									break;
 							}
 							if ("" != $print_css ) {
