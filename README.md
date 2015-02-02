@@ -33,6 +33,9 @@ Read Offline allows you to download or print posts and pages. You can download t
 * Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
 * languages/read-offline.po for easy translation.
 
+## Changelog ##
+
+Please [see the CHANGELOG.md](CHANGELOG.md) file.
 
 ## Installation ##
 
