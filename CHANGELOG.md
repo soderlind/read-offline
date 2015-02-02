@@ -1,5 +1,8 @@
 ## Changelog ##
 
+### 0.2.4 ###
+* Solved a bug that prevented a user from adding a custom css to ePub
+
 ### 0.2.3 ###
 * Reduced mPDF library size by 90% (!!), incl removing fonts. Only [DejaVu fonts](http://dejavu-fonts.org/) are included. Will add font management (i.e. option to add fonts) in later version. Please [tell me](https://github.com/soderlind/read-offline/issues/new) if this breaks the plugin.
 
