@@ -1,5 +1,8 @@
 ## Changelog ##
 
+### 0.2.5 ###
+* Solved a bug that prevented a user from adding a custom css to PDF
+
 ### 0.2.4 ###
 * Solved a bug that prevented a user from adding a custom css to ePub
 

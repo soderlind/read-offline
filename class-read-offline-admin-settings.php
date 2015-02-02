@@ -1033,7 +1033,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
             array(  // Single set of radio buttons
                 'field_id'         => 'style',
                 'section_id'       => 'epub',
-                'title'            => __( 'Print Style', 'read-offline' ),
+                'title'            => __( 'ePub Style', 'read-offline' ),
                 //'description'      => __( 'Choose one from the radio buttons.', 'read-offline' ),
                 'type'             => 'revealer',
                 'label'            => array(

@@ -467,7 +467,7 @@ class Read_Offline_Parser extends Read_Offline {
 
 									$pdf->WriteHTML(file_get_contents(get_stylesheet_uri()),1);
 									break;
-								case 'custom_image':
+								case 'css':
 									$pdf->WriteHTML(parent::$options['pdf_css']['css'],1);
 									break;
 

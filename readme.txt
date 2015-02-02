@@ -4,7 +4,7 @@ Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
 Tested up to: 4.1
-Stable tag: 0.2.4
+Stable tag: 0.2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,8 @@ There are 2 ways you can add the Read Offline link
 3. Read Offline -> Print
 
 == Changelog ==
+= 0.2.5 =
+* Solved a bug that prevented a user from adding a custom css to PDF
 = 0.2.4 =
 * Solved a bug that prevented a user from adding a custom css to ePub
 = 0.2.3 =
