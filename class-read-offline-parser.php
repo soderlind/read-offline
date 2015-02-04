@@ -168,21 +168,24 @@ class Read_Offline_Parser extends Read_Offline {
 								. "<body>\n";
 
 							$content_end = "\n</body>\n</html>\n";
+
 							$i = 0;
 							if (false !== preg_match('@(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:"]))@',$html,$matches)) {								$urls = array_keys(array_flip($matches));
 								foreach ($urls as $url) {
-									$mime = $epub->getMimeTypeFromUrl($url);
-									if ('' != $mime) {
-										$rel_url = ltrim( basename(wp_make_link_relative($url)), '/');
-										$html = str_replace($url, $rel_url , $html);
-
-										$epub_file_id =   'epublargefile' . $i++; //basename( $rel_url, strrchr( $rel_url, '.' ));
-										$epub_file = trailingslashit(ABSPATH) .  wp_make_link_relative($url);
-
-										$epub->addLargeFile($rel_url, $epub_file_id , $epub_file, $mime);
+									if (false !== ($attchment_id = $this->_get_attachment_id_from_url($url))) {
+										$attachment_meta = wp_get_attachment_metadata( $attchment_id);
+										$mime         = $attachment_meta['sizes']['large']['mime-type'];
+										$rel_url      = $attachment_meta['file'];
+										$html         = str_replace($url, $rel_url , $html);
+										$epub_file_id =   'epublargefile' . $i++;
+										$epub_file    = sprintf("%s/%s",wp_upload_dir()['basedir'],$rel_url);
+										if (file_exists($epub_file)) {
+											$epub->addLargeFile($rel_url, $epub_file_id , $epub_file, $mime);
+										}
 									}
 								}
 							}
+
 							$epub->addChapter("Body", "Body.html", $content_start .  $html . $content_end);
 
 							$epub->finalize();
@@ -752,6 +755,27 @@ class Read_Offline_Parser extends Read_Offline {
 			}
 
 			return (count($out)) ? implode(', ', $out ) : "";
+		}
+
+		// from https://philipnewcomer.net/2012/11/get-the-attachment-id-from-an-image-url-in-wordpress/
+		private function _get_attachment_id_from_url( $attachment_url = '' ) {
+			global $wpdb;
+			$attachment_id = false;
+			// If there is no url, return.
+			if ( '' == $attachment_url )
+				return;
+			// Get the upload directory paths
+			$upload_dir_paths = wp_upload_dir();
+			// Make sure the upload path base directory exists in the attachment URL, to verify that we're working with a media library image
+			if ( false !== strpos( $attachment_url, $upload_dir_paths['baseurl'] ) ) {
+				// If this is the URL of an auto-generated thumbnail, get the URL of the original image
+				$attachment_url = preg_replace( '/-\d+x\d+(?=\.(jpg|jpeg|png|gif)$)/i', '', $attachment_url );
+				// Remove the upload path base directory from the attachment URL
+				$attachment_url = str_replace( $upload_dir_paths['baseurl'] . '/', '', $attachment_url );
+				// Finally, run a custom database query to get the attachment ID from the modified attachment URL
+				$attachment_id = $wpdb->get_var( $wpdb->prepare( "SELECT wposts.ID FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta WHERE wposts.ID = wpostmeta.post_id AND wpostmeta.meta_key = '_wp_attached_file' AND wpostmeta.meta_value = '%s' AND wposts.post_type = 'attachment'", $attachment_url ) );
+			}
+			return $attachment_id;
 		}
 
 		function store_post_styles() {
