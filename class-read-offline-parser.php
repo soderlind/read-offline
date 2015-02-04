@@ -92,6 +92,7 @@ class Read_Offline_Parser extends Read_Offline {
 								, $html
 							);
 							break;
+//epub
 						case 'epub':
 
 							require_once "library/PHPePub/EPub.php";
@@ -111,6 +112,30 @@ class Read_Offline_Parser extends Read_Offline {
 
 							if ('' != parent::$options['epub']['epub_cover_image'] ) {
 								$epub->setCoverImage(parent::$options['epub']['epub_cover_image']);
+							}
+							/**
+							 * Coverart
+							 */
+							$coverart = $this->_get_child_array_key('epub',parent::$options['epub']['art']);
+							$upload_dir = wp_upload_dir();
+							if ('none' != $coverart) {
+
+								switch ($coverart) {
+
+									case 'feature_image':
+										$image_url = wp_get_attachment_url( get_post_thumbnail_id($post->ID, 'thumbnail') );
+
+										$attachment_data = wp_get_attachment_metadata(get_post_thumbnail_id($post->ID, 'thumbnail'));
+										$image_path = $upload_dir['basedir'] . '/' . $attachment_data['file'];
+										if (count($attachment_data)) {
+											$epub->setCoverImage($image_path);
+										}
+										break;
+
+									case 'custom_image':
+										$epub->setCoverImage("Cover.jpg", file_get_contents($coverart));
+										break;
+								}
 							}
 							$epub->setDate(get_the_date( 'U', $post->ID ));
 							$epub->setRights(parent::$options['copyright']['message']);
@@ -143,13 +168,27 @@ class Read_Offline_Parser extends Read_Offline {
 								. "<body>\n";
 
 							$content_end = "\n</body>\n</html>\n";
+							$i = 0;
+							if (false !== preg_match('@(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:"]))@',$html,$matches)) {								$urls = array_keys(array_flip($matches));
+								foreach ($urls as $url) {
+									$mime = $epub->getMimeTypeFromUrl($url);
+									if ('' != $mime) {
+										$rel_url = ltrim( basename(wp_make_link_relative($url)), '/');
+										$html = str_replace($url, $rel_url , $html);
 
-							//$epub->setCoverImage("wp-content/themes/twentyten/images/headers/path.jpg");
+										$epub_file_id =   'epublargefile' . $i++; //basename( $rel_url, strrchr( $rel_url, '.' ));
+										$epub_file = trailingslashit(ABSPATH) .  wp_make_link_relative($url);
 
-							$epub->addChapter("Body", "Body.html", $content_start . $html . $content_end);
+										$epub->addLargeFile($rel_url, $epub_file_id , $epub_file, $mime);
+									}
+								}
+							}
+							$epub->addChapter("Body", "Body.html", $content_start .  $html . $content_end);
+
 							$epub->finalize();
 							$zipData = $epub->sendBook($post->post_name);
 						break;
+//mobi
 						case 'mobi':
 							require_once "library/phpMobi/MOBIClass/MOBI.php";
 							//require_once "mobi/Mobi.inc.php";

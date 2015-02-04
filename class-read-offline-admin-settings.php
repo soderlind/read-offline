@@ -1023,12 +1023,29 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 
 
         $this->addSettingFields(
-            array( // Image Selector
-                'field_id'         => 'epub_cover_image',
+            array(
+                'field_id'         => 'art',
                 'section_id'       => 'epub',
                 'title'            => __('Cover Art', 'read-offline' ),
-                'type'             => 'image',
+                'type'             => 'revealer',
+                //'description'      => __( 'If ', 'read-offline'),
+                'label'            => array(
+                    'none'                 => __( 'None', 'read-offline' ),
+                    'feature_image'        => __( 'Featured Image', 'read-offline' ),
+                    '#fieldrow-epub_custom_image' => __( 'Image (added below)', 'read-offline' ),
+                ),
+                'default'          => 'none',
+                'attributes'       => array(
+                    'select'               => array(
+                        'style'                    =>  'width: 200px;',
+                    ),
+                ),
                'help'              => __( 'Help text', 'read-offline' ),
+             ),
+            array(
+                'field_id'         => 'custom_image',
+                'section_id'       => 'epub',
+                'type'             => 'image',
             ),
             array(  // Single set of radio buttons
                 'field_id'         => 'style',
@@ -1294,7 +1311,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 
         //update_option( 'Read_Offline_Admin_Settings', '' );
 
-        //printf("<pre>%s</pre>", print_r(get_option( 'Read_Offline_Admin_Settings' ),true));
+        printf("<pre>%s</pre>", print_r(get_option( 'Read_Offline_Admin_Settings' ),true));
 
         //echo $this->oDebug->getArray( get_option( 'Read_Offline_Admin_Settings' ) );
     }

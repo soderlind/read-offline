@@ -1,5 +1,10 @@
 ## Changelog ##
 
+### 0.2.7 ###
+* ePub: Added option to add Featured Image as a coverpage
+* ePub: Fixed bug with adding images
+* Read Offline ePub validates using the [EPUB Validator](http://validator.idpf.org/)
+
 ### 0.2.6 ###
 * Read Offline now works with Pages
 
