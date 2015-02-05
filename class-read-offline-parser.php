@@ -170,18 +170,35 @@ class Read_Offline_Parser extends Read_Offline {
 							$content_end = "\n</body>\n</html>\n";
 
 							$i = 0;
-							if (false !== preg_match('@(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:"]))@',$html,$matches)) {								$urls = array_keys(array_flip($matches));
-								foreach ($urls as $url) {
-									if (false !== ($attchment_id = $this->_get_attachment_id_from_url($url))) {
-										$attachment_meta = wp_get_attachment_metadata( $attchment_id);
-										$mime         = $attachment_meta['sizes']['large']['mime-type'];
-										$rel_url      = $attachment_meta['file'];
-										$html         = str_replace($url, $rel_url , $html);
-										$epub_file_id =   'epublargefile' . $i++;
-										$epub_file    = sprintf("%s/%s",wp_upload_dir()['basedir'],$rel_url);
-										if (file_exists($epub_file)) {
-											$epub->addLargeFile($rel_url, $epub_file_id , $epub_file, $mime);
-										}
+							$doc = new DOMDocument();
+							@$doc->loadHTML($html);  // add error check
+							$tags = $doc->getElementsByTagName('img');
+							foreach ($tags as $tag) {
+						    	$url =  $tag->getAttribute('src');
+
+								if (false !== ($attchment_id = $this->_get_attachment_id_from_url($url))) {
+									$attachment_meta = wp_get_attachment_metadata( $attchment_id);
+									$mime         = get_post_mime_type($attchment_id ); //$attachment_meta['sizes']['large']['mime-type'];
+									$rel_url      = $attachment_meta['file'];
+									$html         = str_replace($url, $rel_url , $html);
+									$epub_file_id =   'epublargefile' . $i++;
+									$epub_file    = sprintf("%s/%s",wp_upload_dir()['basedir'],$rel_url);
+									// printf("<p>
+									// 	url: %s <br />
+									// 	mime: %s<br />
+									// 	rel_url: %s<br />
+									// 	epub_file: %s<br />
+									// 	exists?: %s<br />
+									// 	</p>",
+									// 	$url,
+									// 	$mime,
+									// 	$rel_url,
+									// 	$epub_file,
+									// 	(file_exists($epub_file)? "true" : "false")
+									// );
+
+									if (file_exists($epub_file)) {
+										$epub->addLargeFile($rel_url, $epub_file_id , $epub_file, $mime);
 									}
 								}
 							}
