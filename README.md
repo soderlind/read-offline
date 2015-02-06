@@ -45,12 +45,11 @@ Please [see the CHANGELOG.md](CHANGELOG.md) file.
 
 ## Use ##
 
-There are 2 ways you can add the Read Offline link
+Add it to the top or bottom of each post and/or page (See Settings->Read Offline)
 
-1. Add it to the top or bottom of each post and/or page (See Settings->Read Offline)
-1. Using the Read Offline widget
 
-(shortcode will be added in the next version)
+
+([shortcode](https://github.com/soderlind/read-offline/issues/6) and [widget](https://github.com/soderlind/read-offline/issues/10) comming soon)
 
 ## Screenshots ##
 
