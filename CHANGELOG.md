@@ -1,5 +1,8 @@
 ## Changelog ##
 
+### 0.2.8 ###
+* ePub: rewrote routine for embedding images
+
 ### 0.2.7 ###
 * ePub: Added option to add Featured Image as a coverpage
 * ePub: Fixed bug with adding images

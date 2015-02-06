@@ -2,9 +2,9 @@
 /*
 Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
-Description: lorem ipsum dolores est
+Description: Read Offline allows you to download or print posts and pages. You can download the posts as PDF, ePub or mobi
 Author: Per Soderlind
-Version: 0.2.7
+Version: 0.2.8
 Author URI: http://soderlind.no
 Text Domain: read-offline
 Domain Path: /languages
