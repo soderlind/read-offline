@@ -182,7 +182,8 @@ class Read_Offline_Parser extends Read_Offline {
 									$rel_url      = $attachment_meta['file'];
 									$html         = str_replace($url, $rel_url , $html);
 									$epub_file_id =   'epublargefile' . $i++;
-									$epub_file    = sprintf("%s/%s",wp_upload_dir()['basedir'],$rel_url);
+									$upload_dir = wp_upload_dir();
+									$epub_file    = sprintf("%s/%s",$upload_dir['basedir'],$rel_url);
 									// printf("<p>
 									// 	url: %s <br />
 									// 	mime: %s<br />
