@@ -25,18 +25,10 @@ class Read_Offline {
 
 	private function __construct() {
 
-		//self::$plugin_url = plugins_url( basename(dirname(__FILE__)), dirname(__FILE__) );
-		self::$plugin_url =  plugin_dir_url( __FILE__ );
-		//$this->url = plugin_dir_url( __FILE__ );
-		self::$plugin_path = plugin_dir_path( __FILE__ );
 		self::$options = get_option( 'Read_Offline_Admin_Settings' );
 		if (is_admin()) {
 			add_action( 'admin_init', array($this, 'read_offline_update' ));
 		}
-		self::$temp_root = WP_CONTENT_DIR . '/cache/read-offline';
-		//$this->read_offline_update();
-		//$this->_create_tmp_directories();
-
 	}
 
 	public static function query_url($id,$name,$format) {

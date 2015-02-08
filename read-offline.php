@@ -11,6 +11,9 @@ Domain Path: /languages
 */
 
 
+define('READOFFLINE_DIR', __DIR__);
+define('READOFFLINE_URL', plugin_dir_url( __FILE__ ));
+define('READOFFLINE_CACHE', WP_CONTENT_DIR . '/cache/read-offline');
 
 if ( version_compare( PHP_VERSION, '5.3.0' ) < 0 ) {
     return add_action( 'admin_notices', 'read_offline_admin_notice_php_version' );
@@ -18,7 +21,7 @@ if ( version_compare( PHP_VERSION, '5.3.0' ) < 0 ) {
 
 
 
-Read_Offline_Loader::autoload(__DIR__);
+Read_Offline_Loader::autoload( READOFFLINE_DIR . '/includes');
 
 if ( is_admin() ) {
  	new Read_Offline_Admin_Settings ();

@@ -95,7 +95,7 @@ class Read_Offline_Parser extends Read_Offline {
 //epub
 						case 'epub':
 
-							require_once "library/PHPePub/EPub.php";
+							require_once (READOFFLINE_DIR .'/library/PHPePub/EPub.php');
 							//require_once "epub/EPub.inc.php";
 
 							$epub = new EPub();
@@ -211,7 +211,7 @@ class Read_Offline_Parser extends Read_Offline {
 						break;
 //mobi
 						case 'mobi':
-							require_once "library/phpMobi/MOBIClass/MOBI.php";
+							require_once (READOFFLINE_DIR . '/library/phpMobi/MOBIClass/MOBI.php');
 							//require_once "mobi/Mobi.inc.php";
 
 							$mobi = new MOBI();
@@ -255,11 +255,11 @@ class Read_Offline_Parser extends Read_Offline {
 							$zipData = $mobi->download($post->post_name . ".mobi");
 						break;
 						case 'pdf':
-							define("_MPDF_TEMP_PATH",  parent::$temp_root . '/tmp/');
-							define('_MPDF_TTFONTDATAPATH',parent::$temp_root . '/font/');
+							define("_MPDF_TEMP_PATH",  READOFFLINE_CACHE . '/tmp/');
+							define('_MPDF_TTFONTDATAPATH',READOFFLINE_CACHE . '/font/');
 							// _MPDF_SYSTEM_TTFONTS - us when implementing font management
 
-							require_once "library/mpdf60/mpdf.php";
+							require_once (READOFFLINE_DIR . '/library/mpdf60/mpdf.php');
 
 							$paper_format = sprintf("'%s-%s'",
 									('custom_paper_format' == $this->_get_child_array_key('pdf_layout',parent::$options['pdf_layout']['paper_format'])) ? parent::$options['pdf_layout']['custom_paper_format'] : parent::$options['pdf_layout']['paper_format'],

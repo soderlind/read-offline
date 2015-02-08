@@ -20,23 +20,29 @@ class Read_Offline_UX extends Read_Offline {
 		parent::get_instance();
 
 		//$this->url = plugin_dir_url( dirname(__FILE__) );
-		add_action('the_content', array($this,'embed'));
+		add_action('the_content', array($this,'embed_post'));
+		//add_action('the_category', array($this,'embed_category'));
+		add_filter ( 'get_the_archive_title', array($this,'embed_category'));
 		add_action('wp_enqueue_scripts', array($this,'add_script_style'));
 	}
 
 	function add_script_style() {
-		wp_enqueue_style('read-offline-embed', parent::$plugin_url . 'library/css/read-offline-embed.css',array(),parent::$plugin_version);
-		wp_enqueue_style('read-offline-css', parent::$plugin_url   . 'library/css/read-offline.css',array(),parent::$plugin_version);
-		wp_enqueue_script('read-offline',      parent::$plugin_url . 'library/js/read-offline-wp.js',array('jquery'),parent::$plugin_version);
+		wp_enqueue_style('read-offline-embed', READOFFLINE_URL . '/library/css/read-offline-embed.css',array(),parent::$plugin_version);
+		wp_enqueue_style('read-offline-css', READOFFLINE_URL   . '/library/css/read-offline.css',array(),parent::$plugin_version);
+		wp_enqueue_script('read-offline',      READOFFLINE_URL . '/library/js/read-offline-wp.js',array('jquery'),parent::$plugin_version);
 
 		// google analytics track event
 		if ( '1' == parent::$options['misc']['google'] ) {
-			wp_enqueue_script('read-offline-ga', parent::$plugin_url.'library/js/read-offline-ga.js',array('jquery'),parent::$plugin_version);
+			wp_enqueue_script('read-offline-ga', READOFFLINE_URL.'/library/js/read-offline-ga.js',array('jquery'),parent::$plugin_version);
 		}
 
 	}
 
-	function embed($content) {
+	function embed_category($title) {
+		return "XX " . $title;
+	}
+
+	function embed_post($content) {
 		global $post;
 		if (!is_object($post)) return;
 
