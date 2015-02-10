@@ -104,7 +104,6 @@ class Read_Offline {
 			wp_die('WP_Filesystem Error:' . print_r($wp_filesystem,true));
 
 		$directories = array('cache/read-offline/tmp', 'cache/read-offline/font');
-
 		foreach ($directories as $directory) {
 			$path = WP_CONTENT_DIR;
 			foreach (explode('/', $directory) as $foldername) {
