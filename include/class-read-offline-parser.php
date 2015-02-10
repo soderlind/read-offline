@@ -128,12 +128,12 @@ class Read_Offline_Parser extends Read_Offline {
 										$attachment_data = wp_get_attachment_metadata(get_post_thumbnail_id($post->ID, 'thumbnail'));
 										$image_path = $upload_dir['basedir'] . '/' . $attachment_data['file'];
 										if (count($attachment_data)) {
-											$this->_setCoverImage($epub, $image_path);
+											$epub->setCoverImage($image_path);
 										}
 										break;
 
 									case 'custom_image':
-										$this->_setCoverImage($epub, "Cover.jpg", file_get_contents($coverart));
+										$epub->setCoverImage("Cover.jpg", file_get_contents($coverart));
 										break;
 								}
 							}
