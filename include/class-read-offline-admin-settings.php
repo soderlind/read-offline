@@ -4,7 +4,7 @@
 // Include the library
 if ( ! class_exists( 'AdminPageFramework' ) ) {
     //include_once( dirname( __FILE__ ) . '/library/source/admin-page-framework.php' );
-    include_once( READOFFLINE_DIR . '/library/admin/admin-page-framework.min.php' );
+    include_once( READOFFLINE_PATH . '/library/admin/admin-page-framework.min.php' );
 }
 
 // extend the class
@@ -13,10 +13,10 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
     public function start_Read_Offline_Admin_Settings() {  // start_{extended class name} - this method gets automatically triggered at the end of the class constructor.
 
        if (! class_exists('RevealerCustomFieldType'))
-           include_once(READOFFLINE_DIR . '/library/admin/RevealerCustomFieldType.php');
+           include_once(READOFFLINE_PATH . '/library/admin/RevealerCustomFieldType.php');
 
        if (! class_exists('AceCustomFieldType'))
-           include_once(READOFFLINE_DIR . '/library/admin/AceCustomFieldType.php');
+           include_once(READOFFLINE_PATH . '/library/admin/AceCustomFieldType.php');
 
         $sClassName = get_class( $this );
 
@@ -615,7 +615,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                     'language'             => 'html',
                     'gutter'               => true,
                 ),
-                'default'          => file_get_contents( READOFFLINE_DIR . '/templates/pdf/custom-print-header.html'),
+                'default'          => file_get_contents( READOFFLINE_PATH . '/templates/pdf/custom-print-header.html'),
                 'hidden'           => true,
                 'description'      => __( 'The following aliases can be used:', 'read-offline' ) . ' {PAGENO}, {nb​}, {DATE}, {TODAY}, {TITLE}, {AUTHOR}, {DOCURL}, {SITENAME} ' . __('and','read-offline') . ' {SITEURL} <br />' . __( 'Custom CSS, below, will be used.', 'read-offline' ),
                 'help'             => __( 'Help text', 'read-offline' ),
@@ -731,7 +731,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                     'language'             => 'html',
                     'gutter'               => true,
                 ),
-                'default'          => file_get_contents( READOFFLINE_DIR . '/templates/pdf/custom-print-footer.html'),
+                'default'          => file_get_contents( READOFFLINE_PATH . '/templates/pdf/custom-print-footer.html'),
               'hidden'             => true,
                 'description'      => __( 'The following aliases can be used:', 'read-offline' ) . ' {PAGENO}, {nb​}, {DATE}, {TODAY}, {TITLE}, {AUTHOR}, {DOCURL}, {SITENAME} ' . __('and','read-offline') . ' {SITEURL} <br />' . __( 'Custom CSS, below, will be used.', 'read-offline' ),
                 'help'             => __( 'Help text', 'read-offline' ),
@@ -832,7 +832,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                 //'title'           => 'Custom CSS',
                 'description'      => __( 'Lorem ipsum <a href="http://mpdf1.com/manual/index.php?tid=307" target="_blank">using @page</a>', 'read-offline' ),
                 'type'             => 'ace',
-                'default'          => file_get_contents( READOFFLINE_DIR . '/templates/pdf/custom-print.css'),
+                'default'          => file_get_contents( READOFFLINE_PATH . '/templates/pdf/custom-print.css'),
                 'attributes'       =>  array(
                     'style'                 => 'width:100%;max-width:600px;height:100%;max-height:400px;',
                 ),
@@ -1251,7 +1251,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                 //'title'            => __('Print Style', 'read-offline' ),
                 //'description'      => __('Type a text string here.', 'read-offline' ),
                 'type'             => 'ace',
-                'default'          => file_get_contents( READOFFLINE_DIR . '/templates/print/custom-print.css'),
+                'default'          => file_get_contents( READOFFLINE_PATH . '/templates/print/custom-print.css'),
                 'attributes'       =>  array(
                     'style'                 => 'width:100%;max-width:600px;height:100%;max-height:400px;',
                 ),
@@ -1311,7 +1311,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 
         //update_option( 'Read_Offline_Admin_Settings', '' );
 
-        // printf("<pre>%s</pre>", print_r(get_option( 'Read_Offline_Admin_Settings' ),true));
+        //printf("<pre>%s</pre>", print_r(get_option( 'Read_Offline_Admin_Settings' ),true));
 
         //echo $this->oDebug->getArray( get_option( 'Read_Offline_Admin_Settings' ) );
     }

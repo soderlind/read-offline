@@ -2,15 +2,8 @@
 
 class Read_Offline {
 
-	public static $plugin_url;
-	public static $plugin_path;
-	public static $plugin_version = '0.2.0';
-	public static $l10n_domain = "read-offline";
+
 	public static $options;
-
-	public $url;
-	public static $temp_root;
-
 	private static $instance;
 
 	public static function get_instance() {
@@ -92,9 +85,9 @@ class Read_Offline {
 
 		$options = get_option( "Read_Offline" );
 		$version = (isset($options['version'])) ? $options['version'] : '0';
-
-		if ( $version != self::$plugin_version ) {
-			$options['version'] = self::$plugin_version;
+		$version = 0;
+		if ( $version != READOFFLINE_VERSION ) {
+			$options['version'] = READOFFLINE_VERSION;
 
 			$this->_remove_tmp_directories();
 
@@ -110,18 +103,23 @@ class Read_Offline {
 		if( ! is_object($wp_filesystem) )
 			wp_die('WP_Filesystem Error:' . print_r($wp_filesystem,true));
 
-
-		$directories = array(WP_CONTENT_DIR . '/cache/read-offline/tmp', WP_CONTENT_DIR . '/cache/read-offline/font');
+		$directories = array('cache/read-offline/tmp', 'cache/read-offline/font');
 
 		foreach ($directories as $directory) {
-			if (! wp_mkdir_p ($directory) ) {
-				return add_action( 'admin_notices', function(){
-				    $msg[] = '<div class="error"><p>';
-				    $msg[] = '<strong>Read Offline</strong>: ';
-				    $msg[] = sprintf( __( 'Unable to create directory %s. Is its parent directory writable by the server?','read-offline' ), $directory );
-				    $msg[] = '</p></div>';
-				    echo implode( PHP_EOL, $msg );
-				});
+			$path = WP_CONTENT_DIR;
+			foreach (explode('/', $directory) as $foldername) {
+				$path .= '/' . $foldername;
+				if ( !$wp_filesystem->exists($path) ) {
+					if ( !$wp_filesystem->mkdir($path, FS_CHMOD_DIR) ){
+						return add_action( 'admin_notices', function() use ( $path ){
+						    $msg[] = '<div class="error"><p>';
+						    $msg[] = '<strong>Read Offline</strong>: ';
+						    $msg[] = sprintf( __( 'Unable to create directory "<strong>%s</strong>". Is its parent directory writable by the server?','read-offline' ), $path );
+						    $msg[] = '</p></div>';
+						    echo implode( PHP_EOL, $msg );
+						});
+					}
+				}
 			}
 		}
 	}
