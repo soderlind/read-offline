@@ -3,8 +3,8 @@
 
 // Include the library
 if ( ! class_exists( 'AdminPageFramework' ) ) {
-    //include_once( dirname( __FILE__ ) . '/library/source/admin-page-framework.php' );
-    include_once( READOFFLINE_PATH . '/library/admin/admin-page-framework.min.php' );
+    //include_once( dirname( __FILE__ ) . '/lib/source/admin-page-framework.php' );
+    include_once( READOFFLINE_PATH . '/lib/admin/admin-page-framework.min.php' );
 }
 
 // extend the class
@@ -13,10 +13,10 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
     public function start_Read_Offline_Admin_Settings() {  // start_{extended class name} - this method gets automatically triggered at the end of the class constructor.
 
        if (! class_exists('RevealerCustomFieldType'))
-           include_once(READOFFLINE_PATH . '/library/admin/RevealerCustomFieldType.php');
+           include_once(READOFFLINE_PATH . '/lib/admin/RevealerCustomFieldType.php');
 
        if (! class_exists('AceCustomFieldType'))
-           include_once(READOFFLINE_PATH . '/library/admin/AceCustomFieldType.php');
+           include_once(READOFFLINE_PATH . '/lib/admin/AceCustomFieldType.php');
 
         $sClassName = get_class( $this );
 
@@ -56,7 +56,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
     public function replyToInsertDonationButton( $sContent ) {
         return "<div class='donate' style=''>"
             . "<a href='" . esc_url( 'http://soderlind.no/donate/' ) . "' target='_blank' >"
-                . "<img src='" . READOFFLINE_URL . "/library/css/donation.gif' alt='" . esc_attr( __( 'Please donate!', 'admin-page-framework' ) ). "' />"
+                . "<img src='" . READOFFLINE_URL . "/css/donation.gif' alt='" . esc_attr( __( 'Please donate!', 'admin-page-framework' ) ). "' />"
             . "</a>"
             . "</div>"
             . $sContent;

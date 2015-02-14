@@ -85,7 +85,7 @@ class Read_Offline {
 
 		$options = get_option( "Read_Offline" );
 		$version = (isset($options['version'])) ? $options['version'] : '0';
-		$version = 0;
+
 		if ( $version != READOFFLINE_VERSION ) {
 			$options['version'] = READOFFLINE_VERSION;
 

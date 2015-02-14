@@ -27,13 +27,13 @@ class Read_Offline_UX extends Read_Offline {
 	}
 
 	function add_script_style() {
-		wp_enqueue_style('read-offline-embed', READOFFLINE_URL . '/library/css/read-offline-embed.css',array(), READOFFLINE_VERSION );
-		wp_enqueue_style('read-offline-css', READOFFLINE_URL   . '/library/css/read-offline.css',array(), READOFFLINE_VERSION );
-		wp_enqueue_script('read-offline',      READOFFLINE_URL . '/library/js/read-offline-wp.js',array('jquery'), READOFFLINE_VERSION );
+		wp_enqueue_style('read-offline-embed', READOFFLINE_URL . '/css/read-offline-embed.css',array(), READOFFLINE_VERSION );
+		wp_enqueue_style('read-offline-css',   READOFFLINE_URL . '/css/read-offline.css',array(), READOFFLINE_VERSION );
+		wp_enqueue_script('read-offline',      READOFFLINE_URL . '/js/read-offline-wp.js',array('jquery'), READOFFLINE_VERSION );
 
 		// google analytics track event
 		if ( '1' == parent::$options['misc']['google'] ) {
-			wp_enqueue_script('read-offline-ga', READOFFLINE_URL.'/library/js/read-offline-ga.js',array('jquery'), READOFFLINE_VERSION );
+			wp_enqueue_script('read-offline-ga', READOFFLINE_URL.'/js/read-offline-ga.js',array('jquery'), READOFFLINE_VERSION );
 		}
 
 	}
