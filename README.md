@@ -2,7 +2,7 @@
 
 Read Offline allows you to download or print posts and pages. You can download the post as PDF, ePub or mobi
 
-
+### NOTE, the latest version in the WordPress plugin directory is broken. Please [download the latest version](https://github.com/soderlind/read-offline/archive/master.zip) here at GitHub
 
 ### NOTE, this is still a beta version ###
 
