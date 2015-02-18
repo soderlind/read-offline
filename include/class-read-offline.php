@@ -133,8 +133,16 @@ class Read_Offline {
 
 		$directories = array(WP_CONTENT_DIR . '/cache/read-offline', WP_CONTENT_DIR . '/cache/read-offline-tmp');
 		foreach ($directories as $directory) {
-			if (true !== $wp_filesystem->rmdir( $directory , true )) {
-			    wp_die('hepp');
+			if (file_exists($directory)) {
+				if (true !== $wp_filesystem->rmdir( $directory , true )) {
+				    return add_action( 'admin_notices', function() use ( $directory ){
+						    $msg[] = '<div class="error"><p>';
+						    $msg[] = '<strong>Read Offline</strong>: ';
+						    $msg[] = sprintf( __( 'Unable to remove cache directory "<strong>%s</strong>". Is it and its directories writable by the server?','read-offline' ), $directory );
+						    $msg[] = '</p></div>';
+						    echo implode( PHP_EOL, $msg );
+						});
+				}
 			}
 		}
 	}
