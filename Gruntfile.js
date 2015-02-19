@@ -104,7 +104,7 @@ module.exports = function (grunt) {
 					allowEmpty: true
 				},
 				files: {
-					src: [ 'README.md', 'readme.txt', 'read-offline.php', 'package.json', 'Gruntfile.js','assets/**', 'include/**', 'languages/**', 'library/**', 'templates/**' ]
+					src: [ 'README.md', 'readme.txt', 'read-offline.php', 'package.json', 'Gruntfile.js','assets/**', 'inc/**', 'languages/**', 'lib/**', 'templates/**' ]
 				}
 			}
 		},
@@ -177,7 +177,31 @@ module.exports = function (grunt) {
 				dest: 'http://plugins.svn.wordpress.org/read-offline',
 				tmp: 'build/make_svn'
 			}
-		}
+		},
+		makepot: {
+		    target: {
+		        options: {
+		            domainPath: '/languages',
+		            mainFile: 'read-offline.php',
+		            potFilename: 'read-offline.pot',
+		            potHeaders: {
+		                poedit: true,
+		                'x-poedit-keywordslist': true
+		            },
+		            processPot: function( pot, options ) {
+	                    pot.headers['report-msgid-bugs-to'] = 'https://github.com/soderlind/read-offline/issues';
+	                    /*pot.headers['language-team'] = 'Team Name <team@example.com>';*/
+	                    return pot;
+	                },
+		            type: 'wp-plugin',
+		            updateTimestamp: true,
+		            exclude: [
+		            	'lib/.*',
+		            	'node_modules/.*'
+		            ],
+		        }
+		    }
+		}, //makepot
 	});
 
 
@@ -191,6 +215,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks( 'grunt-svn-checkout' );
 	grunt.loadNpmTasks( 'grunt-push-svn' );
 	grunt.loadNpmTasks( 'grunt-remove' );
+	grunt.loadNpmTasks( 'grunt-wp-i18n' )
 
 	grunt.registerTask('syntax', 'default task description', function(){
 	  console.log('Syntax:\n\tgrunt release');
@@ -199,9 +224,12 @@ module.exports = function (grunt) {
 	//register default task
 //	grunt.registerTask( 'default', [ 'glotpress_download' ]);
 	grunt.registerTask( 'default', ['syntax']);
+
 // get the latest version of Shortcake
 	grunt.registerTask( 'shortcake', ['gitclone:shortcake', 'copy:shortcake', 'clean:shortcake']);
-	//release tasks
+// makepot
+	grunt.registerTask('l10n', ['makepot']);
+//release tasks
 	grunt.registerTask( 'version_number', [ 'replace:reamde_md', 'replace:reamde_txt', 'replace:plugin_php' ] );
 //	grunt.registerTask( 'pre_vcs', [ 'version_number', 'glotpress_download' ] );
 	grunt.registerTask( 'pre_vcs', [ 'version_number'] );
