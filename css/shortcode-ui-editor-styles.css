@@ -5,7 +5,15 @@
   .wpview-wrap .shortcake-error {
     color: red;
     font-weight: bold; }
-
+/*
+.wpview-wrap {
+min-height: 0px!important ;
+}
+.wpview-wrap {
+position: relative;
+border: 1px solid transparent;
+}
+*/
 .shortcake-preview .loading-placeholder .wpview-loading {
   width: 60px;
   height: 5px;
