@@ -44,14 +44,14 @@ class Read_Offline_Create extends Read_Offline {
 		require_once (READOFFLINE_PATH .'/lib/htmlpurifier-4.6.0-standalone/HTMLPurifier.standalone.php');
 		$htmlpurifier_config = HTMLPurifier_Config::createDefault();
 
-		// $epub_html_whitelist = array ('h1','h2','h3','h4','h5','h6', 'a', 'abbr', 'area', 'audio', 'b', 'bdi', 'bdo', 'br', 'button', 'canvas', 'cite', 'code', 'command', 'datalist', 'del', 'dfn', 'em', 'embed', 'i', 'iframe', 'img', 'input', 'ins', 'kbd', 'keygen', 'label', 'map', 'mark', 'meter', 'ns1:switch', 'ns2:math', 'ns3:svg', 'object', 'output', 'progress', 'q', 'ruby', 's', 'samp', 'script', 'select', 'small', 'span', 'strong', 'sub', 'sup', 'textarea', 'time', 'u', 'var', 'video' , 'wbr');
+		$epub_html_whitelist = array ('h1','h2','h3','h4','h5','h6', 'a', 'abbr', 'area', 'audio', 'b', 'bdi', 'bdo', 'br', 'button', 'canvas', 'cite', 'code', 'command', 'datalist', 'del', 'dfn', 'em', 'embed', 'i', 'iframe', 'img', 'input', 'ins', 'kbd', 'keygen', 'label', 'map', 'mark', 'meter', 'ns1:switch', 'ns2:math', 'ns3:svg', 'object', 'output', 'progress', 'q', 'ruby', 's', 'samp', 'script', 'select', 'small', 'span', 'strong', 'sub', 'sup', 'textarea', 'time', 'u', 'var', 'video' , 'wbr');
 		// //$htmlpurifier_config->set('HTML.Doctype', 'XHTML 1.1');
-		// $htmlpurifier_config->set('HTML.AllowedElements',$epub_html_whitelist);
+		$htmlpurifier_config->set('HTML.AllowedElements',$epub_html_whitelist);
 
 
-		// $ebub_html_attributes = array('*.accesskey', '*.aria-activedescendant', '*.aria-atomic', '*.aria-autocomplete', '*.aria-busy', '*.aria-checked', '*.aria-controls', '*.aria-describedby', '*.aria-disabled', '*.aria-dropeffect', '*.aria-expanded', '*.aria-flowto', '*.aria-grabbed', '*.aria-haspopup', '*.aria-hidden', '*.aria-invalid', '*.aria-label', '*.aria-labelledby', '*.aria-level', '*.aria-live', '*.aria-multiline', '*.aria-multiselectable', '*.aria-orientation', '*.aria-owns', '*.aria-posinset', '*.aria-pressed', '*.aria-readonly', '*.aria-relevant', '*.aria-required', '*.aria-selected', '*.aria-setsize', '*.aria-sort', '*.aria-valuemax', '*.aria-valuemin', '*.aria-valuenow', '*.aria-valuetext', '*.border', '*.class', '*.contenteditable', '*.contextmenu', '*.dir', '*.draggable', '*.dropzone', '*.hidden', '*.id', '*.lang', '*.ns1:type', '*.ns2:alphabet', '*.ns2:ph', '*.onabort', '*.onblur', '*.oncanplay', '*.oncanplaythrough', '*.onchange', '*.onclick', '*.oncontextmenu', '*.ondblclick', '*.ondrag', '*.ondragend', '*.ondragenter', '*.ondragleave', '*.ondragover', '*.ondragstart', '*.ondrop', '*.ondurationchange', '*.onemptied', '*.onended', '*.onerror', '*.onfocus', '*.oninput', '*.oninvalid', '*.onkeydown', '*.onkeypress', '*.onkeyup', '*.onload', '*.onloadeddata', '*.onloadedmetadata', '*.onloadstart', '*.onmousedown', '*.onmousemove', '*.onmouseout', '*.onmouseover', '*.onmouseup', '*.onmousewheel', '*.onpause', '*.onplay', '*.onplaying', '*.onprogress', '*.onratechange', '*.onreadystatechange', '*.onreset', '*.onscroll', '*.onseeked', '*.onseeking', '*.onselect', '*.onshow', '*.onstalled', '*.onsubmit', '*.onsuspend', '*.ontimeupdate', '*.onvolumechange', '*.onwaiting', '*.role', '*.spellcheck', '*.style', '*.tabindex', '*.title', '*.xml:base', '*.xml:lang' , '*.xml:space');
-		// $htmlpurifier_config->set('HTML.AllowedAttributes',$ebub_html_attributes);
-		//$htmlpurifier_config->set( 'AutoFormat.RemoveSpansWithoutAttributes', true );
+		$ebub_html_attributes = array('*.accesskey', '*.aria-activedescendant', '*.aria-atomic', '*.aria-autocomplete', '*.aria-busy', '*.aria-checked', '*.aria-controls', '*.aria-describedby', '*.aria-disabled', '*.aria-dropeffect', '*.aria-expanded', '*.aria-flowto', '*.aria-grabbed', '*.aria-haspopup', '*.aria-hidden', '*.aria-invalid', '*.aria-label', '*.aria-labelledby', '*.aria-level', '*.aria-live', '*.aria-multiline', '*.aria-multiselectable', '*.aria-orientation', '*.aria-owns', '*.aria-posinset', '*.aria-pressed', '*.aria-readonly', '*.aria-relevant', '*.aria-required', '*.aria-selected', '*.aria-setsize', '*.aria-sort', '*.aria-valuemax', '*.aria-valuemin', '*.aria-valuenow', '*.aria-valuetext', '*.border', '*.class', '*.contenteditable', '*.contextmenu', '*.dir', '*.draggable', '*.dropzone', '*.hidden', '*.id', '*.lang', '*.ns1:type', '*.ns2:alphabet', '*.ns2:ph', '*.onabort', '*.onblur', '*.oncanplay', '*.oncanplaythrough', '*.onchange', '*.onclick', '*.oncontextmenu', '*.ondblclick', '*.ondrag', '*.ondragend', '*.ondragenter', '*.ondragleave', '*.ondragover', '*.ondragstart', '*.ondrop', '*.ondurationchange', '*.onemptied', '*.onended', '*.onerror', '*.onfocus', '*.oninput', '*.oninvalid', '*.onkeydown', '*.onkeypress', '*.onkeyup', '*.onload', '*.onloadeddata', '*.onloadedmetadata', '*.onloadstart', '*.onmousedown', '*.onmousemove', '*.onmouseout', '*.onmouseover', '*.onmouseup', '*.onmousewheel', '*.onpause', '*.onplay', '*.onplaying', '*.onprogress', '*.onratechange', '*.onreadystatechange', '*.onreset', '*.onscroll', '*.onseeked', '*.onseeking', '*.onselect', '*.onshow', '*.onstalled', '*.onsubmit', '*.onsuspend', '*.ontimeupdate', '*.onvolumechange', '*.onwaiting', '*.role', '*.spellcheck', '*.style', '*.tabindex', '*.title', '*.xml:base', '*.xml:lang' , '*.xml:space');
+		$htmlpurifier_config->set('HTML.AllowedAttributes',$ebub_html_attributes);
+		$htmlpurifier_config->set( 'AutoFormat.RemoveSpansWithoutAttributes', true );
 
 		$htmlpurifier = new HTMLPurifier($htmlpurifier_config);
 		$this->html = $htmlpurifier->purify($html);
@@ -185,7 +185,8 @@ class Read_Offline_Create extends Read_Offline {
 		foreach ($tags as $tag) {
 	    	$url =  $tag->getAttribute('src');
 
-			if (false !== ($attchment_id = $this->_get_attachment_id_from_url($url))) {
+			//if (false !== ($attchment_id = $this->_get_attachment_id_from_url($url))) {
+			if (false !== ($attchment_id = attachment_url_to_postid($url))) {
 				$attachment_meta = wp_get_attachment_metadata( $attchment_id);
 				$mime         = get_post_mime_type($attchment_id ); //$attachment_meta['sizes']['large']['mime-type'];
 				$rel_url      = $attachment_meta['file'];
@@ -521,7 +522,7 @@ class Read_Offline_Create extends Read_Offline {
 		 * Default CSS
 		 */
 		if ('default_header' == $header || 'default_footer' == $footer) {
-			$pdf->WriteHTML(file_get_contents(plugin_dir_path( __FILE__ ) . 'templates/pdf/default-print.css'),1);
+			$pdf->WriteHTML(file_get_contents( READOFFLINE_PATH. '/templates/pdf/default-print.css' ),1);
 		}
 
 		/**
