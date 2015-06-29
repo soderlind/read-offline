@@ -1,0 +1,13 @@
+# We don't want these files in our "plugins.zip", so tell GitHub to ignore them when the user click on Download ZIP
+/README.md export-ignore
+/package.json export-ignore
+/Gruntfile.js export-ignore
+/.gitattributes export-ignore
+/assets export-ignore
+/assets/banner-1544x500.png export-ignore
+/assets/banner-772x250.png export-ignore
+/assets/icon-128x128.png export-ignore
+/assets/icon-256x256.png export-ignore
+/assets/screenshot-1.jpg export-ignore
+/assets/screenshot-2.jpg export-ignore
+/assets/screenshot-3.jpg export-ignore
