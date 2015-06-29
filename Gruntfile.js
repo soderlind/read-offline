@@ -1,4 +1,10 @@
-
+/*
+ * Based on http://torquemag.io/automating-wordpress-plugin-updates-releases-grunt/
+ *
+ * added:
+ *        copy:svn_assets task
+ *        makepot, creates read-offline.pot
+ */
 module.exports = function (grunt) {
 
 	//setup file list for copying/ not copying for SVN
@@ -43,8 +49,8 @@ module.exports = function (grunt) {
 			post_build: [
 				'build'
 			],
-			shortcake: [
-				'tmp'
+			shortcake_tmp: [
+				'tmp/shortcake'
 			]
 		},
 		copy: {
@@ -55,7 +61,7 @@ module.exports = function (grunt) {
 				expand: true,
 				cwd:  'assets/',
 				src:  '**',
-				dest: 'build/<%= pkg.name %>/assets/', 
+				dest: 'build/<%= pkg.name %>/assets/',
 				flatten: true,
 				filter: 'isFile'
 			},
@@ -90,7 +96,7 @@ module.exports = function (grunt) {
 		gittag: {
 			addtag: {
 				options: {
-					tag: '2.x/<%= pkg.version %>',
+					tag: '<%= pkg.version %>',
 					message: 'Version <%= pkg.version %>'
 				}
 			}
@@ -188,8 +194,9 @@ module.exports = function (grunt) {
 		                poedit: true,
 		                'x-poedit-keywordslist': true
 		            },
+		            bugsurl: '<%= pkg.bugs.url%>',
 		            processPot: function( pot, options ) {
-	                    pot.headers['report-msgid-bugs-to'] = 'https://github.com/soderlind/read-offline/issues';
+	                    pot.headers['report-msgid-bugs-to'] = options.bugsurl;
 	                    /*pot.headers['language-team'] = 'Team Name <team@example.com>';*/
 	                    return pot;
 	                },
@@ -215,7 +222,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks( 'grunt-svn-checkout' );
 	grunt.loadNpmTasks( 'grunt-push-svn' );
 	grunt.loadNpmTasks( 'grunt-remove' );
-	grunt.loadNpmTasks( 'grunt-wp-i18n' )
+	grunt.loadNpmTasks( 'grunt-wp-i18n' );
 
 	grunt.registerTask('syntax', 'default task description', function(){
 	  console.log('Syntax:\n\tgrunt release');
@@ -226,7 +233,7 @@ module.exports = function (grunt) {
 	grunt.registerTask( 'default', ['syntax']);
 
 // get the latest version of Shortcake
-	grunt.registerTask( 'shortcake', ['gitclone:shortcake', 'copy:shortcake', 'clean:shortcake']);
+	grunt.registerTask( 'shortcake', ['gitclone:shortcake', 'copy:shortcake', 'clean:shortcake_tmp']);
 // makepot
 	grunt.registerTask('l10n', ['makepot']);
 //release tasks

@@ -15,7 +15,7 @@
   },
   "license": "GPL",
   "bugs": {
-    "url": "https://github.com/soderlind/read-offline/issues"
+    "url": "https://github.com/soderlind/read-offline/issues/new"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
@@ -29,5 +29,8 @@
     "grunt-svn-checkout": "^0.1.1",
     "grunt-text-replace": "^0.4.0",
     "grunt-wp-i18n": "^0.5.0"
+  },
+  "dependencies": {
+    "gh-issue-url": "0.0.2"
   }
 }

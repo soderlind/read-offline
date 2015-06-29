@@ -8,7 +8,7 @@ Stable tag: 0.2.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Read Offline allows you to download or print posts and pages. You can download the posts in PDF, ePub or mobi
+Read Offline allows you to download or print posts and pages. You can download the posts as PDF, ePub or mobi
 
 == Description ==
 
