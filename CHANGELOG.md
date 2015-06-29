@@ -1,87 +1,59 @@
-## Changelog ##
+# Changelog
 
-### 0.2.8 ###
-* ePub: rewrote routine for embedding images
+- [2015-06-30](https://github.com/dss-web/read-offline/commit/2f84119): Version 0.3.0 (committer: soderlind) 
+- [2015-06-29](https://github.com/dss-web/read-offline/commit/4826a0f): updated assets, removed shortcake (committer: soderlind) 
+- [2015-06-29](https://github.com/dss-web/read-offline/commit/e9067d3): added multisite support for add epub and mobi as attachment (committer: soderlind) 
+- [2015-06-29](https://github.com/dss-web/read-offline/commit/fd4a9f5): fixed bug saving pdf,epub and mobi as attachment added custom download function (committer: soderlind) 
+- [2015-06-29](https://github.com/dss-web/read-offline/commit/9d45f83): not used .. yet, buggy proof of concept (committer: soderlind) 
+- [2015-06-29](https://github.com/dss-web/read-offline/commit/7868e08): re-enabled htmlpurifier, replaced custom function with attachment_url_to_postid (committer: soderlind) 
+- [2015-06-29](https://github.com/dss-web/read-offline/commit/f566281): modified autoloader, removed widget (committer: soderlind) 
+- [2015-06-29](https://github.com/dss-web/read-offline/commit/9a7741b): updated (committer: soderlind) 
+- [2015-06-29](https://github.com/dss-web/read-offline/commit/cf4857a): updated, added prefix (committer: soderlind) 
+- [2015-06-29](https://github.com/dss-web/read-offline/commit/0bb0d25): updated (committer: soderlind) 
+- [2015-06-29](https://github.com/dss-web/read-offline/commit/2e18fc5): update (committer: soderlind) 
+- [2015-06-23](https://github.com/dss-web/read-offline/commit/3acf1cb): save pdf, epu and mobi as attachment to post (committer: soderlind) 
+- [2015-06-23](https://github.com/dss-web/read-offline/commit/4c18b0a): added the htmlpurifier standalone library (committer: soderlind) 
+- [2015-06-23](https://github.com/dss-web/read-offline/commit/9858560): initial commit (committer: soderlind) 
+- [2015-06-23](https://github.com/dss-web/read-offline/commit/34a09d3): Moved create doc (pdf, mobi, epub and print) to a new class: class-read-offline-create.php (committer: soderlind) 
+- [2015-03-01](https://github.com/dss-web/read-offline/commit/4b209ba): Update README.md (committer: Per Søderlind) 
+- [2015-02-19](https://github.com/dss-web/read-offline/commit/b5167dd): Added Shortcake (committer: soderlind) 
+- [2015-02-19](https://github.com/dss-web/read-offline/commit/3ff7001): Updated (committer: soderlind) 
+- [2015-02-19](https://github.com/dss-web/read-offline/commit/0d2dcbe): Updated languages/read-offline.pot (committer: soderlind) 
+- [2015-02-19](https://github.com/dss-web/read-offline/commit/a185aa2): Added makepot, creates languages/read-offline.pot (committer: soderlind) 
+- [2015-02-18](https://github.com/dss-web/read-offline/commit/8f8608b): hotfix for issue #21 (committer: Per Søderlind) 
+- [2015-02-17](https://github.com/dss-web/read-offline/commit/001a58c): Update README.md (committer: Per Søderlind) 
+- [2015-02-14](https://github.com/dss-web/read-offline/commit/a54188e): Plugin management (committer: soderlind) 
+- [2015-02-14](https://github.com/dss-web/read-offline/commit/635b74b): Added node_modules (committer: soderlind) 
+- [2015-02-14](https://github.com/dss-web/read-offline/commit/ed47992): Added Shortcake (committer: soderlind) 
+- [2015-02-14](https://github.com/dss-web/read-offline/commit/b2c9fb4): Added Shortcake (committer: soderlind) 
+- [2015-02-14](https://github.com/dss-web/read-offline/commit/c6b48e7): moved files (committer: soderlind) 
+- [2015-02-14](https://github.com/dss-web/read-offline/commit/e382bdc): changed folder names (committer: soderlind) 
+- [2015-02-10](https://github.com/dss-web/read-offline/commit/32654f7): reverted to orginal setCover method (committer: soderlind) 
+- [2015-02-10](https://github.com/dss-web/read-offline/commit/f424ee9): rewrote private function _create_tmp_directories (committer: soderlind) 
+- [2015-02-10](https://github.com/dss-web/read-offline/commit/1a00d72): renamed folder (committer: soderlind) 
+- [2015-02-08](https://github.com/dss-web/read-offline/commit/96856a3): moved classes to includes (committer: soderlind) 
+- [2015-02-08](https://github.com/dss-web/read-offline/commit/0a66c1d): Update README.md (committer: Per Søderlind) 
+- [2015-02-08](https://github.com/dss-web/read-offline/commit/3a5e3a1): Fixed issue #18 (committer: soderlind) 
+- [2015-02-06](https://github.com/dss-web/read-offline/commit/af45514): Updated (committer: soderlind) 
+- [2015-02-06](https://github.com/dss-web/read-offline/commit/7f4c1d7): 0.2.8: rewrote routine for embedding images in epub (committer: soderlind) 
+- [2015-02-06](https://github.com/dss-web/read-offline/commit/5fcd774): removed unnecessary files (committer: soderlind) 
+- [2015-02-05](https://github.com/dss-web/read-offline/commit/3cd0d58): embed images in epub (committer: soderlind) 
+- [2015-02-04](https://github.com/dss-web/read-offline/commit/b42961d): attach images to epub (committer: soderlind) 
+- [2015-02-04](https://github.com/dss-web/read-offline/commit/dd1f9e5): v0.2.7, ePub validates using the EPUB validator (committer: soderlind) 
+- [2015-02-02](https://github.com/dss-web/read-offline/commit/1dd4d18): Read Offline now works with Pages (committer: soderlind) 
+- [2015-02-02](https://github.com/dss-web/read-offline/commit/e6905f2): Fixed: Adding a custom CSS to PDF (committer: soderlind) 
+- [2015-02-02](https://github.com/dss-web/read-offline/commit/0ba351b): v 0.2.4 (committer: soderlind) 
+- [2015-02-02](https://github.com/dss-web/read-offline/commit/0578990): fixed bug preventing custom css for epub (committer: soderlind) 
+- [2015-02-02](https://github.com/dss-web/read-offline/commit/6a6c681): Fix minor typos (committer: soderlind) 
+- [2015-01-28](https://github.com/dss-web/read-offline/commit/a072ebe): Update README.md (committer: Per Søderlind) 
+- [2015-01-27](https://github.com/dss-web/read-offline/commit/a1749b0): Updated (committer: soderlind) 
+- [2015-01-27](https://github.com/dss-web/read-offline/commit/8c601f2): Reduced mPDF library size, incl removed fonts (committer: soderlind) 
+- [2015-01-22](https://github.com/dss-web/read-offline/commit/cdd14d2): Added localization (committer: soderlind) 
+- [2015-01-22](https://github.com/dss-web/read-offline/commit/a6e5cf5): Renamed folder (committer: soderlind) 
+- [2015-01-21](https://github.com/dss-web/read-offline/commit/1fd337f): 0.2.1 - see changelog (committer: soderlind) 
+- [2015-01-19](https://github.com/dss-web/read-offline/commit/36b5ec8): Update README.md (committer: Per Søderlind) 
+- [2015-01-19](https://github.com/dss-web/read-offline/commit/86607d5): renamed (committer: soderlind) 
+- [2015-01-19](https://github.com/dss-web/read-offline/commit/2eeef04): renamed (committer: soderlind) 
+- [2015-01-19](https://github.com/dss-web/read-offline/commit/0ed1774): Complete rewrite, see changelog in README (committer: soderlind) 
+- [2015-01-19](https://github.com/dss-web/read-offline/commit/4cd3d63): Clean Up (committer: soderlind) 
 
-### 0.2.7 ###
-* ePub: Added option to add Featured Image as a coverpage
-* ePub: Fixed bug with adding images
-* Read Offline ePub validates using the [EPUB Validator](http://validator.idpf.org/)
-
-### 0.2.6 ###
-* Read Offline now works with Pages
-
-### 0.2.5 ###
-* Solved a bug that prevented a user from adding a custom css to PDF
-
-### 0.2.4 ###
-* Solved a bug that prevented a user from adding a custom css to ePub
-
-### 0.2.3 ###
-* Reduced mPDF library size by 90% (!!), incl removing fonts. Only [DejaVu fonts](http://dejavu-fonts.org/) are included. Will add font management (i.e. option to add fonts) in later version. Please [tell me](https://github.com/soderlind/read-offline/issues/new) if this breaks the plugin.
-
-### 0.2.2 ###
-* Added localization (that is, added missing `load_plugin_textdomain()`). 
-
-### 0.2.1 ###
-* New Feature: Read Offline->Print->Print Style = "The site theme style"
-* Biugfixs
-   * PDF: Page numbering
-   * ePub: ePub-> Add cover page. Missing cover page gave error.
-   * Minor fixes.
-
-### 0.2.0 ###
-* **Complete rewrite**. NOTE, I haven't added support for the `[readoffline]` shortcodes in this version, it will be added in 0.3.0
-* Added more PDF features
-   * Paper formats
-   * Table of Contents
-   * Cover Page
-   * Header and Footer
-   * Use Theme or Custom CSS
-   * Add Watermark
-   * Add Protection
-* **Print**: In addition to downloading a PDF, ePub or mobi, you can now print the page
-   * Add print header text
-   * Custom print style
-* Updated libraries should give better UTF-8 support for PDF, ePub and mobi.
-
-### 0.1.9 ###
-* Fixed a bug in permalinks that gave 404 for blogs in a subdirectory. Also removed code that gave error when downloading an ePub.
-
-### 0.1.8 ###
-* Added Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
-
-### 0.1.7 ###
-*  Fixed a small bug
-
-### 0.1.6 ###
-*  Added the option to add custom css to PDF
-
-### 0.1.5 ###
-* In Settings->Read Offline, added the option to add custom css to ePub
-* Added languages/read-offline.po for easy translation.
-
-### 0.1.4 ###
-* Added permalink support (/read-offline/"postid"/"post-name"."type"). I've written [a how-to add permalink to plugins guide at soderlind.no](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)
-* removed the obsolete download.php
-
-### 0.1.3 ###
-* epub will now validate against http://www.epubconversion.com/ePub-validator-iBook.jsp
-* Added language variable to the epub file, ISO 639-1 two letter tag based on the WordPress get_locale()
-
-### 0.1.2 ###
-* Fix typo in download.php, was including   "Epub.inc.php",  correct is "EPub.inc.php".
-
-### 0.1.1 ###
-* bugfix
-
-### 0.1.0 ###
-* Added the Read Offline shortcode
-* Added, in Settings->Read Offline, option to add Read Offline to top and/or bottom of post and page
-
-### 0.0.2 ###
-* Filename based on the posts slug
-* Added meta data
-
-### 0.0.1 ###
-* Initial release
