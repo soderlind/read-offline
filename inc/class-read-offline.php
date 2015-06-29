@@ -31,6 +31,17 @@ class Read_Offline {
 			add_action( 'admin_init', array($this, 'read_offline_update' ));
 		}
 		add_filter('upload_mimes', array($this,'add_epub_mobi_pdf_mime_types'), 1, 1);
+		if ( is_multisite() ) {
+			// add pdf, epub and mobi to Upload file types in wp-admin/network/settings.php
+			$new_upload_filetypes = implode(' ',
+				array_unique(array_merge(
+					explode(' ', get_site_option( 'upload_filetypes' ) ),
+					array_keys(self::$mime_types)
+				))
+			);
+			update_site_option( 'upload_filetypes', $new_upload_filetypes );
+		}
+
 
 		$post_types = array_keys(array_intersect_assoc(
 			array(
