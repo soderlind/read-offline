@@ -21,24 +21,22 @@ if ( version_compare( PHP_VERSION, '5.3.0' ) < 0 ) {
     return add_action( 'admin_notices', 'read_offline_admin_notice_php_version' );
 }
 
-
-
-Read_Offline_Loader::autoload( READOFFLINE_PATH . '/include'); // autoload includes/class.*.php files
+Read_Offline_Loader::autoload( READOFFLINE_PATH . '/inc'); // autoload inc/class.*.php files
 
 if ( is_admin() ) {
  	new Read_Offline_Admin_Settings ();
 }
+
 if (get_option( 'Read_Offline_Admin_Settings' )) {
 	add_action( 'init', function(){
 			//Read_Offline::get_instance();
 			Read_Offline_Parser::get_instance();
 			//Read_Offline_Shortcode::get_instance();
 			Read_Offline_UX::get_instance();
-
-	});
-	add_action( 'widgets_init', function(){
-	     register_widget( 'Read_Offline_Widget' );
-	});
+	}, 1);
+	// add_action( 'widgets_init', function(){
+	//      register_widget( 'Read_Offline_Widget' );
+	// });
 } else {
 	if ( is_admin() ) {
 		return add_action( 'admin_notices', 'read_offline_admin_notice_update_options',99 );
@@ -75,18 +73,23 @@ function read_offline_admin_notice_update_options () {
 class Read_Offline_Loader {
 	private static  $dir = __DIR__;
 
-	public static function autoload($dir = '' ) {
-		if ( ! empty( $dir ) )
+	public static function autoload($dir = '') {
+		if ( ! empty( $dir ) ) {
 			self::$dir = $dir;
-
+		}
 		spl_autoload_register(  __CLASS__ . '::loader'  );
 	}
 
 	private static function loader( $class_name ) {
-		$class_path = trailingslashit(self::$dir) . 'class-' . strtolower( str_replace( '_', '-', $class_name ) ) . '.php';
 
-		if ( file_exists( $class_path ) )
+		$filename = sprintf("class-%s.php",strtolower( str_replace( '_', '-', $class_name ) ));
+
+		$class_path = trailingslashit(self::$dir) . $filename;
+
+		if ( file_exists( $class_path ) ) {
 			require_once $class_path;
+		}
+
 	}
 }
 
