@@ -3,8 +3,8 @@ Contributors: PerS
 Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
-Tested up to: 4.1
-Stable tag: 0.2.8
+Tested up to: 4.2.2
+Stable tag: 0.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,8 @@ There are 2 ways you can add the Read Offline link
 3. Read Offline -> Print
 
 == Changelog ==
+= 0.3.0 =
+* A lot of changes since last commit, please see [CHANGELOG.md](https://github.com/soderlind/read-offline/blob/master/CHANGELOG.md) at GitHub
 = 0.2.8 =
 * ePub: rewrote routine for embedding images
 = 0.2.7 =

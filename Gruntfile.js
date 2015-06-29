@@ -7,50 +7,38 @@
  */
 module.exports = function (grunt) {
 
-	//setup file list for copying/ not copying for SVN
-	files_list = [
-		'**',
-		'!assets/**', // will be copied in copy:svn_assets below
-		'!node_modules/**',
-		'!release/**',
-		'!.git/**',
-		'!.sass-cache/**',
-		'!Gruntfile.js',
-		'!package.json',
-		'!.gitignore',
-		'!.gitmodules',
-		'!bin/**',
-		'!tests/**',
-		'!.gitattributes',
-		'!.travis.yml',
-		'!composer.lock',
-		'!composer.json',
-		'!CONTRIBUTING.md',
-		'!git-workflow.md',
-		'!phpunit.xml.dist'
+	/**
+	 * Files added to WordPress SVN, don't include 'assets/**' here.
+	 * @type {Array}
+	 */
+	svn_files_list = [
+		'readme.txt',
+		'read-offline.php',
+		'css/**',
+		'inc/**',
+		'js/**',
+		'languages/**',
+		'lib/**',
+		'templates/**'
 	];
+
+	/**
+	 * Let's add a couple of more files to GitHub
+	 * @type {Array}
+	 */
+	git_files_list = svn_files_list.concat([
+		'README.md',
+		'package.json',
+		'Gruntfile.js',
+		'assets/**'
+	]);
 
 	// Project configuration.
 	grunt.initConfig({
 		pkg : grunt.file.readJSON( 'package.json' ),
-		/*
-		glotpress_download : {
-			core : {
-				options : {
-					domainPath : 'languages',
-					url        : 'http://wp-translate.org',
-					slug       : 'read-offline',
-					textdomain : 'read-offline'
-				}
-			}
-		},
-		*/
 		clean: {
 			post_build: [
 				'build'
-			],
-			shortcake_tmp: [
-				'tmp/shortcake'
 			]
 		},
 		copy: {
@@ -69,28 +57,17 @@ module.exports = function (grunt) {
 				options : {
 					mode :true
 				},
-				src:  files_list,
+				expand: true,
+				src:  svn_files_list,
 				dest: 'build/<%= pkg.name %>/trunk/'
 			},
 			svn_tag: {
 				options : {
 					mode :true
 				},
-				src:  files_list,
-				dest: 'build/<%= pkg.name %>/tags/<%= pkg.version %>/'
-			},
-			shortcake: {
-				options : {
-					mode :true
-				},
 				expand: true,
-				cwd:  'tmp/shortcake',
-				src:  [
-					'inc/**',
-					'js/**',
-					'css/**'
-				],
-				dest: ''
+				src:  svn_files_list,
+				dest: 'build/<%= pkg.name %>/tags/<%= pkg.version %>/'
 			}
 		},
 		gittag: {
@@ -110,7 +87,7 @@ module.exports = function (grunt) {
 					allowEmpty: true
 				},
 				files: {
-					src: [ 'README.md', 'readme.txt', 'read-offline.php', 'package.json', 'Gruntfile.js','assets/**', 'inc/**', 'languages/**', 'lib/**', 'templates/**' ]
+					src: [ git_files_list ]
 				}
 			}
 		},
@@ -123,12 +100,20 @@ module.exports = function (grunt) {
 				}
 			}
 		},
-		gitclone: {
-		    shortcake: {
-		      	options: {
-		        	repository: 'https://github.com/fusioneng/Shortcake.git',
-		        	directory: 'tmp/shortcake'
-		      	}
+		"file-creator": {
+		    "folder": {
+		    	".gitattributes": function(fs, fd, done) {
+		        	var glob = grunt.file.glob;
+		        	var _ = grunt.util._;
+					fs.writeSync(fd, '# We don\'t want these files in our "plugins.zip", so tell GitHub to ignore them when the user click on Download ZIP'  + '\n');
+		        	_.each(git_files_list.diff(svn_files_list) , function(filepattern) {
+		        		glob.sync(filepattern, function(err,files) {
+			            	_.each(files, function(file) {
+			              		fs.writeSync(fd, '/' + file + ' export-ignore'  + '\n');
+			            	});
+		        		});
+		        	});
+		    	}
 		    }
 		},
 		replace: {
@@ -153,7 +138,7 @@ module.exports = function (grunt) {
 
 			},
 			plugin_php: {
-				src: [ 'read-offline.php' ],
+				src: [ '<%= pkg.main %>' ],
 				overwrite: true,
 				replacements: [{
 					from: /Version:\s*(.*)/,
@@ -164,25 +149,43 @@ module.exports = function (grunt) {
 				}]
 			}
 		},
-		svn_checkout: {
-			make_local: {
-				repos: [
-					{
-						path: [ 'release' ],
-						repo: 'http://plugins.svn.wordpress.org/read-offline'
-					}
-				]
-			}
+		svn_export: {
+		    dev: {
+		      options: {
+		        repository: 'http://plugins.svn.wordpress.org/<%= pkg.name %>',
+		        output: 'build/<%= pkg.name %>'
+		    	}
+		    }
 		},
 		push_svn: {
 			options: {
 				remove: true
 			},
 			main: {
-				src: 'release/<%= pkg.name %>',
-				dest: 'http://plugins.svn.wordpress.org/read-offline',
+				src: 'build/<%= pkg.name %>',
+				dest: 'http://plugins.svn.wordpress.org/<%= pkg.name %>',
 				tmp: 'build/make_svn'
 			}
+		},
+		changelog: {
+		    sample: {
+		      options: {
+		      	fileHeader: '# Changelog',
+		      	dest: 'CHANGELOG.md',
+		      	after: '2013-03-01',
+		        logArguments: [
+		          '--pretty=- [%ad](https://github.com/dss-web/<%= pkg.name %>/commit/%h): %s (committer: %cn)',
+		          '--no-merges',
+		          '--date=short'
+		        ],
+		        template: '{{> features}}',
+		        featureRegex: /^(.*)$/gim,
+		        partials: {
+		          features: '{{#if features}}{{#each features}}{{> feature}}{{/each}}{{else}}{{> empty}}{{/if}}\n',
+		          feature: '{{this}} {{this.date}}\n'
+		        }
+		      }
+		    }
 		},
 		makepot: {
 		    target: {
@@ -219,31 +222,37 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-git' );
 	grunt.loadNpmTasks( 'grunt-text-replace' );
-	grunt.loadNpmTasks( 'grunt-svn-checkout' );
+	grunt.loadNpmTasks( 'grunt-svn-export' );
 	grunt.loadNpmTasks( 'grunt-push-svn' );
 	grunt.loadNpmTasks( 'grunt-remove' );
 	grunt.loadNpmTasks( 'grunt-wp-i18n' );
+	grunt.loadNpmTasks( 'grunt-file-creator' );
+	grunt.loadNpmTasks( 'grunt-changelog' );
 
 	grunt.registerTask('syntax', 'default task description', function(){
-	  console.log('Syntax:\n\tgrunt release');
+	  console.log('Syntax:\n' +
+	  				'\tgrunt release (pre_vcs, do_svn, do_git, clean:post_build)\n' +
+	  				'\tgrunt pre_vcs (update plugin version number in files, make languages/.pot)\n' +
+	  				'\tgrunt do_svn (svn_export, copy:svn_trunk, copy:svn_tag, push_svn)\n' +
+	  				'\tgrunt do_git (gitattributes, gitcommit, gittag, gitpush)'
+	  	);
 	});
 
-	//register default task
-//	grunt.registerTask( 'default', [ 'glotpress_download' ]);
-	grunt.registerTask( 'default', ['syntax']);
-
-// get the latest version of Shortcake
-	grunt.registerTask( 'shortcake', ['gitclone:shortcake', 'copy:shortcake', 'clean:shortcake_tmp']);
-// makepot
-	grunt.registerTask('l10n', ['makepot']);
-//release tasks
+	grunt.registerTask( 'default', ['syntax'] );
 	grunt.registerTask( 'version_number', [ 'replace:reamde_md', 'replace:reamde_txt', 'replace:plugin_php' ] );
-//	grunt.registerTask( 'pre_vcs', [ 'version_number', 'glotpress_download' ] );
-	grunt.registerTask( 'pre_vcs', [ 'version_number'] );
-	grunt.registerTask( 'do_svn', [ 'svn_checkout', 'copy:svn_assets', 'copy:svn_trunk', 'copy:svn_tag', 'push_svn' ] );
-	grunt.registerTask( 'do_git', [ 'gitcommit', 'gittag', 'gitpush' ] );
+	grunt.registerTask( 'pre_vcs', [ 'version_number', 'makepot'] );
+	grunt.registerTask( 'gitattributes', [ 'file-creator'] );
 
+	grunt.registerTask( 'do_svn', [ 'svn_export', 'copy:svn_assets', 'copy:svn_trunk', 'copy:svn_tag', 'push_svn' ] );
+	grunt.registerTask( 'do_git', [  'gitcommit', 'gittag', 'gitpush' ] );
 	grunt.registerTask( 'release', [ 'pre_vcs', 'do_svn', 'do_git', 'clean:post_build' ] );
 
+};
 
+/**
+ * Helper
+ */
+// from http://stackoverflow.com/a/4026828/1434155
+Array.prototype.diff = function(a) {
+    return this.filter(function(i) {return a.indexOf(i) < 0;});
 };

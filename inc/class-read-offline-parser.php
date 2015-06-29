@@ -75,7 +75,7 @@ class Read_Offline_Parser extends Read_Offline {
 						foreach ($attachments->posts as $attachment) {
 							$attached_file = get_attached_file( $attachment->ID, true);
 							$attached_url  = wp_get_attachment_url( $attachment->ID );
-							if ($post->post_name == basename($attached_file, '.' . $docformat)) {
+							if ( 0 == strpos(basename($attached_file, '.' . $docformat), $post->post_name) ) { // strpos 0 = start of string
 								if (filesize($attached_file) > 0) {
 									parent::read_offline_download($attached_file,$mime_type,wp_create_nonce( 'read-offline-download' ));
 									exit();
