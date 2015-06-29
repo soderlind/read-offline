@@ -42,35 +42,70 @@ class Read_Offline_Parser extends Read_Offline {
 			$query_vars[] = 'read_offline_id';
 			$query_vars[] = 'read_offline_name';
 			$query_vars[] = 'read_offline_format';
+			$query_vars[] = 'read_offline_nonce';
 			return $query_vars;
 		}
 
 		function parse_request($wp_query) {
 			global $post;
+			$create_new = false;
 			if (isset($wp_query->query_vars['read_offline_id'])) {
 				$docformat = strtolower($wp_query->query_vars['read_offline_format']);
-				$id = $wp_query->query_vars['read_offline_id'];
-				$post = get_page($id);
+				$filename = sprintf('%s.%s',$wp_query->query_vars['read_offline_name'],$wp_query->query_vars['read_offline_format'] );
+				$post_id = $wp_query->query_vars['read_offline_id'];
+				$post = get_page($post_id);
 				if (is_object($post) && $post->post_status == 'publish') {
-
-					$create = Read_Offline_Create::get_instance();
-					$create->init($post);
-
-					switch ($docformat) {
-						case 'pdf':
-							$create->pdf($post);
-							break;
-						case 'epub':
-							$create->epub($post);
-							break;
-						case 'mobi':
-							$create->mobi($post);
-							break;
-						case 'print':
-							$create->pprint($post);
-							break;
+					if (isset($_REQUEST['read-offline-code'])) { 
+						$code  = $_REQUEST['read-offline-code'];
+						if ( base64_encode(AUTH_KEY) == $code ) {
+							$create_new = true;
+						}
 					}
-					exit();
+
+					if ( false == $create_new && 'print' != $docformat) {
+						$mime_type = parent::$mime_types[$docformat];
+						$attachments = new WP_Query( array(
+							'post_type'      => 'attachment',
+							'post_status'    => 'any',
+							'posts_per_page' => 500,
+							'post_parent'    => $post_id,
+							'post_mime_type' => $mime_type
+						) );
+
+						foreach ($attachments->posts as $attachment) {
+							$attached_file = get_attached_file( $attachment->ID, true);
+							$attached_url  = wp_get_attachment_url( $attachment->ID );
+							if ($post->post_name == basename($attached_file, '.' . $docformat)) {
+								if (filesize($attached_file) > 0) {
+									parent::read_offline_download($attached_file,$mime_type,wp_create_nonce( 'read-offline-download' ));
+									exit();
+								}
+							}
+						}
+						$create_new = true;
+					}
+
+
+					if (true == $create_new || 'print' == $docformat) {
+						$create = Read_Offline_Create::get_instance();
+						$create->init($post);
+
+						switch ($docformat) {
+							case 'pdf':
+								$create->pdf($post);
+								break;
+							case 'epub':
+								$create->epub($post);
+								break;
+							case 'mobi':
+								$create->mobi($post);
+								break;
+							case 'print':
+								$create->pprint($post);
+								break;
+						}
+						exit();
+					}
 				}
 			}
 		}
@@ -83,25 +118,4 @@ class Read_Offline_Parser extends Read_Offline {
 	   			$wp_rewrite->flush_rules();
 			}
     	}
-
-
-
-		// function store_post_styles() {
-		// 	global $wp_styles, $post;
-
-		// 	if (is_single()) {
-		// 		$transient_id = 'read_offline_post_styles_' . $post->ID;
-		// 		$transient = get_transient( $transient_id );
-		// 		if ( empty( $transient ) ) {
-		// 			$css_sources = array();
-		// 			$styles = $wp_styles->done;
-		// 			foreach ( $styles as $loaded_styles ) {
-		// 				$css_sources[] = $wp_styles->registered[$loaded_styles]->src;
-		// 			}
-		// 			//printf("<pre>%s</pre>%s",print_r($css_sources,true), $transient_id);
-		// 		   set_transient($transient_id , ($css_sources), 60 ); // ex. sec*min*hours 60*60*12 is 12 hours
-		// 		}
-		// 	}
-		// }
-
 }

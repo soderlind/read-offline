@@ -1,7 +1,8 @@
 <?php
 
-class Read_Offline {
+	define( 'FS_CHMOD_DIR', ( 0755 & ~ umask() ) );
 
+class Read_Offline {
 
 	public static $options;
 
@@ -45,17 +46,17 @@ class Read_Offline {
 //		add_action('save_post', array($this,'save_as_attachment_to_post_type'));
 	}
 
-	public static function query_url($id,$name,$format, $refresh = false) {
-		//$rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
+	public static function query_url($post_id,$name,$format, $refresh = false) {
+		$code = base64_encode(AUTH_KEY);
 		if ( get_option('permalink_structure')) {
 			return sprintf("%s/read-offline/%s/%s.%s%s",
-				home_url(),$id,$name,$format, 
-				( $refresh ) ? '?nonce=' . wp_create_nonce( 'read-offline' ) : ''
+				home_url(),$post_id,$name,$format, 
+				( $refresh ) ? '?read-offline-code=' . $code  : ''
 			);
 		} else {
 			return sprintf("%s/index.php?read_offline_id=%s&read_offline_name=%s&&read_offline_format=%s%s",
-				home_url(),$id,$name,$format,
-				( $refresh ) ? '&nonce=' . wp_create_nonce( 'read-offline' ) : ''
+				home_url(),$post_id,$name,$format,
+				( $refresh ) ? '&read-offline-code=' . $code  : ''
 			);
 		}
 	}
@@ -110,6 +111,7 @@ class Read_Offline {
 
 
 	public function save_as_attachment_to_post_type($post_id,$post) {
+
 		// Autosave, do nothing
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 		        return $post_id;
@@ -130,67 +132,66 @@ class Read_Offline {
 
 		foreach (self::$mime_types as $file_extention => $mime_type) {
 			$is_previously_attached = false;
-			$attachments = get_posts( array(
-				'post_type' => 'attachment',
-				'posts_per_page' => -1,
-				'post_parent' => $post_id,
+
+			$attachments = new WP_Query( array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'any',
+				'posts_per_page' => 500,
+				'post_parent'    => $post_id,
 				'post_mime_type' => $mime_type
 			) );
-			$readoffline_url = self::query_url($post_id,$post->post_name,$file_extention);
-			// previously attached ?
-			foreach ($attachments as $attachment) {
+			$readoffline_url = self::query_url($post_id,$post->post_name,$file_extention,true);
+
+			// previously attached?  delete it !
+			foreach ($attachments->posts as $attachment) {
 				$attached_file = get_attached_file( $attachment->ID, true);
 				$attached_url  = wp_get_attachment_url( $attachment->ID );
-				if ($post->post_name == basename($attached_file, '.' . $file_extention)) {
-					$is_previously_attached = true;
-					wp_get_http($readoffline_url,$attached_file);
-					update_attached_file( $attachment_id, $attached_file );
+				if ( 0 == strpos(basename($attached_file, '.' . $file_extention), $post->post_name) ) { // strpos 0 = start of string
+					wp_delete_attachment( $attachment->ID, true );
 				}
 			}
 
-			//not previously attached
-			if (false == $is_previously_attached) {
-				//create a new file
-				$to_filename = sprintf('%s.%s',$post->post_name,$file_extention);
-				$uploaded_bits = wp_upload_bits($to_filename,null,file_get_contents($readoffline_url));
-				if ( false !== $uploaded_bits['error'] ) {
-					$error = $uploaded_bits['error'];
-        			return add_action( 'admin_notices', function() use ( $error ){
-						    $msg[] = '<div class="error"><p>';
-						    $msg[] = '<strong>Read Offline</strong>: ';
-						    $msg[] = sprintf( __( 'wp_upload_bits failed,  error: "<strong>%s</strong>','read-offline' ), $error );
-						    $msg[] = '</p></div>';
-						    echo implode( PHP_EOL, $msg );
-						});
-      			}
-				$attached_file = $uploaded_bits['file'];
-				$attached_url  = $uploaded_bits['url'];
+			//create a new attachment
+			$to_filename = sprintf('%s.%s',$post->post_name,$file_extention);
+			$uploaded_bits = wp_upload_bits(
+					$to_filename,
+					null, //deprecated
+					file_get_contents($readoffline_url), // replace with wp_remote_get
+					date_i18n( 'Y/m', strtotime( $post->post_date ) ) // save in post date yyyy/mm folder
+			);
+			if ( false !== $uploaded_bits['error'] ) {
+				$error = $uploaded_bits['error'];
+    			return add_action( 'admin_notices', function() use ( $error ){
+					    $msg[] = '<div class="error"><p>';
+					    $msg[] = '<strong>Read Offline</strong>: ';
+					    $msg[] = sprintf( __( 'wp_upload_bits failed,  error: "<strong>%s</strong>','read-offline' ), $error );
+					    $msg[] = '</p></div>';
+					    echo implode( PHP_EOL, $msg );
+					});
+  			}
+			$attached_file = $uploaded_bits['file'];
+			$attached_url  = $uploaded_bits['url'];
 
-				// code from: http://codex.wordpress.org/Function_Reference/wp_insert_attachment#Example
-				// Prepare an array of post data for the attachment.
-				$attachment = array(
-					'guid'           => $attached_url, 
-					'post_mime_type' => $mime_type,
-					'post_title'     => $post->post_title,
-					'post_content'   => wp_strip_all_tags(self::get_excerpt_by_id($post_id)),
-					'post_status'    => 'inherit'
-				);
+			// code from: http://codex.wordpress.org/Function_Reference/wp_insert_attachment#Example
+			// Prepare an array of post data for the attachment.
+			$attachment = array(
+				'guid'           => $attached_url, 
+				'post_mime_type' => $mime_type,
+				'post_title'     => $post->post_title,
+				'post_content'   => wp_strip_all_tags(self::get_excerpt_by_id($post_id)),
+				'post_status'    => 'inherit'
+			);
+			// Insert the attachment.
+			$attach_id = wp_insert_attachment( $attachment, $attached_file, $post_id );
 
-				// Insert the attachment.
-				$attach_id = wp_insert_attachment( $attachment, $attached_file, $post_id );
+			// Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
+			require_once( ABSPATH . 'wp-admin/includes/image.php' );
 
-				// Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
-				require_once( ABSPATH . 'wp-admin/includes/image.php' );
-
-				// Generate the metadata for the attachment, and update the database record.
-				$attach_data = wp_generate_attachment_metadata( $attach_id, $attached_file );
-				wp_update_attachment_metadata( $attach_id, $attach_data );
-			}
+			// Generate the metadata for the attachment, and update the database record.
+			$attach_data = wp_generate_attachment_metadata( $attach_id, $attached_file );
+			wp_update_attachment_metadata( $attach_id, $attach_data );
 		}
-
 	}
-
-
 
 	function add_epub_mobi_pdf_mime_types($mime_types) {
 
@@ -201,6 +202,27 @@ class Read_Offline {
 	}
 
 
+	function read_offline_download($attached_file,$mime_type,$nonce) {
+		if (wp_verify_nonce( $nonce, 'read-offline-download' )) {
+			header('Content-Description: File Transfer');
+			header('Content-Transfer-Encoding: binary');
+			header('Cache-Control: public, must-revalidate, max-age=0');
+			header('Pragma: public');
+			header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
+			header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
+			header('Content-Type: application/force-download');
+			header('Content-Type: application/octet-stream', false);
+			header('Content-Type: application/download', false);
+			header('Content-Type: ' . $mime_type , false);
+			if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) OR empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
+				// don't use length if server using compression
+				header('Content-Length: '.filesize($attached_file));
+			}
+			header('Content-disposition: attachment; filename="'. basename($attached_file) .'"');
+			readfile($attached_file);
+			exit();
+		}
+	}
 
 
 	public function read_offline_update() {
