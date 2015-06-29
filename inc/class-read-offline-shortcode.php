@@ -19,10 +19,13 @@ class Read_Offline_Shortcode {
 	private function __construct() {
 
 		// if options shorcode NN enabled
-		//add_shortcode( 'pdf', array($this,'pdf'));
+		add_shortcode( 'pdf', array($this,'pdf'));
 		add_shortcode( 'epub', array($this,'epub'));
-		//add_shortcode( 'mobi', array($this,'mobi'));
+		add_shortcode( 'mobi', array($this,'mobi'));
 		//add_shortcode( 'print', array($this,'print'));
+
+		add_action('admin_enqueue_scripts', array($this,'shortcode_script_style'));
+
 
 		if (is_admin()) {
 			if (! class_exists('Shortcode_UI')) {
@@ -44,13 +47,59 @@ class Read_Offline_Shortcode {
 			Shortcode_UI::get_instance()->register_shortcode_ui(
 				'epub',
 				array(
-					'label' => "Read Offline ePub",
+					'label' => "ePub",
 					// Icon/image for shortcode. Optional. src or dashicons-$icon. Defaults to carrot.
-					'listItemImage' => 'dashicons-media-text', // https://developer.wordpress.org/resource/dashicons/
+					'listItemImage' => 'dashicons-book', // https://developer.wordpress.org/resource/dashicons/
 					// Available shortcode attributes and default values. Required. Array.
 					// Attribute model expects 'attr', 'type' and 'label'
 					// Supported field types: text, checkbox, textarea, radio, select, email, url, number, and date.
 					'attrs' => array(
+						array(
+							'label'   => __('Placement','read-offline'),
+							'attr'    => 'position',
+							'type'    => 'select',
+							'options' => array( // List of options  value => label
+								'none'     => __('None','read-offline'),
+								'left'  => __('Left','read-offline'),
+								'center' => __('Center','read-offline'),
+								'right'   => __('Right','read-offline'),
+		                    ),
+		                    'value' => 'none', // selected option value
+		                    'description' => __('Select "None" if you want to use your own CSS to control the placement.','read-offline'),
+		                ),
+		                array(
+							'label' => __('Cover Art','read-offline'),
+							'attr'  => 'cover',
+							'type'  => 'select',
+							'options' => array( // List of options  value => label
+		                        'none'  => __('None','read-offline'),
+		                        'default'  => __('Default','read-offline'),
+		                        'featured'  => __('Featured Image','read-offline'),
+		                        'custom'  => __('Image (added below)','read-offline'),
+		                    ),
+		                    'value' => 'default', // selected option value
+		                    'description' => __('"Default" is the cover art set in Read Offline -> ePub','read-offline'),
+		                ),
+		                array(
+							'label' => __('Image','read-offline'),
+							'attr'  => 'image',
+							'type'  => 'attachment',
+							'libraryType' => array( 'image' ),
+							'addButton'   => __('Select Cover','read-offline'),
+							'frameTitle'  => __('Select Cover','read-offline'),
+						),
+						array(
+							'label' => __('ePub Style','read-offline'),
+							'attr'  => 'style',
+							'type'  => 'select',
+							'options' => array( // List of options  value => label
+		                        'none'  => __('None','read-offline'),
+		                        'default'  => __('Custom','read-offline'),
+		                    ),
+		                    'value' => 'default', // selected option value
+		                    'description' => __('"Custom" is the custom style set in Read Offline -> ePub','read-offline'),
+		                )
+/*
 						array(
 							'label' => __('Text','l10n-domain'),
 							'attr'  => 'mytext',
@@ -123,12 +172,116 @@ class Read_Offline_Shortcode {
 							'addButton'   => 'Select Image',
 							'frameTitle'  => 'Select Image',
 						),
+*/
 					),
 				)
 			);
+			Shortcode_UI::get_instance()->register_shortcode_ui(
+				'pdf',
+				array(
+					'label' => "PDF",
+					// Icon/image for shortcode. Optional. src or dashicons-$icon. Defaults to carrot.
+					'listItemImage' => 'dashicons-book', // https://developer.wordpress.org/resource/dashicons/
+					// Available shortcode attributes and default values. Required. Array.
+					// Attribute model expects 'attr', 'type' and 'label'
+					// Supported field types: text, checkbox, textarea, radio, select, email, url, number, and date.
+					'attrs' => array(
+						array(
+							'label' => __('Cover Art','read-offline'),
+							'attr'  => 'cover',
+							'type'  => 'select',
+							'options' => array( // List of options  value => label
+		                        'none'  => __('None','read-offline'),
+		                        'default'  => __('Default','read-offline'),
+		                        'featured'  => __('Featured Image','read-offline'),
+		                        'custom'  => __('Image (added below)','read-offline'),
+		                    ),
+		                    'value' => 'default', // selected option value
+		                    'description' => __('"Default" is the cover art set in Read Offline -> ePub','read-offline'),
+		                ),
+		                array(
+							'label' => __('Image','read-offline'),
+							'attr'  => 'image',
+							'type'  => 'attachment',
+							'libraryType' => array( 'image' ),
+							'addButton'   => __('Select Cover','read-offline'),
+							'frameTitle'  => __('Select Cover','read-offline'),
+						),
+						array(
+							'label' => __('ePub Style','read-offline'),
+							'attr'  => 'style',
+							'type'  => 'select',
+							'options' => array( // List of options  value => label
+		                        'none'  => __('None','read-offline'),
+		                        'default'  => __('Custom','read-offline'),
+		                    ),
+		                    'value' => 'default', // selected option value
+		                    'description' => __('"Custom" is the custom style set in Read Offline -> ePub','read-offline'),
+		                )
+					),
+				)
+			);
+
+			Shortcode_UI::get_instance()->register_shortcode_ui(
+				'mobi',
+				array(
+					'label' => "mobi",
+					// Icon/image for shortcode. Optional. src or dashicons-$icon. Defaults to carrot.
+					'listItemImage' => 'dashicons-book', // https://developer.wordpress.org/resource/dashicons/
+					// Available shortcode attributes and default values. Required. Array.
+					// Attribute model expects 'attr', 'type' and 'label'
+					// Supported field types: text, checkbox, textarea, radio, select, email, url, number, and date.
+					'attrs' => array(
+						array(
+							'label' => __('Cover Art','read-offline'),
+							'attr'  => 'cover',
+							'type'  => 'select',
+							'options' => array( // List of options  value => label
+		                        'none'  => __('None','read-offline'),
+		                        'default'  => __('Default','read-offline'),
+		                        'featured'  => __('Featured Image','read-offline'),
+		                        'custom'  => __('Image (added below)','read-offline'),
+		                    ),
+		                    'value' => 'default', // selected option value
+		                    'description' => __('"Default" is the cover art set in Read Offline -> ePub','read-offline'),
+		                ),
+		                array(
+							'label' => __('Image','read-offline'),
+							'attr'  => 'image',
+							'type'  => 'attachment',
+							'libraryType' => array( 'image' ),
+							'addButton'   => __('Select Cover','read-offline'),
+							'frameTitle'  => __('Select Cover Art','read-offline'),
+						),
+					),
+				)
+			);
+
 		}
 	}
 
+	function pdf ($attributes, $content) {
+		// $attributes = shortcode_atts(array( // default values
+		// 	'nn'   	=>	'value' //
+		// 	),
+		// 	$attributes
+		// );
+		//sleep(3600);
+		// exit();
+		if (is_admin()) {
+		ob_start();
+		?>
+		<!--section class="pullquote" style"width:100%;"-->
+			<div class='plugin_icon' style='height:30px;width:100px;margin:0 auto;diplay:block;/*position: relative; top: 50%;transform: translateY(-50%);*/'>
+					<span class='dashicons dashicons-book' style='font-size:18px;vertical-align: middle;'></span> <span style='font-size:18px;'>PDF</span>
+			</div>
+		<!--/section-->
+		<?php
+		return ob_get_clean();
+		} else {
+			return "<h1>hei</h1>";
+		} 
+	}
 
 	function epub ($attributes, $content) {
 		// $attributes = shortcode_atts(array( // default values
@@ -136,19 +289,51 @@ class Read_Offline_Shortcode {
 		// 	),
 		// 	$attributes
 		// );
-
-
+		//sleep(3600);
+		// exit();
+		if (is_admin()) {
 		ob_start();
 		?>
-
-		<p class="epub" style="style="text-align: right;" background: rgba(0,0,0,0.1);">
-			
-			<span class="dashicons dashicons-media-document"></span>ePub
-			<p><?php printf("<pre>%s</pre>",print_r($attributes,true));?></p>
-		</p>
-
+		<!--section class="pullquote" style"width:100%;"-->
+			<div class='plugin_icon' style='height:30px;width:100px;margin:0 auto;diplay:block;/*position: relative; top: 50%;transform: translateY(-50%);*/'>
+					<span class='dashicons dashicons-book' style='font-size:18px;vertical-align: middle;'></span> <span style='font-size:18px;'>ePub</span>
+			</div>
+		<!--/section-->
 		<?php
 		return ob_get_clean();
+		} else {
+			return "<h1>hei</h1>";
+		} 
+	}
+
+	function mobi ($attributes, $content) {
+		// $attributes = shortcode_atts(array( // default values
+		// 	'nn'   	=>	'value' //
+		// 	),
+		// 	$attributes
+		// );
+		//sleep(3600);
+		// exit();
+		if (is_admin()) {
+		ob_start();
+		?>
+		<!--section class="pullquote" style"width:100%;"-->
+			<div class='plugin_icon' style='height:30px;width:100px;margin:0 auto;diplay:block;/*position: relative; top: 50%;transform: translateY(-50%);*/'>
+					<span class='dashicons dashicons-book' style='font-size:18px;vertical-align: middle;'></span> <span style='font-size:18px;'>mobi</span>
+			</div>
+		<!--/section-->
+		<?php
+		return ob_get_clean();
+		} else {
+			return "<h1>hei</h1>";
+		} 
+	}
+
+
+
+
+	function shortcode_script_style() {
+		wp_enqueue_style('read-offline-embed', READOFFLINE_URL . '/css/read-offline-admin.css',array(), READOFFLINE_VERSION );
 	}
 
 
