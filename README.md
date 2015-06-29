@@ -2,7 +2,7 @@
 
 Read Offline allows you to download or print posts and pages. You can download the post as PDF, ePub or mobi
 
-
+### NOTE, the latest version in the WordPress plugin directory is broken. Please [download the latest version](https://github.com/soderlind/read-offline/archive/master.zip) here at GitHub
 
 ### NOTE, this is still a beta version ###
 
@@ -32,6 +32,14 @@ Read Offline allows you to download or print posts and pages. You can download t
 * Permalink support (/read-offline/"postid"/"post-name"."type"). I've written a "[how-to add a permalink to your plugin](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)" guide at soderlind.no
 * Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
 * languages/read-offline.po for easy translation.
+
+## Feedback & Support ##
+
+If you have any requests, issues, or other feedback to provide on this beta, please use the links below.
+
+* [Report a problem](https://github.com/soderlind/read-offline/issues/new?title=Issue%3A&body=**Description%20of%20Problem**%0A%0A%0A%0A**Details**%0A%0A%0A%0A*%20URL%20of%20Page%20exhibiting%20problem%3A%20%0A*%20Browser(s)%20exhibiting%20problem%20(Firefox%2C%20Chrome%2C%20etc.)%3A%20%0A*%20Version%20of%20WordPress%20Installed%3A%20%0A*%20Other%20plugins%20installed%3A%20%0A%0A%0A**Screenshots**%0A%0A)
+* [Request a feature](https://github.com/soderlind/read-offline/issues/new?title=Request%3A&body=**Description%20of%20feature%2Frequest**%0A%0A%0A%0A**This%20feature%20would%20be%20used%20to**%0A%0A)
+* [Provide general feedback](https://github.com/soderlind/read-offline/issues/new?title=Feedback%3A%20&body=)
 
 ## Todo ##
 
