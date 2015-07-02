@@ -1,9 +1,4 @@
 /*
- * Based on http://torquemag.io/automating-wordpress-plugin-updates-releases-grunt/
- *
- * added:
- *        copy:svn_assets task
- *        makepot, creates read-offline.pot
  */
 module.exports = function (grunt) {
 
