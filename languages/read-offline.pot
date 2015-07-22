@@ -160,6 +160,10 @@ msgstr ""
 msgid "Copyright"
 msgstr ""
 
+#: inc/class-read-offline-admin-settings.php:251
+msgid "Copyright Message"
+msgstr ""
+
 #: inc/class-read-offline-admin-settings.php:252
 msgid ""
 "The copyright message will be added to the PDF (\"Creator\"), ePub "
