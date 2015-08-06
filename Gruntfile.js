@@ -216,7 +216,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks( 'grunt-remove' );
 	grunt.loadNpmTasks( 'grunt-wp-i18n' );
 	grunt.loadNpmTasks( 'grunt-file-creator' );
-	grunt.loadNpmTasks('grunt-github-changes');
+	grunt.loadNpmTasks( 'grunt-github-changes' );
 
 	grunt.registerTask('syntax', 'default task description', function(){
 	  console.log('Syntax:\n' +
