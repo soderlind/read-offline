@@ -248,7 +248,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
             array(  // Text Area
                 'field_id'         => 'message',
                 'section_id'       => 'copyright',
-                'title'           => 'Copyright Message',
+                'title'            => __( 'Copyright Message', 'read-offline' ),
                 'description'      => __( 'The copyright message will be added to the PDF ("Creator"), ePub ("Rights") and mobi ("imprint") file meta data.', 'read-offline' ),
                 'type'             => 'textarea',
                 'default'          => "",
