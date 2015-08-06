@@ -38,23 +38,7 @@ class Read_Offline_Create extends Read_Offline {
 		$html = '<h1 class="entry-title">' . get_the_title($post->ID) . '</h1>';
 		$content = $post->post_content;
 		$content = preg_replace("/\[\\/?readoffline(\\s+.*?\]|\])/i", "", $content); // remove all [readonline] shortcodes
-		$html .= apply_filters('the_content', $content);
-
-		// purify content
-		require_once (READOFFLINE_PATH .'/lib/htmlpurifier-4.6.0-standalone/HTMLPurifier.standalone.php');
-		$htmlpurifier_config = HTMLPurifier_Config::createDefault();
-
-		$epub_html_whitelist = array ('h1','h2','h3','h4','h5','h6', 'a', 'abbr', 'area', 'audio', 'b', 'bdi', 'bdo', 'br', 'button', 'canvas', 'cite', 'code', 'command', 'datalist', 'del', 'dfn', 'em', 'embed', 'i', 'iframe', 'img', 'input', 'ins', 'kbd', 'keygen', 'label', 'map', 'mark', 'meter', 'ns1:switch', 'ns2:math', 'ns3:svg', 'object', 'output', 'progress', 'q', 'ruby', 's', 'samp', 'script', 'select', 'small', 'span', 'strong', 'sub', 'sup', 'textarea', 'time', 'u', 'var', 'video' , 'wbr');
-		// //$htmlpurifier_config->set('HTML.Doctype', 'XHTML 1.1');
-		$htmlpurifier_config->set('HTML.AllowedElements',$epub_html_whitelist);
-
-
-		$ebub_html_attributes = array('*.accesskey', '*.aria-activedescendant', '*.aria-atomic', '*.aria-autocomplete', '*.aria-busy', '*.aria-checked', '*.aria-controls', '*.aria-describedby', '*.aria-disabled', '*.aria-dropeffect', '*.aria-expanded', '*.aria-flowto', '*.aria-grabbed', '*.aria-haspopup', '*.aria-hidden', '*.aria-invalid', '*.aria-label', '*.aria-labelledby', '*.aria-level', '*.aria-live', '*.aria-multiline', '*.aria-multiselectable', '*.aria-orientation', '*.aria-owns', '*.aria-posinset', '*.aria-pressed', '*.aria-readonly', '*.aria-relevant', '*.aria-required', '*.aria-selected', '*.aria-setsize', '*.aria-sort', '*.aria-valuemax', '*.aria-valuemin', '*.aria-valuenow', '*.aria-valuetext', '*.border', '*.class', '*.contenteditable', '*.contextmenu', '*.dir', '*.draggable', '*.dropzone', '*.hidden', '*.id', '*.lang', '*.ns1:type', '*.ns2:alphabet', '*.ns2:ph', '*.onabort', '*.onblur', '*.oncanplay', '*.oncanplaythrough', '*.onchange', '*.onclick', '*.oncontextmenu', '*.ondblclick', '*.ondrag', '*.ondragend', '*.ondragenter', '*.ondragleave', '*.ondragover', '*.ondragstart', '*.ondrop', '*.ondurationchange', '*.onemptied', '*.onended', '*.onerror', '*.onfocus', '*.oninput', '*.oninvalid', '*.onkeydown', '*.onkeypress', '*.onkeyup', '*.onload', '*.onloadeddata', '*.onloadedmetadata', '*.onloadstart', '*.onmousedown', '*.onmousemove', '*.onmouseout', '*.onmouseover', '*.onmouseup', '*.onmousewheel', '*.onpause', '*.onplay', '*.onplaying', '*.onprogress', '*.onratechange', '*.onreadystatechange', '*.onreset', '*.onscroll', '*.onseeked', '*.onseeking', '*.onselect', '*.onshow', '*.onstalled', '*.onsubmit', '*.onsuspend', '*.ontimeupdate', '*.onvolumechange', '*.onwaiting', '*.role', '*.spellcheck', '*.style', '*.tabindex', '*.title', '*.xml:base', '*.xml:lang' , '*.xml:space');
-		$htmlpurifier_config->set('HTML.AllowedAttributes',$ebub_html_attributes);
-		$htmlpurifier_config->set( 'AutoFormat.RemoveSpansWithoutAttributes', true );
-
-		$htmlpurifier = new HTMLPurifier($htmlpurifier_config);
-		$this->html = $htmlpurifier->purify($html);
+		$this->html .= apply_filters('the_content', $content);
 	}
 
 	function pprint($post) {
@@ -174,7 +158,7 @@ class Read_Offline_Create extends Read_Offline {
 
 		$content_end = "\n</body>\n</html>\n";
 
-		$html = $this->html;
+		$html = $this->_purity_html($this->html);
 
 
 		$i = 0;
@@ -700,6 +684,24 @@ class Read_Offline_Create extends Read_Offline {
 
 	}
 
+
+	private function _purity_html($html, $type = 'epub') {
+		// purify content
+		require_once (READOFFLINE_PATH .'/lib/htmlpurifier-4.6.0-standalone/HTMLPurifier.standalone.php');
+		$htmlpurifier_config = HTMLPurifier_Config::createDefault();
+
+		$epub_html_whitelist = array ('h1','h2','h3','h4','h5','h6', 'a', 'abbr', 'area', 'audio', 'b', 'bdi', 'bdo', 'br', 'button', 'canvas', 'cite', 'code', 'command', 'datalist', 'del', 'dfn', 'em', 'embed', 'i', 'iframe', 'img', 'input', 'ins', 'kbd', 'keygen', 'label', 'map', 'mark', 'meter', 'ns1:switch', 'ns2:math', 'ns3:svg', 'object', 'output', 'p', 'progress', 'q', 'ruby', 's', 'samp', 'script', 'select', 'small', 'span', 'strong', 'sub', 'sup', 'textarea', 'time', 'u', 'var', 'video' , 'wbr');
+		// //$htmlpurifier_config->set('HTML.Doctype', 'XHTML 1.1');
+		$htmlpurifier_config->set('HTML.AllowedElements',$epub_html_whitelist);
+
+
+		$ebub_html_attributes = array('*.accesskey', '*.aria-activedescendant', '*.aria-atomic', '*.aria-autocomplete', '*.aria-busy', '*.aria-checked', '*.aria-controls', '*.aria-describedby', '*.aria-disabled', '*.aria-dropeffect', '*.aria-expanded', '*.aria-flowto', '*.aria-grabbed', '*.aria-haspopup', '*.aria-hidden', '*.aria-invalid', '*.aria-label', '*.aria-labelledby', '*.aria-level', '*.aria-live', '*.aria-multiline', '*.aria-multiselectable', '*.aria-orientation', '*.aria-owns', '*.aria-posinset', '*.aria-pressed', '*.aria-readonly', '*.aria-relevant', '*.aria-required', '*.aria-selected', '*.aria-setsize', '*.aria-sort', '*.aria-valuemax', '*.aria-valuemin', '*.aria-valuenow', '*.aria-valuetext', '*.border', '*.class', '*.contenteditable', '*.contextmenu', '*.dir', '*.draggable', '*.dropzone', '*.hidden', '*.id', '*.lang', '*.ns1:type', '*.ns2:alphabet', '*.ns2:ph', '*.onabort', '*.onblur', '*.oncanplay', '*.oncanplaythrough', '*.onchange', '*.onclick', '*.oncontextmenu', '*.ondblclick', '*.ondrag', '*.ondragend', '*.ondragenter', '*.ondragleave', '*.ondragover', '*.ondragstart', '*.ondrop', '*.ondurationchange', '*.onemptied', '*.onended', '*.onerror', '*.onfocus', '*.oninput', '*.oninvalid', '*.onkeydown', '*.onkeypress', '*.onkeyup', '*.onload', '*.onloadeddata', '*.onloadedmetadata', '*.onloadstart', '*.onmousedown', '*.onmousemove', '*.onmouseout', '*.onmouseover', '*.onmouseup', '*.onmousewheel', '*.onpause', '*.onplay', '*.onplaying', '*.onprogress', '*.onratechange', '*.onreadystatechange', '*.onreset', '*.onscroll', '*.onseeked', '*.onseeking', '*.onselect', '*.onshow', '*.onstalled', '*.onsubmit', '*.onsuspend', '*.ontimeupdate', '*.onvolumechange', '*.onwaiting', '*.role', '*.spellcheck', '*.style', '*.tabindex', '*.title', '*.xml:base', '*.xml:lang' , '*.xml:space');
+		$htmlpurifier_config->set('HTML.AllowedAttributes',$ebub_html_attributes);
+		$htmlpurifier_config->set( 'AutoFormat.RemoveSpansWithoutAttributes', true );
+
+		$htmlpurifier = new HTMLPurifier($htmlpurifier_config);
+		return $htmlpurifier->purify($html);
+	}
 
 	private function _get_child_array_key($parent_element,$org){
 		//$org: #fieldrow-pdf_header_default_header
