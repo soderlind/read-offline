@@ -1,10 +1,7 @@
 /*
- * Based on http://torquemag.io/automating-wordpress-plugin-updates-releases-grunt/
  *
- * added:
- *        copy:svn_assets task
- *        makepot, creates read-offline.pot
  */
+
 module.exports = function (grunt) {
 
 	/**
@@ -183,7 +180,7 @@ module.exports = function (grunt) {
 		    target: {
 		        options: {
 		            domainPath: '/languages',
-		            mainFile: 'read-offline.php',
+		            mainFile: '<%= pkg.main %>',
 		            potFilename: 'read-offline.pot',
 		            potHeaders: {
 		                poedit: true,
@@ -219,9 +216,6 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks( 'grunt-remove' );
 	grunt.loadNpmTasks( 'grunt-wp-i18n' );
 	grunt.loadNpmTasks( 'grunt-file-creator' );
-	//grunt.loadNpmTasks( 'grunt-changelog' );
-	//grunt.loadNpmTasks('grunt-templated-changelog');
-	//grunt.loadNpmTasks('git-changelog');
 	grunt.loadNpmTasks('grunt-github-changes');
 
 	grunt.registerTask('syntax', 'default task description', function(){
