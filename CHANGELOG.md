@@ -1,6 +1,14 @@
 ## Change Log
 
-### upcoming (2015/07/01 10:05 +00:00)
+### upcoming (2015/08/06 18:27 +00:00)
+- [a2d7266](https://github.com/soderlind/read-offline/commit/a2d72661cf36ec63878769b614ec0702076d4ec6) Conflicts: 	Gruntfile.js (@soderlind)
+
+### 0.3.1 (2015/08/06 18:12 +00:00)
+- [13eecff](https://github.com/soderlind/read-offline/commit/13eecff694c95de790b37daab8fb81ca85d046fd) Version 0.3.1 (@soderlind)
+- [70274d3](https://github.com/soderlind/read-offline/commit/70274d333b6f16293d030d80ebf941270b99effe) Fixed HTML purification (previous version stripped html P-tags, sorry). (@soderlind)
+- [102fcca](https://github.com/soderlind/read-offline/commit/102fcca01947bb2c090a2c6df0cc3651a21c6c53) Version 0.3.0 (@soderlind)
+- [20e57dc](https://github.com/soderlind/read-offline/commit/20e57dcf17628b7b1fbb7e64e8301342d004353c) Update Gruntfile.js (@soderlind)
+- [c66ae31](https://github.com/soderlind/read-offline/commit/c66ae31b463d30af6264008c7cd5de34da0d9949) updated (@soderlind)
 - [955817c](https://github.com/soderlind/read-offline/commit/955817c5c86e02b7eecfb51e4fee656afc5cb843) added (@soderlind)
 - [79b9dd8](https://github.com/soderlind/read-offline/commit/79b9dd8c04ff120eb5b3625852bfdbbfaf5b9a53) Updated CHANGELOG.md (@soderlind)
 
