@@ -1,4 +1,12 @@
 <?php
+use PHPePub\Core\EPub;
+use PHPePub\Core\EPubChapterSplitter;
+use PHPePub\Core\Logger;
+use PHPePub\Core\Structure\OPF\DublinCore;
+use PHPePub\Core\Structure\OPF\MetaValue;
+use PHPePub\Helpers\CalibreHelper;
+use PHPePub\Helpers\URLHelper;
+use PHPZip\Zip\File\Zip;
 
 class Read_Offline_Create extends Read_Offline {
 
@@ -20,15 +28,20 @@ class Read_Offline_Create extends Read_Offline {
 
 
 	private $author_firstlast;
-	private $author_lastfirst; 
+	private $author_lastfirst;
 	private $subject;
-	private $keywords; 
+	private $keywords;
 	private $generator;
 	private $html;
 
 	function init($post) {
-		$this->author_firstlast = sprintf("%s %s",get_the_author_meta('user_firstname',$post->post_author),get_the_author_meta('user_lastname',$post->post_author));
-		$this->author_lastfirst = sprintf("%s, %s",get_the_author_meta('user_firstname',$post->post_author),get_the_author_meta('user_lastname',$post->post_author));
+		if ( '' !== get_the_author_meta('user_firstname',$post->post_author)  && '' !== get_the_author_meta('user_lastname',$post->post_author ) ) {
+			$this->author_firstlast = sprintf("%s %s",get_the_author_meta('user_firstname',$post->post_author),get_the_author_meta('user_lastname',$post->post_author));
+			$this->author_lastfirst = sprintf("%s, %s",get_the_author_meta('user_firstname',$post->post_author),get_the_author_meta('user_lastname',$post->post_author));
+		} else {
+			$this->author_firstlast = get_the_author_meta('display_name',$post->post_author);
+			$this->author_lastfirst = get_the_author_meta('display_name',$post->post_author);
+		}
 
 		$this->subject = (count(wp_get_post_categories($post->ID))) ? implode(' ,',array_map("get_cat_name", wp_get_post_categories($post->ID))) : "";
 		$this->keywords = $this->_get_taxonomies_terms($post);
@@ -72,30 +85,19 @@ class Read_Offline_Create extends Read_Offline {
 
 	function epub($post) {
 
-		// require_once (READOFFLINE_PATH .'/lib/PHPePub/EPub.php');
-		// //require_once "epub/EPub.inc.php";
-
-		//$epub = new EPub(EPub::BOOK_VERSION_EPUB3);
-		$epub = new Read_Offline_Epub();
+		$epub = new EPub(EPub::BOOK_VERSION_EPUB3);
 		$epub->isLogging = false;
-		$epub->setGenerator($this->generator);
 
+		$epub->setGenerator($this->generator);
 		$epub->setTitle($post->post_title); //setting specific options to the EPub library
 		$epub->setIdentifier($post->guid, EPub::IDENTIFIER_URI);
 		$iso6391 = ( '' == get_locale() ) ? 'en' : strtolower( substr(get_locale(), 0, 2) ); // only ISO 639-1
 		$epub->setLanguage($iso6391);
-		//$epub->setAuthor($author_firstlast, $author_lastfirst); // "Firstname, Lastname", "Lastname, First names"
+		$epub->setAuthor($this->author_firstlast, $this->author_lastfirst); // "Firstname Lastname", "Lastname, First names"
 		$epub->setPublisher(get_bloginfo( 'name' ), get_bloginfo( 'url' ));
 		$epub->setSourceURL($post->guid);
 
 
-		// printf("<pre>%s</pre>",print_r(parent::$options['epub'],true));
-		// exit();
-		// if ('' != parent::$options['epub']['epub_cover_image'] ) {
-		// 	echo parent::$options['epub']['epub_cover_image'];
-		// 	exit();
-		// 	$epub->setCoverImage(parent::$options['epub']['epub_cover_image']);
-		// }
 		$print_css = "";
 		$print_style = $this->_get_child_array_key('epub',parent::$options['epub']['style']);
 		switch ($print_style) {
@@ -124,7 +126,7 @@ class Read_Offline_Create extends Read_Offline {
 					$image_url = wp_get_attachment_url( get_post_thumbnail_id($post->ID, 'thumbnail') );
 					if (false !== file_exists($image_url)) {
 						$attachment_data = wp_get_attachment_metadata(get_post_thumbnail_id($post->ID, 'thumbnail'));
-						printf("<pre>%s</pre>",print_r($attachment_data,true));
+						// printf("<pre>%s</pre>",print_r($attachment_data,true));
 						$image_path = $upload_dir['basedir'] . '/' . $attachment_data['file'];
 						if (count($attachment_data)) {
 							$epub->setCoverImage($image_path);
@@ -153,69 +155,36 @@ class Read_Offline_Create extends Read_Offline {
 			. "</head>\n"
 			. "<body>\n";
 
-		$content_start = sprintf('<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="styles.css" /><title>%s</title></head><body>', $post->post_title );
+		// $content_start = sprintf('<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="styles.css" /><title>%s</title></head><body>', $post->post_title );
 
 
 		$content_end = "\n</body>\n</html>\n";
 
-		$html = $this->_purity_html($this->html);
+		$cover = $content_start . sprintf("<h1>%s</h1>\n<h2>%s: %s</h2>\n",$post->post_title, _x( 'By', 'Rererence between title and author: Title By: Author Name' ) , $this->author_firstlast) . $content_end;
+		$epub->addChapter("Notices", "Cover.html", $cover);
 
+		//FIXME, Add EPub TOC
+		// $epub->buildTOC(NULL, "toc", "Table of Contents", TRUE, TRUE);
+/*
+		$epub->addFileToMETAINF("com.apple.ibooks.display-options.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<display_options>\n    <platform name=\"*\">\n        <option name=\"fixed-layout\">true</option>\n        <option name=\"interactive\">true</option>\n        <option name=\"specified-fonts\">true</option>\n    </platform>\n</display_options>");
+*/
 
-		$i = 0;
-		$doc = new DOMDocument();
-		@$doc->loadHTML( mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8') );
-		//@$doc->loadHTML($html);  // add error check
-		$tags = $doc->getElementsByTagName('img');
-		foreach ($tags as $tag) {
-	    	$url =  $tag->getAttribute('src');
-
-			//if (false !== ($attchment_id = $this->_get_attachment_id_from_url($url))) {
-			if (false !== ($attchment_id = attachment_url_to_postid($url))) {
-				$attachment_meta = wp_get_attachment_metadata( $attchment_id);
-				$mime         = get_post_mime_type($attchment_id ); //$attachment_meta['sizes']['large']['mime-type'];
-				$rel_url      = $attachment_meta['file'];
-				$html         = str_replace($url, $rel_url , $html);
-				$epub_file_id =   'epublargefile' . $i++;
-				$upload_dir = wp_upload_dir();
-				$epub_file    = sprintf("%s/%s",$upload_dir['basedir'],$rel_url);
-				// printf("<p>
-				// 	url: %s <br />
-				// 	mime: %s<br />
-				// 	rel_url: %s<br />
-				// 	epub_file: %s<br />
-				// 	exists?: %s<br />
-				// 	</p>",
-				// 	$url,
-				// 	$mime,
-				// 	$rel_url,
-				// 	$epub_file,
-				// 	(file_exists($epub_file)? "true" : "false")
-				// );
-				if (file_exists($epub_file)) {
-					$epub->addLargeFile($rel_url, $epub_file_id , $epub_file, $mime);
-				}
-			}
-		}
-
-		// echo $content_start . $html . $content_end;
-
-		// exit();
-		$epub->addChapter("Body", "Body.html", $content_start . $html . $content_end);
-
+		$html = $this->html;
+		$epub->addChapter("Body", "Body.html", $content_start . $html . $content_end, false, EPub::EXTERNAL_REF_ADD );
 		$epub->finalize();
 		$zipData = $epub->sendBook($post->post_name);
-
 	}
 
 	function mobi($post) {
 		require_once (READOFFLINE_PATH . '/lib/phpMobi/MOBIClass/MOBI.php');
-		//require_once "mobi/Mobi.inc.php";
+		// require_once (READOFFLINE_PATH . '/lib/simple_html_dom/simple_html_dom.php');
 		$html = $this->html;
 
 		$mobi = new MOBI();
 
-		$mobi_content = new MOBIFile();
+
 		/*
+		//options:
 		asin
 		-author
 		contributor
@@ -233,6 +202,9 @@ class Read_Offline_Create extends Read_Offline {
 		type
 		version
 		 */
+		/*
+		//FIXME: add mobi toc and cover image
+		$mobi_content = new MOBIFile();
 		$mobi_content->set("title", $post->post_title);
 		$mobi_content->set("description", parent::get_excerpt_by_id($post->ID));
 		$mobi_content->set("author", $this->author_firstlast);
@@ -242,16 +214,49 @@ class Read_Offline_Create extends Read_Offline {
 		$mobi_content->set("publisher", get_bloginfo( 'name' ), get_bloginfo( 'url' ));
 		$mobi_content->set("subject", $this->subject);
 		$mobi_content->set("imprint", parent::$options['copyright']['message']);
-		//$mobi->setOptions($options);
-
 		if (parent::$options['mobi']['mobi_cover_image']) {
 			$mobi_content->appendImage(parent::image_create_frome_image(parent::$options['mobi']['mobi_cover_image']));
 			$mobi_content->appendPageBreak();
 		}
+		if (0 != count($content)) {
+			foreach ($content as $title => $paragraph) {
+				$mobi_content->appendChapterTitle( wp_strip_all_tags( $title ) );
+				$mobi_content->appendParagraph($paragraph);
+				$mobi_content->appendPageBreak();
+			}
+		} else {
+			$mobi_content->appendParagraph($html);
+			$mobi_content->appendPageBreak();
+		}
 		$mobi->setContentProvider($mobi_content);
-		$mobi->setData($html);
-		$zipData = $mobi->download($post->post_name . ".mobi");
+		*/
+
+		$options = array(
+			"title"          => $post->post_title,
+			"description"    => parent::get_excerpt_by_id($post->ID),
+		  	"author"         => $this->author_firstlast,
+		  	"subject"        => $this->subject,
+			"publishingdate" => get_the_date( 'r', $post->ID ),
+			"source"         => $post->guid,
+			"publisher"      => get_bloginfo( 'name' ),
+			"imprint"        => parent::$options['copyright']['message'],
+		);
+
+		//Set the data
+		$mobi->setData($this->_strip_img($html));
+		$mobi->setOptions($options);
+
+
+		//Get title and make it a 12 character long filename
+		// $title = $mobi->getTitle();
+		$title = $post->post_name;
+		if($title === false) $title = "file";
+		$title = urlencode( substr($title, 0, 12) );
+
+		//Send the mobi file as download
+		$zipData = $mobi->download($title.".mobi");
 	}
+
 
 
 	function pdf($post) {
@@ -685,22 +690,29 @@ class Read_Offline_Create extends Read_Offline {
 	}
 
 
-	private function _purity_html($html, $type = 'epub') {
-		// purify content
-		require_once (READOFFLINE_PATH .'/lib/htmlpurifier-4.6.0-standalone/HTMLPurifier.standalone.php');
-		$htmlpurifier_config = HTMLPurifier_Config::createDefault();
+	private function _strip_img( $html) {
+		$doc = new DOMDocument();
+		// START LibXML error management.
+		// Modify state
+		$libxml_previous_state = libxml_use_internal_errors( true );
+		$doc->loadHTML( mb_convert_encoding( $html, 'HTML-ENTITIES', 'UTF-8' ) );
+		// handle errors
+		libxml_clear_errors();
+		// restore
+		libxml_use_internal_errors( $libxml_previous_state );
+		// END LibXML error management.
 
-		$epub_html_whitelist = array ('h1','h2','h3','h4','h5','h6', 'a', 'abbr', 'area', 'audio', 'b', 'bdi', 'bdo', 'br', 'button', 'canvas', 'cite', 'code', 'command', 'datalist', 'del', 'dfn', 'em', 'embed', 'i', 'iframe', 'img', 'input', 'ins', 'kbd', 'keygen', 'label', 'map', 'mark', 'meter', 'ns1:switch', 'ns2:math', 'ns3:svg', 'object', 'output', 'p', 'progress', 'q', 'ruby', 's', 'samp', 'script', 'select', 'small', 'span', 'strong', 'sub', 'sup', 'textarea', 'time', 'u', 'var', 'video' , 'wbr');
-		// //$htmlpurifier_config->set('HTML.Doctype', 'XHTML 1.1');
-		$htmlpurifier_config->set('HTML.AllowedElements',$epub_html_whitelist);
-
-
-		$ebub_html_attributes = array('*.accesskey', '*.aria-activedescendant', '*.aria-atomic', '*.aria-autocomplete', '*.aria-busy', '*.aria-checked', '*.aria-controls', '*.aria-describedby', '*.aria-disabled', '*.aria-dropeffect', '*.aria-expanded', '*.aria-flowto', '*.aria-grabbed', '*.aria-haspopup', '*.aria-hidden', '*.aria-invalid', '*.aria-label', '*.aria-labelledby', '*.aria-level', '*.aria-live', '*.aria-multiline', '*.aria-multiselectable', '*.aria-orientation', '*.aria-owns', '*.aria-posinset', '*.aria-pressed', '*.aria-readonly', '*.aria-relevant', '*.aria-required', '*.aria-selected', '*.aria-setsize', '*.aria-sort', '*.aria-valuemax', '*.aria-valuemin', '*.aria-valuenow', '*.aria-valuetext', '*.border', '*.class', '*.contenteditable', '*.contextmenu', '*.dir', '*.draggable', '*.dropzone', '*.hidden', '*.id', '*.lang', '*.ns1:type', '*.ns2:alphabet', '*.ns2:ph', '*.onabort', '*.onblur', '*.oncanplay', '*.oncanplaythrough', '*.onchange', '*.onclick', '*.oncontextmenu', '*.ondblclick', '*.ondrag', '*.ondragend', '*.ondragenter', '*.ondragleave', '*.ondragover', '*.ondragstart', '*.ondrop', '*.ondurationchange', '*.onemptied', '*.onended', '*.onerror', '*.onfocus', '*.oninput', '*.oninvalid', '*.onkeydown', '*.onkeypress', '*.onkeyup', '*.onload', '*.onloadeddata', '*.onloadedmetadata', '*.onloadstart', '*.onmousedown', '*.onmousemove', '*.onmouseout', '*.onmouseover', '*.onmouseup', '*.onmousewheel', '*.onpause', '*.onplay', '*.onplaying', '*.onprogress', '*.onratechange', '*.onreadystatechange', '*.onreset', '*.onscroll', '*.onseeked', '*.onseeking', '*.onselect', '*.onshow', '*.onstalled', '*.onsubmit', '*.onsuspend', '*.ontimeupdate', '*.onvolumechange', '*.onwaiting', '*.role', '*.spellcheck', '*.style', '*.tabindex', '*.title', '*.xml:base', '*.xml:lang' , '*.xml:space');
-		$htmlpurifier_config->set('HTML.AllowedAttributes',$ebub_html_attributes);
-		$htmlpurifier_config->set( 'AutoFormat.RemoveSpansWithoutAttributes', true );
-
-		$htmlpurifier = new HTMLPurifier($htmlpurifier_config);
-		return $htmlpurifier->purify($html);
+		$doc->preserveWhiteSpace = false;
+		// Here we strip all the img tags in the document
+		$images = $doc->getElementsByTagName('img');
+		$imgs = array();
+		foreach($images as $img) {
+		   $imgs[] = $img;
+		}
+		foreach($imgs as $img) {
+		   $img->parentNode->removeChild($img);
+		}
+	 	return $doc->saveHTML();
 	}
 
 	private function _get_child_array_key($parent_element,$org){
@@ -811,11 +823,7 @@ class Read_Offline_Create extends Read_Offline {
 	}
 }
 
-
-
-require_once (READOFFLINE_PATH .'/lib/PHPePub/EPub.php');
-
-class Read_Offline_Epub extends EPub {
+class Read_Offline_Epub extends Epub {
 
 
     private $isFinalized = FALSE;
@@ -824,7 +832,9 @@ class Read_Offline_Epub extends EPub {
 	private $docRoot = NULL;
 	private $custom_css = '';
 	function __construct() {
-		parent::__construct(parent::BOOK_VERSION_EPUB3);
+
+		parent::__construct($version = parent::BOOK_VERSION_EPUB3);
+
 	}
 
 
@@ -905,7 +915,7 @@ class Read_Offline_Epub extends EPub {
 		}
 		// if ('' !== $this->custom_css) {
 		// 	$coverPageCss = $this->custom_css;
-		// } else { 
+		// } else {
 		$coverPageCss = "@page, body, div, img {\n"
 				. "\tpadding: 0pt;\n"
 				. "\tmargin:0pt;\n"
