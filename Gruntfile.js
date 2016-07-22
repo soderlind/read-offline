@@ -16,7 +16,8 @@ module.exports = function (grunt) {
 		'js/**',
 		'languages/**',
 		'lib/**',
-		'templates/**'
+		'templates/**',
+		'vendor/**'
 	];
 
 	/**
@@ -28,7 +29,8 @@ module.exports = function (grunt) {
 		'package.json',
 		'Gruntfile.js',
 		'assets/**',
-		'\.gitattributes'
+		'\.gitattributes',
+		'composer*'
 	]);
 
 	// Project configuration.
