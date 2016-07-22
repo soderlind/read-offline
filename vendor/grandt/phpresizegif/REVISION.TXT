@@ -1,0 +1,15 @@
+---------------------------------------------------------------------
+Rev. 1.0.3 - 2015-05-10
+Added: class ExtractGif to extract gif frames (Not rendering, yet), the
+       positioning and timing data is retained in the individual frames.
+Added: proper LGPL 2.1 headers to source files
+---------------------------------------------------------------------
+Rev. 1.0.2 - 2015-05-01
+Added: CreateGif. A simple Gif Animation creation script.
+---------------------------------------------------------------------
+Rev. 1.0.1 - 2015-04-30
+Fixed: Some Composer dependencies were pointing to development versions.
+---------------------------------------------------------------------
+Rev. 1.0.0 - 2015-04-27
+Initial release
+---------------------------------------------------------------------
