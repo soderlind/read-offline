@@ -267,6 +267,21 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
             )
         );
 
+		$this->addSettingFields(
+            array(
+                'field_id'         => 'cache',
+                'section_id'       => 'misc',
+                'title'            => __( 'Save in <a href="upload.php">Media Libary</a>:', 'read-offline'),
+                'description'      => __( 'Use the Media Library as a cache. When a post is created or updated, a PDF, Epub and/or mobi of the post will be saved to the Media Library. This file will be served to the enduser when she clicks on the download link on the frontend. ','read-offline'),
+                'type'             => 'radio',
+                'label'            => array(
+                    '1'                    => __( 'Yes', 'read-offline'),
+                    '0'                    => __( 'No', 'read-offline'),
+                ),
+                'default'          => '0',
+                'help'             => __( 'Use the Media Library as a cache', 'read-offline' ),
+            )
+        );
 
         $this->addSettingFields(
             array(
@@ -280,7 +295,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                     '0'                    => __( 'No', 'read-offline'),
                 ),
                 'default'          => '1',
-                'help'             => __( 'Help text', 'read-offline' ),
+                'help'             => __( 'Track downloads using Google Analytics', 'read-offline' ),
             )
         );
 
@@ -1309,7 +1324,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
           submit_button();
         }
 
-        //update_option( 'Read_Offline_Admin_Settings', '' );
+        // update_option( 'Read_Offline_Admin_Settings', '' );
 
         //printf("<pre>%s</pre>", print_r(get_option( 'Read_Offline_Admin_Settings' ),true));
 
