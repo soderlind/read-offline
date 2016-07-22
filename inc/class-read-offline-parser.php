@@ -48,14 +48,17 @@ class Read_Offline_Parser extends Read_Offline {
 
 		function parse_request($wp_query) {
 			global $post;
-			$create_new = false;
+			$create_new = true;
+			if ( '1' == parent::$options['misc']['cache'] ) {
+				$create_new = false;
+			}
 			if (isset($wp_query->query_vars['read_offline_id'])) {
 				$docformat = strtolower($wp_query->query_vars['read_offline_format']);
 				$filename = sprintf('%s.%s',$wp_query->query_vars['read_offline_name'],$wp_query->query_vars['read_offline_format'] );
 				$post_id = $wp_query->query_vars['read_offline_id'];
 				$post = get_page($post_id);
 				if (is_object($post) && $post->post_status == 'publish') {
-					if (isset($_REQUEST['read-offline-code'])) { 
+					if (isset($_REQUEST['read-offline-code'])) {
 						$code  = $_REQUEST['read-offline-code'];
 						if ( base64_encode(AUTH_KEY) == $code ) {
 							$create_new = true;

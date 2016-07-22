@@ -1,6 +1,6 @@
 <?php
 
-	define( 'FS_CHMOD_DIR', ( 0755 & ~ umask() ) );
+define( 'FS_CHMOD_DIR', ( 0755 & ~ umask() ) );
 
 class Read_Offline {
 
@@ -61,7 +61,7 @@ class Read_Offline {
 		$code = base64_encode(AUTH_KEY);
 		if ( get_option('permalink_structure')) {
 			return sprintf("%s/read-offline/%s/%s.%s%s",
-				home_url(),$post_id,$name,$format, 
+				home_url(),$post_id,$name,$format,
 				( $refresh ) ? '?read-offline-code=' . $code  : ''
 			);
 		} else {
@@ -186,7 +186,7 @@ class Read_Offline {
 			// code from: http://codex.wordpress.org/Function_Reference/wp_insert_attachment#Example
 			// Prepare an array of post data for the attachment.
 			$attachment = array(
-				'guid'           => $attached_url, 
+				'guid'           => $attached_url,
 				'post_mime_type' => $mime_type,
 				'post_title'     => $post->post_title,
 				'post_content'   => wp_strip_all_tags(self::get_excerpt_by_id($post_id)),
@@ -244,8 +244,12 @@ class Read_Offline {
 		if ( $version != READOFFLINE_VERSION ) {
 			$options['version'] = READOFFLINE_VERSION;
 
-			$this->_remove_tmp_directories();
+			if ( false === isset( self::$options['misc']['cache'] )) {
+				self::$options['misc']['cache'] = 0;
+				update_option( 'Read_Offline_Admin_Settings', self::$options );
+			}
 
+			$this->_remove_tmp_directories();
 			update_option( "Read_Offline", $options );
 		}
 		$this->_create_tmp_directories();
