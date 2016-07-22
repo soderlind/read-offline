@@ -1,6 +1,17 @@
 ## Change Log
 
-### upcoming (2015/08/06 18:27 +00:00)
+### 0.4.0 (2016/07/22 13:25 +00:00)
+- [7ac1880](https://github.com/soderlind/read-offline/commit/7ac18803ea6ff688e74a6b21e988cd6625c315c2) Version 0.4.0 (@soderlind)
+- [cd71bcc](https://github.com/soderlind/read-offline/commit/cd71bccca9f93db1ab146b14de7ca93ca14a03ac) Fix ePub and mobi bugs (@soderlind)
+- [93c3ee6](https://github.com/soderlind/read-offline/commit/93c3ee665e2ad2d20adeaa9481f60b906594d4f7) Add option in admin to select if you want to cache pdf, epub or mobi (@soderlind)
+- [de24945](https://github.com/soderlind/read-offline/commit/de24945bc2bd08e4e5bc6b2bc6ac2f4b9b2ffd41) Add option in admin to select if you want to cache pdf, epub or mobi (@soderlind)
+- [42e50ca](https://github.com/soderlind/read-offline/commit/42e50cac540cbb562ee0a405f3759b91ad82ab3c) Remove HTMLPurifier (@soderlind)
+- [72aeace](https://github.com/soderlind/read-offline/commit/72aeace371cab3d056ac9fb5696db3f45712de4c) Update phpMobi to latest version (@soderlind)
+- [25af9dc](https://github.com/soderlind/read-offline/commit/25af9dcfb9a1497ad69ff1d8c9c4454b036e1b34) remove old files (@soderlind)
+- [2d5a289](https://github.com/soderlind/read-offline/commit/2d5a289118866fbb5afdaeb3e2da59a8051e5584) Update PHPePub to 4.0.7 (@soderlind)
+- [e646ad2](https://github.com/soderlind/read-offline/commit/e646ad29dcf2771d02d47ee516d5ceb638f6d200) Update PHPePub to version 4.0.7 (@soderlind)
+- [1e6ca49](https://github.com/soderlind/read-offline/commit/1e6ca4992593839d04a628a921adf06ed4649a51) Added missing translation (@soderlind)
+- [1354256](https://github.com/soderlind/read-offline/commit/1354256726d64366369941222888aeafcd9f3310) Updated changelog (@soderlind)
 - [a2d7266](https://github.com/soderlind/read-offline/commit/a2d72661cf36ec63878769b614ec0702076d4ec6) Conflicts: 	Gruntfile.js (@soderlind)
 
 ### 0.3.1 (2015/08/06 18:12 +00:00)

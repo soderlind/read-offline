@@ -3,8 +3,8 @@ Contributors: PerS
 Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
-Tested up to: 4.2.2
-Stable tag: 0.4.0
+Tested up to: 4.5.3
+Stable tag: 0.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,7 @@ Read Offline allows you to download or print posts and pages. You can download t
 
 **NOTE** This is still a beta version
 
-= Features = 
+= Features =
 
 *   Add download links to the top and bottom of a post or page (configurable in Read Offline->General Options)
 *   You can download a PDF, ePub or mobi file containing the current post or page, or you can print the post / page.
@@ -64,8 +64,14 @@ There are 2 ways you can add the Read Offline link
 3. Read Offline -> Print
 
 == Changelog ==
+= 0.4.0 =
+* Fix ePub and mobi bugs
+* Add option in admin to select if you want to cache pdf, epub or mobi files in the Media Libray, default is "No"
+* Update PHPePub to version 4.0.7
+* Update phpMobi to latest version
+* Remove HTMLPurifier
 = 0.3.1 =
-* Fixed HTML purification (previous version stripped html P-tags, sorry). html-purify is now only used when creating ePub 
+* Fixed HTML purification (previous version stripped html P-tags, sorry). html-purify is now only used when creating ePub
 = 0.3.0 =
 * A lot of changes since last commit, please see [CHANGELOG.md](https://github.com/soderlind/read-offline/blob/master/CHANGELOG.md) at GitHub
 = 0.2.8 =
@@ -117,7 +123,7 @@ There are 2 ways you can add the Read Offline link
 * In Settings->Read Offline, added the option to add custom css to ePub
 * Added languages/read-offline.po for easy translation.
 
-= 0.1.4 = 
+= 0.1.4 =
 * Added permalink support (/read-offline/"postid"/"post-name"."type"). I've written [a how-to add permalink to plugins guide at soderlind.no](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)
 * removed the obsolete download.php
 
