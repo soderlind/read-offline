@@ -248,7 +248,16 @@ class Read_Offline {
 				self::$options['misc']['cache'] = 0;
 				update_option( 'Read_Offline_Admin_Settings', self::$options );
 			}
-
+			if ( false === isset( self::$options['mobi']['add_toc'] )) {
+				self::$options['mobi']['add_toc'] = 0;
+				self::$options['mobi']['toc'] = 0;
+				update_option( 'Read_Offline_Admin_Settings', self::$options );
+			}
+			if ( false === isset( self::$options['epub']['add_toc'] )) {
+				self::$options['epub']['add_toc'] = 0;
+				self::$options['epub']['toc'] = 0;
+				update_option( 'Read_Offline_Admin_Settings', self::$options );
+			}
 			$this->_remove_tmp_directories();
 			update_option( "Read_Offline", $options );
 		}

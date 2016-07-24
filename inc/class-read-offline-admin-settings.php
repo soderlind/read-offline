@@ -1036,6 +1036,49 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
             )
         );
 
+		$this->addSettingFields(
+			array(  // Single set of radio buttons
+				'field_id'         => 'add_toc',
+				'section_id'       => 'epub',
+				'title'            => __( 'Table of Contents', 'read-offline' ),
+				'description'      => __( 'Automatically generate entries for a Table of Contents using a heading element (H1 - H5)', 'read-offline' ),
+				'type'             => 'revealer',
+				'label'            => array(
+						'0'                => __( 'No ', 'read-offline' ),
+						'#fieldrow-epub_toc'  => __( 'Yes (configured below)', 'read-offline' ),
+				),
+				'default'          => '0',
+				'attributes'       => array(
+					'select'               => array(
+						'style'                    =>  'width: 200px;',
+					),
+				),
+				'help'             => __( 'Help text', 'read-offline' ),
+			),
+		   array(
+				'field_id'         => 'toc',
+				'section_id'       => 'epub',
+				//'title'           => 'Custom CSS',
+				'description'      => __( 'Document will be split into chapters based on the header selected', 'read-offline' ),
+				'type'             => 'select',
+				'label'            => array(
+					'0'                    => __( 'Select Heading', 'read-offline' ),
+					'1'                    => __( 'H1', 'read-offline' ),
+					'2'                    => __( 'H2', 'read-offline' ),
+					'3'                    => __( 'H3', 'read-offline' ),
+					'4'                    => __( 'H4', 'read-offline' ),
+					'5'                    => __( 'H5', 'read-offline' ),
+			   ),
+				'default'          => '0',
+				'attributes'       => array(
+					'select'               => array(
+						'style'                    =>  'width: 200px; margin-right: 10px;',
+
+					),
+				'help'             => __( 'Help text', 'read-offline' ),
+				),
+			)
+		);
 
         $this->addSettingFields(
             array(
@@ -1102,7 +1145,6 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
              )
         );
 
-
 // mobi
         $this->addSubMenuPage(
             array(
@@ -1120,6 +1162,50 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
             )
         );
 
+		$this->addSettingFields(
+			array(
+				'field_id'         => 'add_toc',
+				'section_id'       => 'mobi',
+				'title'            => __( 'Table of Contents', 'read-offline' ),
+				'description'      => __( 'Automatically generate entries for a Table of Contents using a heading element (H1 - H5)', 'read-offline' ),
+				'type'             => 'revealer',
+				'label'            => array(
+						'0'                => __( 'No ', 'read-offline' ),
+						'#fieldrow-mobi_toc'  => __( 'Yes (configured below)', 'read-offline' ),
+				),
+				'default'          => '0',
+				'attributes'       => array(
+					'select'               => array(
+						'style'                    =>  'width: 200px;',
+					),
+				),
+				'help'             => __( 'Help text', 'read-offline' ),
+			),
+		   array(
+				'field_id'         => 'toc',
+				'section_id'       => 'mobi',
+				//'title'           => 'Custom CSS',
+				'description'      => __( 'Document will be split into chapters based on the header selected', 'read-offline' ),
+				'type'             => 'select',
+				'label'            => array(
+					'0'                    => __( 'Select Heading', 'read-offline' ),
+					'1'                    => __( 'H1', 'read-offline' ),
+					'2'                    => __( 'H2', 'read-offline' ),
+					'3'                    => __( 'H3', 'read-offline' ),
+					'4'                    => __( 'H4', 'read-offline' ),
+					'5'                    => __( 'H5', 'read-offline' ),
+			   ),
+				'default'          => '0',
+				'attributes'       => array(
+					'select'               => array(
+						'style'                    =>  'width: 200px; margin-right: 10px;',
+
+					),
+				'help'             => __( 'Help text', 'read-offline' ),
+				),
+			)
+		);
+
 
         $this->addSettingFields(
             array( // Image Selector
@@ -1130,8 +1216,6 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
                 'help'             => __( 'Help text', 'read-offline' ),
             )
         );
-
-
 
 
 

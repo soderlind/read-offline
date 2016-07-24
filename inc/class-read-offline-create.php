@@ -8,6 +8,8 @@ use PHPePub\Helpers\CalibreHelper;
 use PHPePub\Helpers\URLHelper;
 use PHPZip\Zip\File\Zip;
 
+require_once (READOFFLINE_PATH . '/lib/phpMobi/MOBIClass/MOBI.php');
+
 class Read_Offline_Create extends Read_Offline {
 
 	private static $instance;
@@ -126,7 +128,7 @@ class Read_Offline_Create extends Read_Offline {
 					$image_url = wp_get_attachment_url( get_post_thumbnail_id($post->ID, 'thumbnail') );
 					if (false !== file_exists($image_url)) {
 						$attachment_data = wp_get_attachment_metadata(get_post_thumbnail_id($post->ID, 'thumbnail'));
-						// printf("<pre>%s</pre>",print_r($attachment_data,true));
+
 						$image_path = $upload_dir['basedir'] . '/' . $attachment_data['file'];
 						if (count($attachment_data)) {
 							$epub->setCoverImage($image_path);
@@ -142,7 +144,7 @@ class Read_Offline_Create extends Read_Offline {
 		$epub->setDate(get_the_date( 'U', $post->ID ));
 		$epub->setRights(parent::$options['copyright']['message']);
 
-
+/*
 		$content_start =
 			"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			. "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
@@ -154,35 +156,58 @@ class Read_Offline_Create extends Read_Offline {
 			. "<title>" . $post->post_title . "</title>\n"
 			. "</head>\n"
 			. "<body>\n";
-
-		// $content_start = sprintf('<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="styles.css" /><title>%s</title></head><body>', $post->post_title );
-
-
+*/
+		$content_start = sprintf('<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="styles.css" /><title>%s</title></head><body>', $post->post_title );
 		$content_end = "\n</body>\n</html>\n";
 
 		$cover = $content_start . sprintf("<h1>%s</h1>\n<h2>%s: %s</h2>\n",$post->post_title, _x( 'By', 'Rererence between title and author: Title By: Author Name' ) , $this->author_firstlast) . $content_end;
 		$epub->addChapter("Notices", "Cover.html", $cover);
 
-		//FIXME, Add EPub TOC
-		// $epub->buildTOC(NULL, "toc", "Table of Contents", TRUE, TRUE);
 /*
 		$epub->addFileToMETAINF("com.apple.ibooks.display-options.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<display_options>\n    <platform name=\"*\">\n        <option name=\"fixed-layout\">true</option>\n        <option name=\"interactive\">true</option>\n        <option name=\"specified-fonts\">true</option>\n    </platform>\n</display_options>");
 */
 
 		$html = $this->html;
-		$epub->addChapter("Body", "Body.html", $content_start . $html . $content_end, false, EPub::EXTERNAL_REF_ADD );
+
+		$add_toc = $this->_get_child_array_key('pdf_layout',parent::$options['epub']['add_toc']);
+		$hsize   = $this->_get_child_array_key('pdf_layout',parent::$options['epub']['toc']);
+		$content = array();
+		if (0 !== $add_toc && 0 !== $hsize ) {
+			$chapter_num = 1;
+			$content = $this->_split_content($html, 'h' . $hsize );
+			if (0 != count($content)) {
+				$epub->buildTOC(NULL, 'toc', __( 'Table of Contents', 'read-offline' ), TRUE, FALSE);
+				foreach ($content as $title => $paragraph) {
+					// $title = wp_strip_all_tags( $title );
+					$header = sprintf( '<h%s>%s</h%s>',$hsize, $title, $hsize );
+					$epub->addChapter($title, sprintf('Chapter%03d.html',$chapter_num), $content_start . $header . $paragraph . $content_end, true, EPub::EXTERNAL_REF_ADD);
+					$chapter_num++;
+				}
+			}
+		}
+
+		if ( 0 === $add_toc || 0 === count($content) ) {
+			$epub->addChapter("Body", "Body.html", $content_start . $html . $content_end, true, EPub::EXTERNAL_REF_ADD );
+		}
 		$epub->finalize();
 		$zipData = $epub->sendBook($post->post_name);
 	}
 
+
+	function nextElementSibling($node) {
+		while ($node && ($node = $node->nextSibling)) {
+			if ($node instanceof DOMElement) {
+				break;
+			}
+		}
+		return $node;
+	}
+
+
 	function mobi($post) {
-		require_once (READOFFLINE_PATH . '/lib/phpMobi/MOBIClass/MOBI.php');
-		// require_once (READOFFLINE_PATH . '/lib/simple_html_dom/simple_html_dom.php');
+
 		$html = $this->html;
-
 		$mobi = new MOBI();
-
-
 		/*
 		//options:
 		asin
@@ -202,53 +227,53 @@ class Read_Offline_Create extends Read_Offline {
 		type
 		version
 		 */
-		/*
-		//FIXME: add mobi toc and cover image
-		$mobi_content = new MOBIFile();
-		$mobi_content->set("title", $post->post_title);
-		$mobi_content->set("description", parent::get_excerpt_by_id($post->ID));
-		$mobi_content->set("author", $this->author_firstlast);
-		$mobi_content->set("publishingdate", get_the_date( 'r', $post->ID ));
 
-		$mobi_content->set("source", $post->guid);
-		$mobi_content->set("publisher", get_bloginfo( 'name' ), get_bloginfo( 'url' ));
-		$mobi_content->set("subject", $this->subject);
-		$mobi_content->set("imprint", parent::$options['copyright']['message']);
-		if (parent::$options['mobi']['mobi_cover_image']) {
-			$mobi_content->appendImage(parent::image_create_frome_image(parent::$options['mobi']['mobi_cover_image']));
-			$mobi_content->appendPageBreak();
-		}
-		if (0 != count($content)) {
-			foreach ($content as $title => $paragraph) {
-				$mobi_content->appendChapterTitle( wp_strip_all_tags( $title ) );
-				$mobi_content->appendParagraph($paragraph);
-				$mobi_content->appendPageBreak();
+		$add_toc = $this->_get_child_array_key('pdf_layout',parent::$options['mobi']['add_toc']);
+		$hsize   = $this->_get_child_array_key('pdf_layout',parent::$options['mobi']['toc']);
+		$content = array();
+		if (0 !== $add_toc && 0 !== $hsize ) {
+			$content = $this->_split_content($html, 'h' . $hsize );
+			if (0 != count($content)) {
+				$mobi_content = new Read_Offline_MobiFile();
+				$mobi_content->set("title", $post->post_title);
+				$mobi_content->set("description", parent::get_excerpt_by_id($post->ID));
+				$mobi_content->set("author", $this->author_firstlast);
+				$mobi_content->set("publishingdate", get_the_date( 'r', $post->ID ));
+
+				$mobi_content->set("source", $post->guid);
+				$mobi_content->set("publisher", get_bloginfo( 'name' ), get_bloginfo( 'url' ));
+				$mobi_content->set("subject", $this->subject);
+				$mobi_content->set("imprint", parent::$options['copyright']['message']);
+				if (parent::$options['mobi']['mobi_cover_image']) {
+					$mobi_content->appendImage(parent::image_create_frome_image(parent::$options['mobi']['mobi_cover_image']));
+					$mobi_content->appendPageBreak();
+				}
+				foreach ($content as $title => $paragraph) {
+					$mobi_content->appendChapterTitle( wp_strip_all_tags( $title ) );
+					// if ( false !== ($imgurl = $this->_get_first_imageurl( $paragraph )) ) {
+					// 	$img = $this->_image_create_from_url( $imgurl );
+					// 	$mobi_content->appendImage( $img );
+					// }
+					$mobi_content->appendParagraph($this->_strip_img($paragraph));
+					$mobi_content->appendPageBreak();
+				}
+				$mobi->setContentProvider($mobi_content);
 			}
-		} else {
-			$mobi_content->appendParagraph($html);
-			$mobi_content->appendPageBreak();
 		}
-		$mobi->setContentProvider($mobi_content);
-		*/
-
-		$options = array(
-			"title"          => $post->post_title,
-			"description"    => parent::get_excerpt_by_id($post->ID),
-		  	"author"         => $this->author_firstlast,
-		  	"subject"        => $this->subject,
-			"publishingdate" => get_the_date( 'r', $post->ID ),
-			"source"         => $post->guid,
-			"publisher"      => get_bloginfo( 'name' ),
-			"imprint"        => parent::$options['copyright']['message'],
-		);
-
-		//Set the data
-		$mobi->setData($this->_strip_img($html));
-		$mobi->setOptions($options);
-
-
-		//Get title and make it a 12 character long filename
-		// $title = $mobi->getTitle();
+		if ( 0 === $add_toc || 0 === count($content) ) {
+			$options = array(
+				"title"          => $post->post_title,
+				"description"    => parent::get_excerpt_by_id($post->ID),
+				"author"         => $this->author_firstlast,
+				"subject"        => $this->subject,
+				"publishingdate" => get_the_date( 'r', $post->ID ),
+				"source"         => $post->guid,
+				"publisher"      => get_bloginfo( 'name' ),
+				"imprint"        => parent::$options['copyright']['message'],
+			);
+			$mobi->setData($this->_strip_img($html));
+			$mobi->setOptions($options);
+		}
 		$title = $post->post_name;
 		if($title === false) $title = "file";
 		$title = urlencode( substr($title, 0, 12) );
@@ -821,6 +846,91 @@ class Read_Offline_Create extends Read_Offline {
 		$transient = get_transient( $transient_id );
 		return get_transient( $transient_id );
 	}
+
+	private function _split_content($html, $header = 'h2') {
+		$content = array();
+		// $title = __( 'Introduction', 'read-offline');
+		$title = '';
+		$have_title = 'end';
+		$html_array = wp_html_split($html);
+
+		foreach ($html_array as $value) {
+			if ( '' !== $value ) {
+				switch ($value) {
+					case '<' . trim($header) . '>':
+						$have_title = 'start';
+						$title = '';
+						break;
+					case '</' . trim($header) . '>':
+						$have_title = 'end';
+						break;
+					default:
+						if ( 'start' === $have_title ) {
+							$title .= trim( wp_strip_all_tags( $value ) );
+						}
+						if ( 'end' === $have_title ) {
+							if (! isset($content[$title])) {
+								$content[$title] = '';
+							}
+							$content[$title] .= $value;
+						}
+						break;
+				}
+			}
+		}
+		return $content;
+	}
+
+
+	function _get_first_imageurl( $content ) {
+
+		$doc = new DOMDocument();
+		// START LibXML error management.
+		// Modify state
+		$libxml_previous_state = libxml_use_internal_errors( true );
+		$doc->loadHTML( mb_convert_encoding( $content, 'HTML-ENTITIES', 'UTF-8' ) );
+		// handle errors
+		libxml_clear_errors();
+		// restore
+		libxml_use_internal_errors( $libxml_previous_state );
+		// END LibXML error management.
+		$tags = $doc->getElementsByTagName('img');
+		// @codingStandardsIgnoreStart
+		// @codingStandardsIgnoreEnd
+		foreach ($tags as $tag) {
+			$url =  $tag->getAttribute('src');
+			// @codingStandardsIgnoreStart
+			// printf( '<pre>%s</pre>', print_r( $url, true ) );
+			// @codingStandardsIgnoreEnd
+			// if ( file_exists( $url ) ) {
+				return $url;
+			// }
+		}
+		return false;
+	}
+
+	function _image_create_from_url( $url ) {
+		$info = pathinfo( $url );
+		switch ( $info['extension'] ) {
+	        case 'jpeg':
+	        case 'jpg':
+	            return imagecreatefromjpeg($url);
+	        break;
+
+	        case 'png':
+	            return imagecreatefrompng($url);
+	        break;
+
+	        case 'gif':
+	            return imagecreatefromgif($url);
+	        break;
+
+	        // default:
+	        //     throw new InvalidArgumentException('File "'.$filename.'" is not valid jpg, png or gif image.');
+	        // break;
+	    }
+	}
+
 }
 
 class Read_Offline_Epub extends Epub {
@@ -938,4 +1048,23 @@ class Read_Offline_Epub extends Epub {
     function setCoverCss($css) {
     	$this->custom_css = $css;
     }
+}
+
+/**
+ *
+ */
+class Read_Offline_MobiFile extends MobiFile {
+	private function addTOC($str, $entries){
+		$this->resolveFilepos($str, self::TOC_LINK);
+		$str->append("<h2>" . __('Contentssss', 'read-offline') . "</h2>");
+		$str->append("<blockquote><table summary='" .  __('Table of Contents', 'read-offline') . "'><col/><tbody>");
+		for($i = 0, $len = sizeof($entries); $i < $len; $i++){
+			$entry = $entries[$i];
+
+			$str->append("<tr><td><a href='#".$entry["id"]."' filepos=");
+			$this->addFilepos($str, $entry["id"]);
+			$str->append(">".$entry["title"]."</a></td></tr>");
+		}
+		$str->append("</tbody></b></table></blockquote><mbp:pagebreak/>");
+	}
 }

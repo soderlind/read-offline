@@ -64,6 +64,11 @@ There are 2 ways you can add the Read Offline link
 3. Read Offline -> Print
 
 == Changelog ==
+= 0.5.0 =
+* Add Table of Contents to ePub and mobi, default off. Set it in Read Offline->ePub and Read Offline->mobi
+* Readded mobi coverpage (kind of catch 22, you must have Table of Contents to get a coverpage) 
+= 0.4.1 =
+* Added missing folder
 = 0.4.0 =
 * Fix ePub and mobi bugs
 * Add option in admin to select if you want to cache pdf, epub or mobi files in the Media Libray, default is "No"
