@@ -2,8 +2,6 @@
 
 Read Offline allows you to download or print posts and pages. You can download the post as PDF, ePub or mobi
 
-### NOTE, this is still a beta version ###
-
 ## Features ##
 
 *   Add download links to the top and bottom of a post or page (configurable in Read Offline->General Options)
@@ -74,7 +72,7 @@ Add it to the top or bottom of each post and/or page (See Settings->Read Offline
 
 ## Developer Notes
 
-* Latest Stable Release: [0.4.1](https://github.com/soderlind/read-offline/releases/tag/0.4.1)
+* Latest Stable Release: [0.5.0](https://github.com/soderlind/read-offline/releases/tag/0.5.0)
 * Stable Branch: [master](https://github.com/soderlind/read-offline/tree/master)
 
-~Current Version: 0.4.1~
+~Current Version: 0.5.0~

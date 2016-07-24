@@ -4,15 +4,13 @@ Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
 Tested up to: 4.5.3
-Stable tag: 0.4.1
+Stable tag: 0.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Read Offline allows you to download or print posts and pages. You can download the posts as PDF, ePub or mobi
 
 == Description ==
-
-**NOTE** This is still a beta version
 
 = Features =
 
@@ -66,7 +64,7 @@ There are 2 ways you can add the Read Offline link
 == Changelog ==
 = 0.5.0 =
 * Add Table of Contents to ePub and mobi, default off. Set it in Read Offline->ePub and Read Offline->mobi
-* Readded mobi coverpage (kind of catch 22, you must have Table of Contents to get a coverpage) 
+* Readded mobi cover page (kind of catch 22, you must have Table of Contents to get a cover page)
 = 0.4.1 =
 * Added missing folder
 = 0.4.0 =

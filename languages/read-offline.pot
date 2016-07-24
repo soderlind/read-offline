@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Read Offline package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Read Offline 0.4.1\n"
+"Project-Id-Version: Read Offline 0.5.0\n"
 "Report-Msgid-Bugs-To: https://github.com/soderlind/read-offline/issues/new\n"
-"POT-Creation-Date: 2016-07-22 16:30:43+00:00\n"
+"POT-Creation-Date: 2016-07-24 12:59:35+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -53,7 +53,7 @@ msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:149
 #: inc/class-read-offline-admin-settings.php:1007
-#: inc/class-read-offline-admin-settings.php:1198
+#: inc/class-read-offline-admin-settings.php:1282
 #: inc/class-read-offline-ux.php:63 inc/class-read-offline-ux.php:81
 msgid "Print"
 msgstr ""
@@ -90,13 +90,17 @@ msgstr ""
 #: inc/class-read-offline-admin-settings.php:989
 #: inc/class-read-offline-admin-settings.php:998
 #: inc/class-read-offline-admin-settings.php:1015
-#: inc/class-read-offline-admin-settings.php:1058
-#: inc/class-read-offline-admin-settings.php:1082
+#: inc/class-read-offline-admin-settings.php:1056
+#: inc/class-read-offline-admin-settings.php:1078
 #: inc/class-read-offline-admin-settings.php:1101
-#: inc/class-read-offline-admin-settings.php:1130
-#: inc/class-read-offline-admin-settings.php:1230
-#: inc/class-read-offline-admin-settings.php:1261
-#: inc/class-read-offline-admin-settings.php:1280
+#: inc/class-read-offline-admin-settings.php:1125
+#: inc/class-read-offline-admin-settings.php:1144
+#: inc/class-read-offline-admin-settings.php:1182
+#: inc/class-read-offline-admin-settings.php:1204
+#: inc/class-read-offline-admin-settings.php:1216
+#: inc/class-read-offline-admin-settings.php:1314
+#: inc/class-read-offline-admin-settings.php:1345
+#: inc/class-read-offline-admin-settings.php:1364
 msgid "Help text"
 msgstr ""
 
@@ -152,7 +156,7 @@ msgstr ""
 #: inc/class-read-offline-admin-settings.php:232
 #: inc/class-read-offline-admin-settings.php:279
 #: inc/class-read-offline-admin-settings.php:295
-#: inc/class-read-offline-admin-settings.php:1221
+#: inc/class-read-offline-admin-settings.php:1305
 #: inc/class-read-offline-widget.php:121
 msgid "No"
 msgstr ""
@@ -272,6 +276,9 @@ msgid "Landscape"
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:446
+#: inc/class-read-offline-admin-settings.php:1043
+#: inc/class-read-offline-admin-settings.php:1169
+#: inc/class-read-offline-create.php:179 inc/class-read-offline-create.php:1060
 msgid "Table of Contents"
 msgstr ""
 
@@ -284,10 +291,14 @@ msgstr ""
 #: inc/class-read-offline-admin-settings.php:450
 #: inc/class-read-offline-admin-settings.php:832
 #: inc/class-read-offline-admin-settings.php:971
+#: inc/class-read-offline-admin-settings.php:1047
+#: inc/class-read-offline-admin-settings.php:1173
 msgid "No "
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:451
+#: inc/class-read-offline-admin-settings.php:1048
+#: inc/class-read-offline-admin-settings.php:1174
 msgid "Yes (configured below)"
 msgstr ""
 
@@ -302,26 +313,36 @@ msgid "-- Start --"
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:469
+#: inc/class-read-offline-admin-settings.php:1066
+#: inc/class-read-offline-admin-settings.php:1192
 msgid "H1"
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:470
 #: inc/class-read-offline-admin-settings.php:486
+#: inc/class-read-offline-admin-settings.php:1067
+#: inc/class-read-offline-admin-settings.php:1193
 msgid "H2"
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:471
 #: inc/class-read-offline-admin-settings.php:487
+#: inc/class-read-offline-admin-settings.php:1068
+#: inc/class-read-offline-admin-settings.php:1194
 msgid "H3"
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:472
 #: inc/class-read-offline-admin-settings.php:488
+#: inc/class-read-offline-admin-settings.php:1069
+#: inc/class-read-offline-admin-settings.php:1195
 msgid "H4"
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:473
 #: inc/class-read-offline-admin-settings.php:489
+#: inc/class-read-offline-admin-settings.php:1070
+#: inc/class-read-offline-admin-settings.php:1196
 msgid "H5"
 msgstr ""
 
@@ -344,9 +365,9 @@ msgstr ""
 #: inc/class-read-offline-admin-settings.php:542
 #: inc/class-read-offline-admin-settings.php:658
 #: inc/class-read-offline-admin-settings.php:796
-#: inc/class-read-offline-admin-settings.php:1048
-#: inc/class-read-offline-admin-settings.php:1072
-#: inc/class-read-offline-admin-settings.php:1251
+#: inc/class-read-offline-admin-settings.php:1091
+#: inc/class-read-offline-admin-settings.php:1115
+#: inc/class-read-offline-admin-settings.php:1335
 #: inc/class-read-offline-shortcode.php:62
 #: inc/class-read-offline-shortcode.php:75
 #: inc/class-read-offline-shortcode.php:96
@@ -464,7 +485,7 @@ msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:635
 #: inc/class-read-offline-admin-settings.php:751
-#: inc/class-read-offline-admin-settings.php:1236
+#: inc/class-read-offline-admin-settings.php:1320
 msgid "and"
 msgstr ""
 
@@ -490,8 +511,8 @@ msgid "Cover Art and Style"
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:792
-#: inc/class-read-offline-admin-settings.php:1044
-#: inc/class-read-offline-admin-settings.php:1128
+#: inc/class-read-offline-admin-settings.php:1087
+#: inc/class-read-offline-admin-settings.php:1214
 #: inc/class-read-offline-shortcode.php:71
 #: inc/class-read-offline-shortcode.php:190
 #: inc/class-read-offline-shortcode.php:236
@@ -499,7 +520,7 @@ msgid "Cover Art"
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:797
-#: inc/class-read-offline-admin-settings.php:1049
+#: inc/class-read-offline-admin-settings.php:1092
 #: inc/class-read-offline-shortcode.php:77
 #: inc/class-read-offline-shortcode.php:196
 #: inc/class-read-offline-shortcode.php:242
@@ -508,7 +529,7 @@ msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:798
 #: inc/class-read-offline-admin-settings.php:905
-#: inc/class-read-offline-admin-settings.php:1050
+#: inc/class-read-offline-admin-settings.php:1093
 #: inc/class-read-offline-shortcode.php:78
 #: inc/class-read-offline-shortcode.php:197
 #: inc/class-read-offline-shortcode.php:243
@@ -520,13 +541,13 @@ msgid "Custom CSS"
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:833
-#: inc/class-read-offline-admin-settings.php:1252
+#: inc/class-read-offline-admin-settings.php:1336
 msgid "The site theme style"
 msgstr ""
 
 #: inc/class-read-offline-admin-settings.php:834
 #: inc/class-read-offline-admin-settings.php:972
-#: inc/class-read-offline-admin-settings.php:1222
+#: inc/class-read-offline-admin-settings.php:1306
 msgid "Yes (added below)"
 msgstr ""
 
@@ -616,55 +637,76 @@ msgstr ""
 msgid "ePub Options"
 msgstr ""
 
-#: inc/class-read-offline-admin-settings.php:1068
+#: inc/class-read-offline-admin-settings.php:1044
+#: inc/class-read-offline-admin-settings.php:1170
+msgid ""
+"Automatically generate entries for a Table of Contents using a heading "
+"element (H1 - H5)"
+msgstr ""
+
+#: inc/class-read-offline-admin-settings.php:1062
+#: inc/class-read-offline-admin-settings.php:1188
+msgid "Document will be split into chapters based on the header selected"
+msgstr ""
+
+#: inc/class-read-offline-admin-settings.php:1065
+#: inc/class-read-offline-admin-settings.php:1191
+msgid "Select Heading"
+msgstr ""
+
+#: inc/class-read-offline-admin-settings.php:1111
 #: inc/class-read-offline-shortcode.php:92
 #: inc/class-read-offline-shortcode.php:211
 msgid "ePub Style"
 msgstr ""
 
-#: inc/class-read-offline-admin-settings.php:1074
-#: inc/class-read-offline-admin-settings.php:1253
+#: inc/class-read-offline-admin-settings.php:1117
+#: inc/class-read-offline-admin-settings.php:1337
 msgid "Custom CSS (added below)"
 msgstr ""
 
-#: inc/class-read-offline-admin-settings.php:1087
+#: inc/class-read-offline-admin-settings.php:1130
 msgid "Style Editor"
 msgstr ""
 
-#: inc/class-read-offline-admin-settings.php:1088
+#: inc/class-read-offline-admin-settings.php:1131
 msgid "Type a text string here."
 msgstr ""
 
-#: inc/class-read-offline-admin-settings.php:1119
+#: inc/class-read-offline-admin-settings.php:1161
 msgid "mobi Options"
 msgstr ""
 
-#: inc/class-read-offline-admin-settings.php:1208
+#: inc/class-read-offline-admin-settings.php:1292
 msgid "Print Options"
 msgstr ""
 
-#: inc/class-read-offline-admin-settings.php:1217
+#: inc/class-read-offline-admin-settings.php:1301
 msgid "Add Print Header?"
 msgstr ""
 
-#: inc/class-read-offline-admin-settings.php:1236
+#: inc/class-read-offline-admin-settings.php:1320
 msgid "Enter header text here. The following aliases can be used:"
 msgstr ""
 
-#: inc/class-read-offline-admin-settings.php:1247
+#: inc/class-read-offline-admin-settings.php:1331
 msgid "Print Style"
 msgstr ""
 
-#: inc/class-read-offline-admin-settings.php:1296
+#: inc/class-read-offline-admin-settings.php:1380
 msgid "Please report issues"
 msgstr ""
 
-#: inc/class-read-offline-create.php:655
+#: inc/class-read-offline-create.php:680
 msgid "<h1>Contents</h1>"
 msgstr ""
 
-#: inc/class-read-offline-create.php:657
+#: inc/class-read-offline-create.php:682
 msgid "Contents"
+msgstr ""
+
+#: inc/class-read-offline-create.php:1059
+msgid "Contentssss"
 msgstr ""
 
 #: inc/class-read-offline-shortcode.php:58
@@ -753,13 +795,13 @@ msgstr ""
 msgid "wp_upload_bits failed,  error: \"<strong>%s</strong>"
 msgstr ""
 
-#: inc/class-read-offline.php:275
+#: inc/class-read-offline.php:284
 msgid ""
 "Unable to create directory \"<strong>%s</strong>\". Is its parent directory "
 "writable by the server?"
 msgstr ""
 
-#: inc/class-read-offline.php:300
+#: inc/class-read-offline.php:309
 msgid ""
 "Unable to remove cache directory \"<strong>%s</strong>\". Is it and its "
 "directories writable by the server?"
