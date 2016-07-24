@@ -1,5 +1,13 @@
 ## Change Log
 
+### 0.5.0 (2016/07/24 12:46 +00:00)
+- [7f94281](https://github.com/soderlind/read-offline/commit/7f94281f5ae409f035ae62e6f8f8f1646fc81c6a) Add Table of Contents to ePub and mobi (@soderlind)
+
+### 0.4.1 (2016/07/22 18:58 +00:00)
+- [d02f13c](https://github.com/soderlind/read-offline/commit/d02f13c4ec8a6c6046cb6239b7ae2984db3ef08b) 0.4.0 (@soderlind)
+- [fe71bd2](https://github.com/soderlind/read-offline/commit/fe71bd247c5a2cc1902a03d373acb9502fdbafe7) Add missing vendor folder to deployment routine (@soderlind)
+- [91d0dad](https://github.com/soderlind/read-offline/commit/91d0dad5091b0d8ff00542f643fd4a785d0945d0) Remove old file (@soderlind)
+
 ### 0.4.0 (2016/07/22 13:25 +00:00)
 - [7ac1880](https://github.com/soderlind/read-offline/commit/7ac18803ea6ff688e74a6b21e988cd6625c315c2) Version 0.4.0 (@soderlind)
 - [cd71bcc](https://github.com/soderlind/read-offline/commit/cd71bccca9f93db1ab146b14de7ca93ca14a03ac) Fix ePub and mobi bugs (@soderlind)
