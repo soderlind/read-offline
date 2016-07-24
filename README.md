@@ -18,9 +18,11 @@ Read Offline allows you to download or print posts and pages. You can download t
 	* Watermark
 	* Protection
 * ePub (set in Read Offline->ePub)
+	* Table of Contents
 	* Cover Page (static or per post feature image)
 	* Custom CSS
 * mobi (set in Read Offline->mobi)
+	* Table of Contents
 	* Cover Page
 * Print features (set in Read Offline->print)
    * Add print header text
