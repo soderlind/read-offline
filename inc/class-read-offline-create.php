@@ -141,7 +141,7 @@ class Read_Offline_Create extends Read_Offline {
 					break;
 			}
 		}
-		$epub->setDate(get_the_date( 'U', $post->ID ));
+		$epub->setDate(get_the_date( 'U', $post ));
 		$epub->setRights(parent::$options['copyright']['message']);
 
 /*
