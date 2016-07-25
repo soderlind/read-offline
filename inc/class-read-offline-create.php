@@ -76,10 +76,11 @@ class Read_Offline_Create extends Read_Offline {
 				$print_css = ( '' != parent::$options['print']['css']) ? parent::$options['print']['css'] : '';
 				break;
 		}
-		printf('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>%s</title><style type="text/css" media="print">%s%s</style></head><body>%s</body></html>'
+		printf('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>%s</title><style type="text/css" media="print">%s%s</style></head><body%s>%s</body></html>'
 			, get_the_title($post->ID)
 			, $print_css
 			, $print_header
+			, (is_rtl()) ? " dir='rtl'" : ""
 			, $this->html
 		);
 	}
@@ -164,7 +165,7 @@ class Read_Offline_Create extends Read_Offline {
 			. "</head>\n"
 			. "<body>\n";
 */
-		$content_start = sprintf('<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="styles.css" /><title>%s</title></head><body>', $post->post_title );
+		$content_start = sprintf('<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="styles.css" /><title>%s</title></head><body%s>', $post->post_title, (is_rtl()) ? " dir='rtl'" : "" );
 		$content_end = "\n</body>\n</html>\n";
 
 		$cover = $content_start . sprintf("<h1>%s</h1>\n<h2>%s: %s</h2>\n",$post->post_title, _x( 'By', 'Rererence between title and author: Title By: Author Name' ) , $this->author_firstlast) . $content_end;
@@ -1005,7 +1006,7 @@ class Read_Offline_Epub extends Epub {
 				. "\t\t<title>Cover Image</title>\n"
 				. "\t\t<link type=\"text/css\" rel=\"stylesheet\" href=\"Styles/CoverPage.css\" />\n"
 				. "\t</head>\n"
-				. "\t<body>\n"
+				. "\t<body ". (is_rtl() ? 'dir=\'rtl\'' : '') . ">\n"
 				. "\t\t<div>\n"
 				. "\t\t\t<img class=\"coverpage\" src=\"" . $imgPath . "\" alt=\"Cover image\" style=\"height: 100%\"/>\n"
 				. "\t\t</div>\n"
@@ -1019,7 +1020,7 @@ class Read_Offline_Epub extends Epub {
 				. "\t\t<title>Cover Image</title>\n"
 				. "\t\t<link type=\"text/css\" rel=\"stylesheet\" href=\"Styles/CoverPage.css\" />\n"
 				. "\t</head>\n"
-				. "\t<body>\n"
+				. "\t<body ". (is_rtl() ? 'dir=\'rtl\'' : '') . ">\n"
 				. "\t\t<section epub:type=\"cover\">\n"
 				. "\t\t\t<img class=\"coverpage\" src=\"" . $imgPath . "\" alt=\"Cover image\" style=\"height: 100%\"/>\n"
 				. "\t\t</section>\n"

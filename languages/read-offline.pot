@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Read Offline package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Read Offline 0.6.0\n"
+"Project-Id-Version: Read Offline 0.6.1\n"
 "Report-Msgid-Bugs-To: https://github.com/soderlind/read-offline/issues/new\n"
-"POT-Creation-Date: 2016-07-25 16:31:53+00:00\n"
+"POT-Creation-Date: 2016-07-25 17:52:34+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -278,7 +278,7 @@ msgstr ""
 #: inc/class-read-offline-admin-settings.php:446
 #: inc/class-read-offline-admin-settings.php:1043
 #: inc/class-read-offline-admin-settings.php:1169
-#: inc/class-read-offline-create.php:179 inc/class-read-offline-create.php:1053
+#: inc/class-read-offline-create.php:186 inc/class-read-offline-create.php:1063
 msgid "Table of Contents"
 msgstr ""
 
@@ -697,15 +697,15 @@ msgstr ""
 msgid "Please report issues"
 msgstr ""
 
-#: inc/class-read-offline-create.php:673
+#: inc/class-read-offline-create.php:683
 msgid "<h1>Contents</h1>"
 msgstr ""
 
-#: inc/class-read-offline-create.php:675
+#: inc/class-read-offline-create.php:685
 msgid "Contents"
 msgstr ""
 
-#: inc/class-read-offline-create.php:1052
+#: inc/class-read-offline-create.php:1062
 msgid "Contentssss"
 msgstr ""
 
@@ -833,7 +833,7 @@ msgstr ""
 msgid "http://soderlind.no"
 msgstr ""
 
-#: inc/class-read-offline-create.php:163
+#: inc/class-read-offline-create.php:170
 msgctxt "Rererence between title and author: Title By: Author Name"
 msgid "By"
 msgstr ""
