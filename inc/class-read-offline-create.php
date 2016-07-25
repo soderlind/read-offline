@@ -238,7 +238,7 @@ class Read_Offline_Create extends Read_Offline {
 				$mobi_content->set("title", $post->post_title);
 				$mobi_content->set("description", parent::get_excerpt_by_id($post->ID));
 				$mobi_content->set("author", $this->author_firstlast);
-				$mobi_content->set("publishingdate", get_the_date( 'r', $post->ID ));
+				$mobi_content->set("publishingdate", get_the_date( 'r', $post ));
 
 				$mobi_content->set("source", $post->guid);
 				$mobi_content->set("publisher", get_bloginfo( 'name' ), get_bloginfo( 'url' ));
@@ -266,7 +266,7 @@ class Read_Offline_Create extends Read_Offline {
 				"description"    => parent::get_excerpt_by_id($post->ID),
 				"author"         => $this->author_firstlast,
 				"subject"        => $this->subject,
-				"publishingdate" => get_the_date( 'r', $post->ID ),
+				"publishingdate"    => get_the_date( 'r', $post ),
 				"source"         => $post->guid,
 				"publisher"      => get_bloginfo( 'name' ),
 				"imprint"        => parent::$options['copyright']['message'],
@@ -290,9 +290,10 @@ class Read_Offline_Create extends Read_Offline {
 
 		define("_MPDF_TEMP_PATH",  READOFFLINE_CACHE . '/tmp/');
 		define('_MPDF_TTFONTDATAPATH',READOFFLINE_CACHE . '/font/');
-		// _MPDF_SYSTEM_TTFONTS - us when implementing font management
-
-		require_once (READOFFLINE_PATH . '/lib/mpdf60/mpdf.php');
+		if ( defined('READ_OFFLINE_FONTS') ) {
+			define( '_MPDF_TTFONTPATH', READ_OFFLINE_FONTS );
+		}
+		require_once (READOFFLINE_PATH . '/lib/mpdf610/mpdf.php');
 
 		$paper_format = sprintf("'%s-%s'",
 				('custom_paper_format' == $this->_get_child_array_key('pdf_layout',parent::$options['pdf_layout']['paper_format'])) ? parent::$options['pdf_layout']['custom_paper_format'] : parent::$options['pdf_layout']['paper_format'],
@@ -312,55 +313,52 @@ class Read_Offline_Create extends Read_Offline {
 			9,  // $mgf=9 - margin footer
 			parent::$options['pdf_layout']['paper_orientation'] // $orientation='P'
 		);
-		// $pdf->fontdata = array(	"dejavusanscondensed" => array(
-		// 		'R' => "DejaVuSansCondensed.ttf",
-		// 		'B' => "DejaVuSansCondensed-Bold.ttf",
-		// 		'I' => "DejaVuSansCondensed-Oblique.ttf",
-		// 		'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
-		// 	)
-		// );
 
-
-		$pdf->fontdata = array(
-			"dejavusanscondensed" => array(
-				'R' => "DejaVuSansCondensed.ttf",
-				'B' => "DejaVuSansCondensed-Bold.ttf",
-				'I' => "DejaVuSansCondensed-Oblique.ttf",
-				'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
-				'useOTL' => 0xFF,
-				'useKashida' => 75,
-				),
-			"dejavusans" => array(
-				'R' => "DejaVuSans.ttf",
-				'B' => "DejaVuSans-Bold.ttf",
-				'I' => "DejaVuSans-Oblique.ttf",
-				'BI' => "DejaVuSans-BoldOblique.ttf",
-				'useOTL' => 0xFF,
-				'useKashida' => 75,
-				),
-			"dejavuserif" => array(
-				'R' => "DejaVuSerif.ttf",
-				'B' => "DejaVuSerif-Bold.ttf",
-				'I' => "DejaVuSerif-Italic.ttf",
-				'BI' => "DejaVuSerif-BoldItalic.ttf",
-				),
-			"dejavuserifcondensed" => array(
-				'R' => "DejaVuSerifCondensed.ttf",
-				'B' => "DejaVuSerifCondensed-Bold.ttf",
-				'I' => "DejaVuSerifCondensed-Italic.ttf",
-				'BI' => "DejaVuSerifCondensed-BoldItalic.ttf",
-				),
-			"dejavusansmono" => array(
-				'R' => "DejaVuSansMono.ttf",
-				'B' => "DejaVuSansMono-Bold.ttf",
-				'I' => "DejaVuSansMono-Oblique.ttf",
-				'BI' => "DejaVuSansMono-BoldOblique.ttf",
-				'useOTL' => 0xFF,
-				'useKashida' => 75,
-				)
+		if ( ! defined( 'READ_OFFLINE_FONTS' ) ) {
+			$pdf->fontdata = array(
+				"dejavusanscondensed" => array(
+					'R' => "DejaVuSansCondensed.ttf",
+					'B' => "DejaVuSansCondensed-Bold.ttf",
+					'I' => "DejaVuSansCondensed-Oblique.ttf",
+					'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
+					'useOTL' => 0xFF,
+					'useKashida' => 75,
+					),
+				"dejavusans" => array(
+					'R' => "DejaVuSans.ttf",
+					'B' => "DejaVuSans-Bold.ttf",
+					'I' => "DejaVuSans-Oblique.ttf",
+					'BI' => "DejaVuSans-BoldOblique.ttf",
+					'useOTL' => 0xFF,
+					'useKashida' => 75,
+					),
+				"dejavuserif" => array(
+					'R' => "DejaVuSerif.ttf",
+					'B' => "DejaVuSerif-Bold.ttf",
+					'I' => "DejaVuSerif-Italic.ttf",
+					'BI' => "DejaVuSerif-BoldItalic.ttf",
+					),
+				"dejavuserifcondensed" => array(
+					'R' => "DejaVuSerifCondensed.ttf",
+					'B' => "DejaVuSerifCondensed-Bold.ttf",
+					'I' => "DejaVuSerifCondensed-Italic.ttf",
+					'BI' => "DejaVuSerifCondensed-BoldItalic.ttf",
+					),
+				"dejavusansmono" => array(
+					'R' => "DejaVuSansMono.ttf",
+					'B' => "DejaVuSansMono-Bold.ttf",
+					'I' => "DejaVuSansMono-Oblique.ttf",
+					'BI' => "DejaVuSansMono-BoldOblique.ttf",
+					'useOTL' => 0xFF,
+					'useKashida' => 75,
+					)
 			);
-
-//$pdf->sans_fonts = array('dejavusanscondensed','sans','sans-serif');
+		} else {
+			$pdf->autoScriptToLang = true;
+			// $pdf->baseScript = 1;
+			$pdf->autoVietnamese = true;
+			$pdf->autoArabic = true;
+		}
 
 		$pdf->SetTitle($post->post_title);
 		$pdf->SetAuthor($this->author_firstlast);
@@ -368,12 +366,7 @@ class Read_Offline_Create extends Read_Offline {
 		$pdf->SetKeywords($this->keywords);
 		$pdf->SetCreator(parent::$options['copyright']['message']);
 
-//							$pdf->autoScriptToLang = true;
-//							$pdf->baseScript = 1;
-//							$pdf->autoVietnamese = true;
-//							$pdf->autoArabic = true;
 		$pdf->autoLangToFont = true;
-
 		$pdf->ignore_invalid_utf8 = true;
 		$pdf->useSubstitutions=false;
 		$pdf->simpleTables = true;
@@ -775,7 +768,7 @@ class Read_Offline_Create extends Read_Offline {
 				$val = '{PAGENO}/{nbpg}';
 			break;
 			case 'date':
-				$val = get_the_date(get_option('date_format'), $post->ID);
+				$val = get_the_date(get_option('date_format'), $post );
 			break;
 		}
 		return $val;
@@ -787,7 +780,7 @@ class Read_Offline_Create extends Read_Offline {
 			$html= addslashes(strip_tags($html));
 		}
 
-		$html = str_replace('{DATE}',     get_the_date(get_option('date_format'), $post->ID),     $html);
+		$html = str_replace('{DATE}',     get_the_date(get_option('date_format'), $post),     $html);
 		$html = str_replace('{TODAY}',    sprintf('{DATE %s}',get_option('date_format')),         $html);
 		$html = str_replace('{TITLE}',    $post->post_title,                                      $html);
 		$html = str_replace('{AUTHOR}',   get_the_author_meta('display_name',$post->post_author), $html);
