@@ -87,13 +87,20 @@ class Read_Offline_Create extends Read_Offline {
 
 	function epub($post) {
 
-		$epub = new EPub(EPub::BOOK_VERSION_EPUB3);
+		$iso6391 = ( '' == get_locale() ) ? 'en' : strtolower( substr(get_locale(), 0, 2) ); // only ISO 639-1
+		if ( is_rtl() ) {
+			$writing_direction = EPub::DIRECTION_RIGHT_TO_LEFT;
+		} else {
+			$writing_direction = EPub::DIRECTION_LEFT_TO_RIGHT;
+		}
+
+		$epub = new EPub(EPub::BOOK_VERSION_EPUB3, $iso6391, $writing_direction);
 		$epub->isLogging = false;
+
 
 		$epub->setGenerator($this->generator);
 		$epub->setTitle($post->post_title); //setting specific options to the EPub library
 		$epub->setIdentifier($post->guid, EPub::IDENTIFIER_URI);
-		$iso6391 = ( '' == get_locale() ) ? 'en' : strtolower( substr(get_locale(), 0, 2) ); // only ISO 639-1
 		$epub->setLanguage($iso6391);
 		$epub->setAuthor($this->author_firstlast, $this->author_lastfirst); // "Firstname Lastname", "Lastname, First names"
 		$epub->setPublisher(get_bloginfo( 'name' ), get_bloginfo( 'url' ));
@@ -358,6 +365,9 @@ class Read_Offline_Create extends Read_Offline {
 			// $pdf->baseScript = 1;
 			$pdf->autoVietnamese = true;
 			$pdf->autoArabic = true;
+			if ( is_rtl() ) {
+				$pdf->SetDirectionality('rtl');
+			}
 		}
 
 		$pdf->SetTitle($post->post_title);
