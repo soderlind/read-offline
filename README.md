@@ -30,6 +30,7 @@ Read Offline allows you to download or print posts and pages. You can download t
 * Permalink support (/read-offline/"postid"/"post-name"."type"). I've written a "[how-to add a permalink to your plugin](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)" guide at soderlind.no
 * Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
 * languages/read-offline.po for easy translation.
+* Support for all mPDF fonts via the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin
 
 ## Feedback & Support ##
 
@@ -49,8 +50,8 @@ Please [see the CHANGELOG.md](CHANGELOG.md) file.
 
 ## Installation ##
 
-1. Download the plugin and extract the read-online.zip
-1. Upload the extracted `read-online` folder to the `/wp-content/plugins/` directory
+1. Download the plugin and extract the read-offline.zip
+1. Upload the extracted `read-offline` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 
 ## Use ##
@@ -74,7 +75,11 @@ Add it to the top or bottom of each post and/or page (See Settings->Read Offline
 
 ## Developer Notes
 
-* Latest Stable Release: [0.5.0](https://github.com/soderlind/read-offline/releases/tag/0.5.0)
+* Latest Stable Release: [0.6.0](https://github.com/soderlind/read-offline/releases/tag/0.6.0)
 * Stable Branch: [master](https://github.com/soderlind/read-offline/tree/master)
 
-~Current Version: 0.5.0~
+~Current Version: 0.6.0~
+
+## Credits ##
+
+Please see [CREDITS.md](CREDITS.md)

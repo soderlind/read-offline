@@ -4,7 +4,7 @@ Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
 Tested up to: 4.5.3
-Stable tag: 0.5.0
+Stable tag: 0.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,12 +40,13 @@ Read Offline allows you to download or print posts and pages. You can download t
 * Permalink support (/read-offline/"postid"/"post-name"."type"). I've written a "[how-to add a permalink to your plugin](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)" guide at soderlind.no
 * Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
 * languages/read-offline.po for easy translation.
+* Support for all mPDF fonts via the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin 
 
 
 == Installation ==
 
-1. Download the plugin and extract the read-online.zip
-1. Upload the extracted `read-online` folder to the `/wp-content/plugins/` directory
+1. Download the plugin and extract the read-offline.zip
+1. Upload the extracted `read-offline` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Use ==
@@ -64,6 +65,9 @@ There are 2 ways you can add the Read Offline link
 3. Read Offline -> Print
 
 == Changelog ==
+= 0.6.0 =
+* Add support for all mPDF fonts via the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin
+* Update mPDF to verion 6.1
 = 0.5.0 =
 * Add Table of Contents to ePub and mobi, default off. Set it in Read Offline->ePub and Read Offline->mobi
 * Readded mobi cover page (kind of catch 22, you must have Table of Contents to get a cover page)
