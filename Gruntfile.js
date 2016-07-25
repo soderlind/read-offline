@@ -26,6 +26,7 @@ module.exports = function (grunt) {
 	 */
 	git_files_list = svn_files_list.concat([
 		'README.md',
+		'CREDITS.md',
 		'package.json',
 		'Gruntfile.js',
 		'assets/**',
