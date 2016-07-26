@@ -1,0 +1,38 @@
+---
+engines:
+    duplication:
+        enabled: true
+        config:
+            languages:
+              php:
+                mass_threshold: 40
+        exclude_paths:
+            - date-time-picker*.php
+    eslint:
+       enabled: true
+       env:
+          jquery: true
+       exclude_paths:
+           - Gruntfile.js
+    csslint:
+       enabled: false
+    fixme:
+       enabled: true
+    phpcodesniffer:
+       enabled: true
+       config:
+          standard: "WordPress-Core"
+       exclude_paths:
+           - inc/class*-shortcode.php
+           - inc/class*-widget.php
+ratings:
+    paths:
+        - "**.js"
+        - "**.php"
+exclude_paths:
+  - node_modules/**/*
+  - languages/**
+  - assets/**
+  - vendor/**
+  - build/**
+  - lib/**
