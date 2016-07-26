@@ -225,7 +225,8 @@ module.exports = function (grunt) {
 	  console.log('Syntax:\n' +
 	  				'\tgrunt release (pre_vcs, do_svn, do_git, clean:post_build)\n' +
 	  				'\tgrunt pre_vcs (update plugin version number in files, make languages/.pot)\n' +
-	  				'\tgrunt do_svn (svn_export, copy:svn_trunk, copy:svn_tag, push_svn)\n' +
+	  				'\tgrunt do_svn (svn_export, copy:svn_assets, copy:svn_trunk, copy:svn_tag, push_svn)\n' +
+	  				'\tgrunt update_svn (copy:svn_assets copy:svn_trunk, copy:svn_tag, push_svn)\n' +
 	  				'\tgrunt do_git (gitattributes, gitcommit, gittag, gitpush)'
 	  	);
 	});
@@ -238,6 +239,7 @@ module.exports = function (grunt) {
 
 
 	grunt.registerTask( 'do_svn', [ 'svn_export', 'copy:svn_assets', 'copy:svn_trunk', 'copy:svn_tag', 'push_svn' ] );
+	grunt.registerTask( 'update_svn', [ 'copy:svn_assets', 'copy:svn_trunk', 'copy:svn_tag', 'push_svn' ] );
 	grunt.registerTask( 'do_git', [  'gitcommit', 'gittag', 'gitpush' ] );
 	grunt.registerTask( 'release', [ 'pre_vcs',  'do_git', 'do_svn', 'clean:post_build' ] );
 
