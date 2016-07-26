@@ -2,7 +2,7 @@
 <ruleset name="Debug Bar List Dependencies">
 	<description>The code standard for Debug Bar List Dependencies is WordPress.</description>
 
-	<rule ref="WordPress" />
+	<rule ref="WordPress-Core" />
 
 	<!-- exclude the 'empty' index files from some documentation checks -->
 	<rule ref="Squiz.Commenting.FileComment.WrongStyle">
