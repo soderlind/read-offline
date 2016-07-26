@@ -1,3 +1,4 @@
+[![Code Climate](https://codeclimate.com/github/soderlind/read-offline/badges/gpa.svg)](https://codeclimate.com/github/soderlind/read-offline)
 # Read Offline #
 
 Read Offline allows you to download or print posts and pages. You can download the post as PDF, ePub or mobi
