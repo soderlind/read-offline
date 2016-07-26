@@ -19,7 +19,12 @@ define( 'READOFFLINE_VERSION', '0.6.1' );
 
 if ( version_compare( PHP_VERSION, '5.3.0' ) < 0 ) {
     return add_action( 'admin_notices', 'read_offline_admin_notice_php_version' );
+} elseif ( version_compare( PHP_VERSION, '5.6.0' ) < 0 ) {
+    add_action( 'admin_notices', 'read_offline_admin_notice_php_warning' );
 }
+
+
+
 
 //load epub library
 require_once (READOFFLINE_PATH . '/vendor/autoload.php');
@@ -55,12 +60,21 @@ add_action('plugins_loaded', function(){
 
 
 function read_offline_admin_notice_php_version () {
-    $msg[] = '<div class="error"><p>';
-    $msg[] = 'Please upgarde PHP at least to version 5.3.0<br>';
-    $msg[] = 'Your current PHP version is <strong>' . PHP_VERSION . '</strong>, which is not suitable for plugin <strong>Read Offline</strong>.';
+    $msg[] = '<div class="notice notice-error"><p>';
+    $msg[] = '<strong>Read Offline</strong>: Your current PHP version is <strong>' . PHP_VERSION . '</strong>, please upgarde PHP at least to version 5.3 (PHP 5.6 or greater is reccomended). ';
+	$msg[] = '<a href="https://wordpress.org/about/requirements/">Ask</a> your hosting provider for an upgrade';
     $msg[] = '</p></div>';
     echo implode( PHP_EOL, $msg );
 }
+
+function read_offline_admin_notice_php_warning () {
+    $msg[] = '<div class="notice notice-warning is-dismissible "><p>';
+    $msg[] = '<strong>Read Offline</strong>: Your current PHP version is ' . PHP_VERSION . '. <strong>Read Offline</strong> runs best on PHP 5.6 or greater.';
+	$msg[] = '<a href="https://wordpress.org/about/requirements/">Ask</a> your hosting provider for an upgrade';
+    $msg[] = '</p></div>';
+    echo implode( PHP_EOL, $msg );
+}
+
 
 function read_offline_admin_notice_update_options () {
     $msg[] = '<div class="updated"><p>';

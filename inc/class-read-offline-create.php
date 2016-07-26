@@ -201,17 +201,6 @@ class Read_Offline_Create extends Read_Offline {
 		$zipData = $epub->sendBook($post->post_name);
 	}
 
-
-	function nextElementSibling($node) {
-		while ($node && ($node = $node->nextSibling)) {
-			if ($node instanceof DOMElement) {
-				break;
-			}
-		}
-		return $node;
-	}
-
-
 	function mobi($post) {
 
 		$html = $this->html;
@@ -274,7 +263,7 @@ class Read_Offline_Create extends Read_Offline {
 				"description"    => parent::get_excerpt_by_id($post->ID),
 				"author"         => $this->author_firstlast,
 				"subject"        => $this->subject,
-				"publishingdate"    => get_the_date( 'r', $post ),
+				"publishingdate" => get_the_date( 'r', $post ),
 				"source"         => $post->guid,
 				"publisher"      => get_bloginfo( 'name' ),
 				"imprint"        => parent::$options['copyright']['message'],
