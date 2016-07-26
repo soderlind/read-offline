@@ -1,5 +1,22 @@
 ## Change Log
 
+### upcoming (2016/07/26 08:37 +00:00)
+- [b56b4dd](https://github.com/soderlind/read-offline/commit/b56b4dd6213413d581bf90504ac93227af9b8a14) Add RTL for PDF, ePub and mobi (@soderlind)
+
+### 0.6.1 (2016/07/25 17:52 +00:00)
+- [c63c686](https://github.com/soderlind/read-offline/commit/c63c6862f1b70260df516a4496f6ef965b5f3a69) 0.6.1 (@soderlind)
+- [d006f94](https://github.com/soderlind/read-offline/commit/d006f94e0d033a2e4760f5626dda0b555defb978) Add RTL for PDF and ePub (@soderlind)
+
+### 0.6.0 (2016/07/25 16:29 +00:00)
+- [58b847f](https://github.com/soderlind/read-offline/commit/58b847f4cb5540dd09167e83e65d3eca801c69a2) Update mPDF to version 6.1 (@soderlind)
+- [6425658](https://github.com/soderlind/read-offline/commit/64256588a9a4368debf7e34576497a5edb2138f0) 0.6.0 (@soderlind)
+- [0697d25](https://github.com/soderlind/read-offline/commit/0697d2588c937aa419b590d73c5b2c949448ccdb) Add support for all mPDF fonts via the Read Offline Fonts add-on plugin (@soderlind)
+- [9fd6b79](https://github.com/soderlind/read-offline/commit/9fd6b7966954524c3fbbe98fd7aa8173ae10c277) 0.5.0 (@soderlind)
+- [2636b4b](https://github.com/soderlind/read-offline/commit/2636b4b17f94a67809f172a1cc0b7fbcee8130e4) 0.5.0 (@soderlind)
+- [7b1ddb0](https://github.com/soderlind/read-offline/commit/7b1ddb05e7c4d8faa2afacd22267a7fbb7695a66) 0.5.0 (@soderlind)
+- [72e78ce](https://github.com/soderlind/read-offline/commit/72e78cebbab27ec4d032f0e5745d888cff459773) 0.5.0 (@soderlind)
+- [e149517](https://github.com/soderlind/read-offline/commit/e149517b453c519ded2eab4b4445e225c3358a70) Fix ePub date (@soderlind)
+
 ### 0.5.0 (2016/07/24 12:46 +00:00)
 - [7f94281](https://github.com/soderlind/read-offline/commit/7f94281f5ae409f035ae62e6f8f8f1646fc81c6a) Add Table of Contents to ePub and mobi (@soderlind)
 

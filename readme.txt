@@ -66,7 +66,7 @@ There are 2 ways you can add the Read Offline link
 
 == Changelog ==
 = 0.6.1 =
-* Add RTL for PDF and ePub
+* Add RTL for PDF, ePub and print. PDF needs the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin.
 = 0.6.0 =
 * Add support for all mPDF fonts via the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin
 * Update mPDF to verion 6.1
