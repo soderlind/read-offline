@@ -96,9 +96,7 @@ class Read_Offline_Create extends Read_Offline {
 		}
 
 		$epub = new EPub( EPub::BOOK_VERSION_EPUB3, $iso6391, $writing_direction );
-		// @codingStandardsIgnoreStart
-		$epub->isLogging = false;
-		// @codingStandardsIgnoreEnd
+		$epub->isLogging = false; // @codingStandardsIgnoreLine
 
 		$epub->setGenerator( $this->generator );
 		$epub->setTitle( $post->post_title ); //setting specific options to the EPub library
@@ -351,12 +349,12 @@ class Read_Offline_Create extends Read_Offline {
 					),
 			);
 		} else {
-			// @codingStandardsIgnoreStart
-			$pdf->autoScriptToLang = true;
-			// $pdf->baseScript = 1;
-			$pdf->autoVietnamese = true;
-			$pdf->autoArabic = true;
-			// @codingStandardsIgnoreEnd
+
+			$pdf->autoScriptToLang = true; // @codingStandardsIgnoreLine
+			// $pdf->baseScript = 1; // @codingStandardsIgnoreLine
+			$pdf->autoVietnamese = true; // @codingStandardsIgnoreLine
+			$pdf->autoArabic = true; // @codingStandardsIgnoreLine
+
 			if ( is_rtl() ) {
 				$pdf->SetDirectionality( 'rtl' );
 			}
@@ -368,14 +366,12 @@ class Read_Offline_Create extends Read_Offline {
 		$pdf->SetKeywords( $this->keywords );
 		$pdf->SetCreator( parent::$options['copyright']['message'] );
 
-		// @codingStandardsIgnoreStart
-		$pdf->autoLangToFont = true;
-		$pdf->ignore_invalid_utf8 = true;
-		$pdf->useSubstitutions = false;
-		$pdf->simpleTables = true;
-		// @codingStandardsIgnoreEnd
-		$pdf->h2bookmarks = array( 'H1' => 0, 'H2' => 1, 'H3' => 2 );
-		$pdf->title2annots = true;
+		$pdf->autoLangToFont      = true; // @codingStandardsIgnoreLine
+		$pdf->ignore_invalid_utf8 = true; // @codingStandardsIgnoreLine
+		$pdf->useSubstitutions    = false; // @codingStandardsIgnoreLine
+		$pdf->simpleTables        = true; // @codingStandardsIgnoreLine
+		$pdf->h2bookmarks         = array( 'H1' => 0, 'H2' => 1, 'H3' => 2 );
+		$pdf->title2annots        = true;
 
 		/**
 		 * Watermark
@@ -432,12 +428,11 @@ class Read_Offline_Create extends Read_Offline {
 			PNG images with alpha channel transparency ('masks' not allowed)
 			encryption is enabled
 			 */
-			// @codingStandardsIgnoreStart
-			$pdf->showWatermarkText = false;
-			$pdf->showWatermarkImage = false;
-			$pdf->useCoreFontsOnly = false;
-			$pdf->PDFA = true;
-			// @codingStandardsIgnoreEnd
+			$pdf->showWatermarkText  = false; // @codingStandardsIgnoreLine
+			$pdf->showWatermarkImage = false; // @codingStandardsIgnoreLine
+			$pdf->useCoreFontsOnly   = false; // @codingStandardsIgnoreLine
+			$pdf->PDFA               = true; // @codingStandardsIgnoreLine
+
 		}
 
 		/**
@@ -615,10 +610,9 @@ class Read_Offline_Create extends Read_Offline {
 					break;
 			}
 			// we don't want watermarks on the cover page
-			// @codingStandardsIgnoreStart
-			$pdf->showWatermarkImage = false;
-			$pdf->showWatermarkText  = false;
-			// @codingStandardsIgnoreEnd
+
+			$pdf->showWatermarkImage = false; // @codingStandardsIgnoreLine
+			$pdf->showWatermarkText  = false; // @codingStandardsIgnoreLine
 		}
 
 		$toc = $this->_get_child_array_key( 'pdf_layout',parent::$options['pdf_layout']['add_toc'] );
@@ -705,10 +699,8 @@ class Read_Offline_Create extends Read_Offline {
 			));
 		}
 		// if waters are set, show them
-		// @codingStandardsIgnoreStart
-		$pdf->showWatermarkImage = true;
-		$pdf->showWatermarkText  = true;
-		// @codingStandardsIgnoreEnd
+		$pdf->showWatermarkImage = true; // @codingStandardsIgnoreLine
+		$pdf->showWatermarkText  = true; // @codingStandardsIgnoreLine
 
 		$pdf->WriteHTML( $html );
 		$pdf->Output( $post->post_name . '.pdf', 'D' );
@@ -727,8 +719,8 @@ class Read_Offline_Create extends Read_Offline {
 		// restore
 		libxml_use_internal_errors( $libxml_previous_state );
 		// END LibXML error management.
-		// @codingStandardsIgnoreStart
-		$doc->preserveWhiteSpace = false;
+
+		$doc->preserveWhiteSpace = false; // @codingStandardsIgnoreLine
 		// Here we strip all the img tags in the document
 		$images = $doc->getElementsByTagName( 'img' );
 		$imgs = array();
@@ -736,11 +728,9 @@ class Read_Offline_Create extends Read_Offline {
 			$imgs[] = $img;
 		}
 		foreach ( $imgs as $img ) {
-			$img->parentNode->removeChild( $img );
+			$img->parentNode->removeChild( $img ); // @codingStandardsIgnoreLine
 		}
 	 	return $doc->saveHTML();
-		printf( '<pre>%s</pre>', print_r( $array, true ) );
-		// @codingStandardsIgnoreEnd
 	}
 
 	private function _get_child_array_key( $parent_element, $org ) {
@@ -898,8 +888,7 @@ class Read_Offline_Create extends Read_Offline {
 		libxml_use_internal_errors( $libxml_previous_state );
 		// END LibXML error management.
 		$tags = $doc->getElementsByTagName( 'img' );
-		// @codingStandardsIgnoreStart
-		// @codingStandardsIgnoreEnd
+
 		foreach ( $tags as $tag ) {
 			$url = $tag->getAttribute( 'src' );
 			// @codingStandardsIgnoreStart
