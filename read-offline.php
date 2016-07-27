@@ -19,9 +19,9 @@ define( 'READOFFLINE_VERSION', '0.6.1' );
 
 if ( version_compare( PHP_VERSION, '5.3.0' ) < 0 ) {
 	return add_action( 'admin_notices', 'read_offline_admin_notice_php_version' );
-} elseif ( version_compare( PHP_VERSION, '5.6.0' ) < 0 ) {
+} /*elseif ( version_compare( PHP_VERSION, '5.6.0' ) < 0 ) {
 	add_action( 'admin_notices', 'read_offline_admin_notice_php_warning' );
-}
+}*/
 
 
 
