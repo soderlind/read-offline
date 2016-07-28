@@ -132,7 +132,7 @@ class Read_Offline_Create extends Read_Offline {
 
 				case 'feature_image':
 					$image_url = wp_get_attachment_url( get_post_thumbnail_id( $post->ID, 'thumbnail' ) );
-					if ( false !== file_exists( $image_url ) ) {
+					if ( false !== $this->_url_exists( $image_url ) ) {
 						$attachment_data = wp_get_attachment_metadata( get_post_thumbnail_id( $post->ID, 'thumbnail' ) );
 
 						$image_path = $upload_dir['basedir'] . '/' . $attachment_data['file'];
@@ -707,6 +707,19 @@ class Read_Offline_Create extends Read_Offline {
 
 	}
 
+	function _url_exists( $url ) {
+			$response = wp_remote_get( $url );
+		if ( is_wp_error( $response ) ) {
+	 		//request can't performed
+	 		return false;
+		}
+		if ( '404' == wp_remote_retrieve_response_code( $response ) ) {
+	 		//request succeed and link not found
+	 		return false;
+		}
+			//request succeed and link exist
+			return true;
+	}
 
 	private function _strip_img( $html ) {
 		$doc = new DOMDocument();
