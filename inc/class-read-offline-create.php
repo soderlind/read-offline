@@ -97,7 +97,12 @@ class Read_Offline_Create extends Read_Offline {
 
 		$epub = new EPub( EPub::BOOK_VERSION_EPUB3, $iso6391, $writing_direction );
 		$epub->isLogging = false; // @codingStandardsIgnoreLine
-
+		/*
+		 * Social DRM:
+		 * - Page 2 contains an Ex Libris (image with customer name), that can be customised per publisher and per customer.
+		 * - Every chapter ends with a personalised footer text.
+		 * - The last page contains a disclaimer and logo, and has a corresponding entry in the table of contents.
+		 */
 		$epub->setGenerator( $this->generator );
 		$epub->setTitle( $post->post_title ); //setting specific options to the EPub library
 		$epub->setIdentifier( $post->guid, EPub::IDENTIFIER_URI );
@@ -707,18 +712,40 @@ class Read_Offline_Create extends Read_Offline {
 
 	}
 
+	/**
+	 * Check if URL is valid, code is borrowed form wp_ajax_test_url() (new in 4.6)
+	 *
+	 * @author soderlind
+	 * @version 0.6.3
+	 * @param   string    $url URL to test
+	 * @return  boolean   result, false if URL is 404
+	 */
 	function _url_exists( $url ) {
-			$response = wp_remote_get( $url );
+
+		$url = esc_url_raw( $url );
+
+		// Relative URL
+		if ( strpos( $href, '//' ) !== 0 && in_array( $href[0], array( '/', '#', '?' ), true ) ) {
+		        $href = get_bloginfo( 'url' ) . $href;
+		}
+
+		// No redirects
+		$response = wp_safe_remote_get( $href, array(
+		        'timeout' => 15,
+		        // Use an explicit user-agent
+		        'user-agent' => 'Read Offline Test',
+		) );
+
+		$url_exists = true;
+
 		if ( is_wp_error( $response ) ) {
-	 		//request can't performed
-	 		return false;
+		    if ( strpos( $response->get_error_message(), 'resolve host' ) !== false ) {
+		        $url_exists = false;
+		    }
+		} elseif ( wp_remote_retrieve_response_code( $response ) === 404 ) {
+		    $url_exists = false;
 		}
-		if ( '404' == wp_remote_retrieve_response_code( $response ) ) {
-	 		//request succeed and link not found
-	 		return false;
-		}
-			//request succeed and link exist
-			return true;
+		return $url_exists;
 	}
 
 	private function _strip_img( $html ) {
