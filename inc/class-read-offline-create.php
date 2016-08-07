@@ -110,6 +110,7 @@ class Read_Offline_Create extends Read_Offline {
 		$epub->setAuthor( $this->author_firstlast, $this->author_lastfirst ); // "Firstname Lastname", "Lastname, First names"
 		$epub->setPublisher( get_bloginfo( 'name' ), get_bloginfo( 'url' ) );
 		$epub->setSourceURL( $post->guid );
+		$epub->rootLevel();
 
 		$print_css = '';
 		$print_style = $this->_get_child_array_key( 'epub',parent::$options['epub']['style'] );
@@ -181,19 +182,45 @@ class Read_Offline_Create extends Read_Offline {
 		$html = $this->html;
 
 		$add_toc = $this->_get_child_array_key( 'pdf_layout',parent::$options['epub']['add_toc'] );
-		$hsize   = $this->_get_child_array_key( 'pdf_layout',parent::$options['epub']['toc'] );
+		$toc     = $this->_get_child_array_key( 'pdf_layout',parent::$options['epub']['toc'] );
 		$content = array();
-		if ( 0 !== $add_toc && 0 !== $hsize ) {
-			$chapter_num = 1;
-			$content = $this->_split_content( $html, 'h' . $hsize );
+		if ( 0 !== $add_toc && 0 !== $toc ) {
+			$content = $this->_split_content( $html, $toc );
 			if ( 0 != count( $content ) ) {
+				$chapter_num = 1;
 				$epub->buildTOC( null, 'toc', __( 'Table of Contents', 'read-offline' ), true, false );
-				foreach ( $content as $title => $paragraph ) {
-					// $title = wp_strip_all_tags( $title );
-					$header = sprintf( '<h%s>%s</h%s>',$hsize, $title, $hsize );
-					$epub->addChapter( $title, sprintf( 'Chapter%03d.html',$chapter_num ), $content_start . $header . $paragraph . $content_end, true, EPub::EXTERNAL_REF_ADD );
+				$levels = array_map( function( $paragraphs ) {
+					return $paragraphs['level'];
+			  	}, $content );
+				$top_level = min( $levels );
+				$epub->setCurrentLevel( 1 );
+				foreach ( $content as $paragraph ) {
+					// TODO, create hieratical TOC
+					// $level = ( $paragraph['level'] > 2 ) ? $paragraph['level'] - 1 : 1;
+					// // $level = $paragraph['level'];
+					// // if ( $epub->getCurrentLevel() < $level ) {
+					// while ( $epub->getCurrentLevel() < $level ) {
+					// 	$epub->subLevel();
+					// }
+					// 	// for ( $i = $epub->getCurrentLevel(); $i < $level; $i++ ) {
+					// 	// 	$epub->subLevel();
+					// 	// }
+					// // } elseif ( $epub->getCurrentLevel() > $level ) {
+					// 	// $epub->setCurrentLevel( $level );
+					// while ( $epub->getCurrentLevel() > $level ) {
+					// 	$epub->backLevel();
+					// }
+					// 	// for ( $i = $epub->getCurrentLevel(); $i > $level; $i-- ) {
+					// 	// 	$epub->backLevel();
+					// 	// }
+					// // }
+					// // $epub->setCurrentLevel( $level );
+
+					$header = ('' !== $paragraph['title'] ) ?  sprintf( '<h%s>%s</h%s>', $paragraph['level'], $paragraph['title'], $paragraph['level'] ) : '';
+					$epub->addChapter( $paragraph['title'], sprintf( 'Chapter%03d.html',$chapter_num ), $content_start . $header . $paragraph['content'] . $content_end, true, EPub::EXTERNAL_REF_ADD );
 					$chapter_num++;
 				}
+				$epub->rootLevel();
 			}
 		}
 
@@ -229,10 +256,10 @@ class Read_Offline_Create extends Read_Offline {
 		 */
 
 		$add_toc = $this->_get_child_array_key( 'pdf_layout',parent::$options['mobi']['add_toc'] );
-		$hsize   = $this->_get_child_array_key( 'pdf_layout',parent::$options['mobi']['toc'] );
+		$toc     = $this->_get_child_array_key( 'pdf_layout',parent::$options['mobi']['toc'] );
 		$content = array();
-		if ( 0 !== $add_toc && 0 !== $hsize ) {
-			$content = $this->_split_content( $html, 'h' . $hsize );
+		if ( 0 !== $add_toc && 0 !== $toc ) {
+			$content = $this->_split_content( $html, $toc );
 			if ( 0 != count( $content ) ) {
 				$mobi_content = new Read_Offline_MobiFile();
 				$mobi_content->set( 'title', $post->post_title );
@@ -248,13 +275,15 @@ class Read_Offline_Create extends Read_Offline {
 					$mobi_content->appendImage( parent::image_create_frome_image( parent::$options['mobi']['mobi_cover_image'] ) );
 					$mobi_content->appendPageBreak();
 				}
-				foreach ( $content as $title => $paragraph ) {
-					$mobi_content->appendChapterTitle( wp_strip_all_tags( $title ) );
+				foreach ( $content as $paragraph ) {
+					if ( '' !== $paragraph['title'] ) {
+						$mobi_content->appendChapterTitle( wp_strip_all_tags( $paragraph['title'] ) );
+					}
 					// if ( false !== ($imgurl = $this->_get_first_imageurl( $paragraph )) ) {
 					// 	$img = $this->_image_create_from_url( $imgurl );
 					// 	$mobi_content->appendImage( $img );
 					// }
-					$mobi_content->appendParagraph( $this->_strip_img( $paragraph ) );
+					$mobi_content->appendParagraph( $this->_strip_img( $paragraph['content'] ) );
 					$mobi_content->appendPageBreak();
 				}
 				$mobi->setContentProvider( $mobi_content );
@@ -880,37 +909,49 @@ class Read_Offline_Create extends Read_Offline {
 		return get_transient( $transient_id );
 	}
 
-	private function _split_content( $html, $header = 'h2' ) {
-		$content = array();
-		// $title = __( 'Introduction', 'read-offline');
-		$title = '';
+	private function _split_content( $html, $header ) {
+
+		$all_tags   = ( 'all' === $header );
+		$content    = array();
+		$title      = '';
+		$num_title  = -1;
 		$have_title = 'end';
+		$level      = 0;
 		$html_array = wp_html_split( $html );
 
 		foreach ( $html_array as $value ) {
 			if ( '' !== $value ) {
 				switch ( $value ) {
-					case '<' . trim( $header ) . '>':
+					case '<h' . trim( $header ) . '>':
+					case ( $all_tags && ( preg_match( '/<h(\d*)>/i', $value, $matches ) ? $value : ! $value ) ):
 						$have_title = 'start';
-						$title = '';
+						$level      = ($all_tags && isset( $matches ) ) ?  $matches[1] : $header;
+						$title      = '';
 						break;
-					case '</' . trim( $header ) . '>':
+					case '</h' . trim( $header ) . '>':
+					case ( $all_tags && ( preg_match( '/<(\/h\d*)>/i', $value ) ? $value : ! $value ) ):
 						$have_title = 'end';
 						break;
 					default:
 						if ( 'start' === $have_title ) {
+							$num_title++;
 							$title .= trim( wp_strip_all_tags( $value ) );
 						}
 						if ( 'end' === $have_title ) {
-							if ( ! isset( $content[ $title ] ) ) {
-								$content[ $title ] = '';
+							if ( ! isset( $content[ $num_title ] ) ) {
+								$content[ $num_title ] = array(
+									'title'   => $title,
+									'level'   => $level,
+									'content' => '',
+								);
 							}
-							$content[ $title ] .= $value;
+							$content[ $num_title ]['content'] .= $value;
 						}
 						break;
 				}
 			}
 		}
+
 		return $content;
 	}
 

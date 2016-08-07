@@ -1051,6 +1051,8 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 					'3'                    => __( 'H3', 'read-offline' ),
 					'4'                    => __( 'H4', 'read-offline' ),
 					'5'                    => __( 'H5', 'read-offline' ),
+					'6'                    => __( 'H6', 'read-offline' ),
+					'all'                  => __( 'All (H1-H6)', 'read-offline' ),
 			   	),
 				'default'          => '0',
 				'attributes'       => array(
@@ -1177,6 +1179,8 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 					'3'                    => __( 'H3', 'read-offline' ),
 					'4'                    => __( 'H4', 'read-offline' ),
 					'5'                    => __( 'H5', 'read-offline' ),
+					'6'                    => __( 'H6', 'read-offline' ),
+					'all'                  => __( 'All (H1-H6)', 'read-offline' ),
 			   	),
 				'default'          => '0',
 				'attributes'       => array(
