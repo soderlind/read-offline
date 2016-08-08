@@ -1,6 +1,37 @@
 ## Change Log
 
-### upcoming (2016/07/26 08:37 +00:00)
+### upcoming (2016/08/08 16:59 +00:00)
+- [fb20613](https://github.com/soderlind/read-offline/commit/fb20613a83433257d82c76d5604e9031d584be7b) 0.7.0 (@soderlind)
+
+### 0.7.0 (2016/08/08 16:17 +00:00)
+- [840b80b](https://github.com/soderlind/read-offline/commit/840b80be3e63bbced358535bad7a1c4d1791a2c7) Add shortcode for PDF, ePub, mobi and print (@soderlind)
+
+### 0.6.4 (2016/08/07 19:05 +00:00)
+- [f5c68b7](https://github.com/soderlind/read-offline/commit/f5c68b7daef00d6de096f0e3d24a20c416efa2c9) Add, for ePub and mobi table of contents, option to select all headers (h1-h6) (@soderlind)
+- [a3351d3](https://github.com/soderlind/read-offline/commit/a3351d3ec3155f02974db86ceb39685630b506fd) Use wp_safe_remote_get instead of wp_remote_get (@soderlind)
+
+### 0.6.3 (2016/07/28 21:40 +00:00)
+- [790785a](https://github.com/soderlind/read-offline/commit/790785aa0cd06982571adef16aa400949a34ff69) Fix load feature image for ePub. (@soderlind)
+- [bb344bd](https://github.com/soderlind/read-offline/commit/bb344bde2faf5b5319f8087013efb1210f14450c) 0.6.2 (@soderlind)
+
+### 0.6.2 (2016/07/27 06:15 +00:00)
+- [c379c36](https://github.com/soderlind/read-offline/commit/c379c368b085b547a533751051d5a3977590e849) Add // @codingStandardsIgnoreLine to methods from extended external classes. (@soderlind)
+- [214e2f8](https://github.com/soderlind/read-offline/commit/214e2f83e7b661b781a6a9369af9a2fe4afff093) Remove notice that you should upgrade to PHP 5.6 (bur really, you should). (@soderlind)
+- [cf838ce](https://github.com/soderlind/read-offline/commit/cf838cebf10cbe2390afaeac2f6c5889245db7cb) Add travis build badge (@soderlind)
+- [b34b99e](https://github.com/soderlind/read-offline/commit/b34b99e1f1422d28b86aef7e7dcdd7b49dbfad29) Update exclude rule (@soderlind)
+- [5832dee](https://github.com/soderlind/read-offline/commit/5832dee0867733b18eb47a52081e82d3342cb47d) Update .travis.yml (@soderlind)
+- [1c56958](https://github.com/soderlind/read-offline/commit/1c56958bcb6e74b9765de4d65753dabe676ecb6d) Update rule to WordPress-Core (@soderlind)
+- [f5b6e86](https://github.com/soderlind/read-offline/commit/f5b6e86a210b1f9c0bc6cc16ae2c2fe8c8f87dfb) remove unsupported php version (@soderlind)
+- [b35fdd5](https://github.com/soderlind/read-offline/commit/b35fdd5d3920ab65bc4ff9306dd5136e88a349ed) rename (@soderlind)
+- [4cd14a0](https://github.com/soderlind/read-offline/commit/4cd14a0bf6d6b42300ed39766c99969852b91729) update (@soderlind)
+- [b0fdeba](https://github.com/soderlind/read-offline/commit/b0fdeba11b6247ba4da27bace84e0a1451a99025) add travis script (@soderlind)
+- [b4162bc](https://github.com/soderlind/read-offline/commit/b4162bc402c86451e27387f485b910b905461b31) Add codeclimate badge (@soderlind)
+- [f850b6b](https://github.com/soderlind/read-offline/commit/f850b6b33682d9453cd9bc4b875434d36772df85) Update plugin to WPCS standards. (@soderlind)
+- [b93bb1e](https://github.com/soderlind/read-offline/commit/b93bb1e39b413b8671def3f6e38d65e495342703) add codeclimate config files (@soderlind)
+- [b668f55](https://github.com/soderlind/read-offline/commit/b668f5583ea218a7f18d38dad5b25d7dab6e5bdf) remove old shortcode-ui code (@soderlind)
+- [1596b8f](https://github.com/soderlind/read-offline/commit/1596b8fff5cceed155b02781ae43dcdedf3acbe9) remove old shortcode-ui code (@soderlind)
+- [9dc2293](https://github.com/soderlind/read-offline/commit/9dc229329215294383a6b6a22944ce6a884992d7) 0.6.1 (@soderlind)
+- [ec761ad](https://github.com/soderlind/read-offline/commit/ec761ad85631081376df6e0bd342c001f0ee55d9) Update RTL for PDF and ePub (@soderlind)
 - [b56b4dd](https://github.com/soderlind/read-offline/commit/b56b4dd6213413d581bf90504ac93227af9b8a14) Add RTL for PDF, ePub and mobi (@soderlind)
 
 ### 0.6.1 (2016/07/25 17:52 +00:00)
