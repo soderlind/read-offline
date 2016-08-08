@@ -3,8 +3,8 @@ Contributors: PerS
 Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
-Tested up to: 4.5.3
-Stable tag: 0.6.2
+Tested up to: 4.6
+Stable tag: 0.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,9 +12,28 @@ Read Offline allows you to download or print posts and pages. You can download t
 
 == Description ==
 
+= Demo examples =
+
+Based on the [UTF-8 sampler from the Kermit project](http://www.columbia.edu/kermit/utf8.html):
+
+* [PDF](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationalizaetion.pdf)
+	* Cover art
+	* Header and footer
+	* Watermark
+	* Protected, only print enabled
+* [ePub](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationalizaetion.epub)
+	* Cover art
+	* Table of Contents
+* [mobi](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationa.mobi)
+	* Table of Contents
+
+For full PDF font support, you must add the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin.
+
+
 = Features =
 
 *   Add download links to the top and bottom of a post or page (configurable in Read Offline->General Options)
+*   Add download links using `[pdf]`, `[epub]`, `[mobi]` and `[print]` shortcodes.
 *   You can download a PDF, ePub or mobi file containing the current post or page, or you can print the post / page.
 *   The download filename is based on the posts slug (`$post->post_name`)
 *   Adds meta data to the file
@@ -53,10 +72,11 @@ Read Offline allows you to download or print posts and pages. You can download t
 
 There are 2 ways you can add the Read Offline link
 
-1. Add it to the top or bottom of each post and/or page (See Settings->Read Offline)
-1. Using the Read Offline widget
+1. Add it to the top or bottom of each post and/or page (See Settings->Read Offline).
+1. `[pdf]`, `[epub]`, `[mobi]` and `[print]` shortcodes, attributes:
+	* `text="Download link text"`, default: `text="Download PDF"` etc.
+	* `icon="false"`, default: `icon="true"`
 
-(shortcode will be added in the next version)
 
 == Screenshots ==
 
@@ -65,8 +85,16 @@ There are 2 ways you can add the Read Offline link
 3. Read Offline -> Print
 
 == Changelog ==
+= 0.7.0 =
+* Add `[pdf]`, `[epub]`, `[mobi]` and `[print]` shortcodes.
+= 0.6.4 =
+* Add, for ePub and mobi table of contents, option to select all headers (h1-h6).
+* Use `wp_safe_remote_get()` instead og `wp_remote_get()`
+= 0.6.3 =
+* Fix load feature image for ePub.
+* Tested & found compatible with WP 4.6.
 = 0.6.2 =
-* Remove notice that you should upgrade to PHP 5.6 (bur really, you should). 
+* Remove notice that you should upgrade to PHP 5.6 (bur really, you should).
 = 0.6.1 =
 * Add RTL for PDF, ePub and print. PDF needs the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin.
 = 0.6.0 =

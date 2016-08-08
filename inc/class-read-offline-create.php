@@ -76,11 +76,11 @@ class Read_Offline_Create extends Read_Offline {
 				$print_css = ( '' != parent::$options['print']['css']) ? parent::$options['print']['css'] : '';
 				break;
 		}
-		printf('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>%s</title><style type="text/css" media="print">%s%s</style></head><body%s>%s</body></html>'
+		printf('<!DOCTYPE html><html%s><head><meta charset="UTF-8"><title>%s</title><style type="text/css" media="print">%s%s</style></head><body>%s</body></html>'
+			, (is_rtl()) ? " dir='rtl'" : ''
 			, get_the_title( $post->ID )
 			, $print_css
 			, $print_header
-			, (is_rtl()) ? " dir='rtl'" : ''
 			, $this->html
 		);
 	}

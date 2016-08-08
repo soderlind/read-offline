@@ -3,6 +3,17 @@
 
 Read Offline allows you to download or print posts and pages. You can download the post as PDF, ePub or mobi
 
+## Demo examples ##
+
+Based on the [UTF-8 sampler from the Kermit project](http://www.columbia.edu/kermit/utf8.html):
+
+* [PDF](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationalizaetion.pdf)
+* [ePub](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationalizaetion.epub)
+* [mobi](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationa.mobi)
+
+For full PDF font support, you must add the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin.
+
+
 ## Features ##
 
 *   Add download links to the top and bottom of a post or page (configurable in Read Offline->General Options)
@@ -32,6 +43,7 @@ Read Offline allows you to download or print posts and pages. You can download t
 * Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
 * languages/read-offline.po for easy translation.
 * Support for all mPDF fonts via the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin
+
 
 ## Feedback & Support ##
 
@@ -76,10 +88,10 @@ Add it to the top or bottom of each post and/or page (See Settings->Read Offline
 
 ## Developer Notes
 
-* Latest Stable Release: [0.6.2](https://github.com/soderlind/read-offline/releases/tag/0.6.2)
+* Latest Stable Release: [0.7.0](https://github.com/soderlind/read-offline/releases/tag/0.7.0)
 * Stable Branch: [master](https://github.com/soderlind/read-offline/tree/master)
 
-~Current Version: 0.6.2~
+~Current Version: 0.7.0~
 
 ## Credits ##
 
