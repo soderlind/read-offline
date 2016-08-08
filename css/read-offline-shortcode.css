@@ -1,0 +1,28 @@
+.readoffline-shortcode {
+	display: inline;
+}
+
+.readoffline-shortcode  .pdf,
+.readoffline-shortcode .epub,
+.readoffline-shortcode .mobi,
+.readoffline-shortcode .print {
+	padding: 0 0 1px 20px;
+	min-height:16px;
+	border: 0;
+}
+
+.readoffline-shortcode .pdf {
+	background: url(document-pdf.png) no-repeat 0 50%;
+}
+
+.readoffline-shortcode .print {
+	background: url(document-print.png) no-repeat 0 50%;
+}
+
+.readoffline-shortcode .epub {
+	background: url(document-epub.png) no-repeat 0 50%;
+}
+
+.readoffline-shortcode .mobi  {
+	background: url(document-mobi.png) no-repeat 0 50%;
+}

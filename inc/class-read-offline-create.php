@@ -52,7 +52,7 @@ class Read_Offline_Create extends Read_Offline {
 		// content
 		$html = '<h1 class="entry-title">' . get_the_title( $post->ID ) . '</h1>';
 		$content = $post->post_content;
-		$content = preg_replace( '/\[\\/?readoffline(\\s+.*?\]|\])/i', '', $content ); // remove all [readonline] shortcodes
+		$content = preg_replace( '/\[\\/?(pdf|epub|mobi|print)(\\s+.*?\]|\])/i', '', $content ); // remove all [readonline] shortcodes
 		$this->html .= apply_filters( 'the_content', $content );
 	}
 
@@ -909,6 +909,14 @@ class Read_Offline_Create extends Read_Offline {
 		return get_transient( $transient_id );
 	}
 
+	/**
+	 * Split html on header tag (h1-h6)
+	 * @author soderlind
+	 * @version 0.6.4
+	 * @param   string    $html   HTML content
+	 * @param   string    $header 1-6 or 'all'
+	 * @return  array
+	 */
 	private function _split_content( $html, $header ) {
 
 		$all_tags   = ( 'all' === $header );
