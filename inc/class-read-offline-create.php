@@ -181,8 +181,8 @@ class Read_Offline_Create extends Read_Offline {
 
 		$html = $this->html;
 
-		$add_toc = $this->_get_child_array_key( 'pdf_layout',parent::$options['epub']['add_toc'] );
-		$toc     = $this->_get_child_array_key( 'pdf_layout',parent::$options['epub']['toc'] );
+		$add_toc = $this->_get_child_array_key( 'epub',parent::$options['epub']['add_toc'] );
+		$toc     = $this->_get_child_array_key( 'epub',parent::$options['epub']['toc'] );
 		$content = array();
 		if ( 0 !== $add_toc && 0 !== $toc ) {
 			$content = $this->_split_content( $html, $toc );
@@ -255,8 +255,8 @@ class Read_Offline_Create extends Read_Offline {
 		version
 		 */
 
-		$add_toc = $this->_get_child_array_key( 'pdf_layout',parent::$options['mobi']['add_toc'] );
-		$toc     = $this->_get_child_array_key( 'pdf_layout',parent::$options['mobi']['toc'] );
+		$add_toc = $this->_get_child_array_key( 'mobi',parent::$options['mobi']['add_toc'] );
+		$toc     = $this->_get_child_array_key( 'mobi',parent::$options['mobi']['toc'] );
 		$content = array();
 		if ( 0 !== $add_toc && 0 !== $toc ) {
 			$content = $this->_split_content( $html, $toc );
@@ -406,7 +406,6 @@ class Read_Offline_Create extends Read_Offline {
 		$pdf->simpleTables        = true; // @codingStandardsIgnoreLine
 		$pdf->h2bookmarks         = array( 'H1' => 0, 'H2' => 1, 'H3' => 2 );
 		$pdf->title2annots        = true;
-
 		/**
 		 * Watermark
 		 */
@@ -732,6 +731,7 @@ class Read_Offline_Create extends Read_Offline {
 			    // 'toc_sheetsize' => '',
 			));
 		}
+
 		// if waters are set, show them
 		$pdf->showWatermarkImage = true; // @codingStandardsIgnoreLine
 		$pdf->showWatermarkText  = true; // @codingStandardsIgnoreLine
