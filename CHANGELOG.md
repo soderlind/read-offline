@@ -1,6 +1,16 @@
 ## Change Log
 
-### upcoming (2016/08/08 16:59 +00:00)
+### upcoming (2016/08/09 18:42 +00:00)
+- [1fca3e9](https://github.com/soderlind/read-offline/commit/1fca3e9037d602efa6774241e64d59680573227a) 0.7.2 (@soderlind)
+
+### 0.7.2 (2016/08/09 18:10 +00:00)
+- [f2eb90c](https://github.com/soderlind/read-offline/commit/f2eb90c3738a085877b5e582116b91460f3855db) ADD: Support for custom post type (@soderlind)
+
+### 0.7.1 (2016/08/09 16:11 +00:00)
+- [0131a52](https://github.com/soderlind/read-offline/commit/0131a529004426112c9c30b14954d11d6769bfd6) FIX: Bug in Table of Contents settings for ePub and mobi. (@soderlind)
+- [982b2f8](https://github.com/soderlind/read-offline/commit/982b2f8e2be2ae3c18f2d015a3c14e2cc0bf9117) Update (@soderlind)
+- [6f2c036](https://github.com/soderlind/read-offline/commit/6f2c03653dd2cb8eb15467af1c5495a9c1d1dd7f) 0.7.0 (@soderlind)
+- [2347f08](https://github.com/soderlind/read-offline/commit/2347f08226940cb23aa1242f28b4fc74431976a2) 0.7.0 (@soderlind)
 - [fb20613](https://github.com/soderlind/read-offline/commit/fb20613a83433257d82c76d5604e9031d584be7b) 0.7.0 (@soderlind)
 
 ### 0.7.0 (2016/08/08 16:17 +00:00)
