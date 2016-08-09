@@ -8,6 +8,7 @@ Read Offline allows you to download or print posts and pages. You can download t
 Based on the [UTF-8 sampler from the Kermit project](http://www.columbia.edu/kermit/utf8.html):
 * [PDF](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationalizaetion.pdf)
 	* Cover art
+	* Table of Contents
 	* Header and footer
 	* Watermark
 	* Protected, only print enabled
@@ -17,7 +18,7 @@ Based on the [UTF-8 sampler from the Kermit project](http://www.columbia.edu/ker
 * [mobi](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationa.mobi)
 	* Cover Art
 	* Table of Contents
-	
+
 For full PDF font support, you must add the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin.
 
 

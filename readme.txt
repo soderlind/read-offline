@@ -19,12 +19,14 @@ Based on the [UTF-8 sampler from the Kermit project](http://www.columbia.edu/ker
 * [PDF](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationalizaetion.pdf)
 	* Cover art
 	* Header and footer
+	* Table of Contents
 	* Watermark
 	* Protected, only print enabled
 * [ePub](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationalizaetion.epub)
 	* Cover art
 	* Table of Contents
 * [mobi](https://github.com/soderlind/read-offline-fonts/raw/master/examples/internationa.mobi)
+	* Cover Art
 	* Table of Contents
 
 For full PDF font support, you must add the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin.
