@@ -96,10 +96,10 @@ Add it to the top or bottom of each post and/or page (See Settings->Read Offline
 
 ## Developer Notes
 
-* Latest Stable Release: [0.7.0](https://github.com/soderlind/read-offline/releases/tag/0.7.0)
+* Latest Stable Release: [0.7.2](https://github.com/soderlind/read-offline/releases/tag/0.7.2)
 * Stable Branch: [master](https://github.com/soderlind/read-offline/tree/master)
 
-~Current Version: 0.7.0~
+~Current Version: 0.7.2~
 
 ## Credits ##
 

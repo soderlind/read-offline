@@ -4,7 +4,7 @@ Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
 Tested up to: 4.6
-Stable tag: 0.7.0
+Stable tag: 0.7.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -87,6 +87,10 @@ There are 2 ways you can add the Read Offline link
 3. Read Offline -> Print
 
 == Changelog ==
+= 0.7.2 =
+* ADD: Support for custom post type
+= 0.7.1 =
+* FIX: Bug in Table of Contents settings for ePub and mobi.
 = 0.7.0 =
 * Add `[pdf]`, `[epub]`, `[mobi]` and `[print]` shortcodes.
 = 0.6.4 =
