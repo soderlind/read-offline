@@ -76,7 +76,14 @@ class Read_Offline_Shortcode extends Read_Offline {
 
 
 	private function _create_output( $type, $attributes, $post ) {
-		if ( ! is_singular( array( 'post', 'page' ) ) ) {
+		$post_types = array_keys(array_intersect(
+			parent::$options['where']['post_types'],
+			array(
+				 'post' => 1,
+				 'page' => 1,
+			)
+		));
+		if ( ! is_singular( $post_types ) ) {
 			return '';
 		}
 		$readoffline = sprintf('<div class="readoffline-shortcode"><a class="%s" href="%s" title="%s %s.%s" %s>%s</a></div>%s',

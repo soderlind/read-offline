@@ -189,9 +189,9 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 				'type'             => 'posttype',
 				'query'                 => array(
 					'public'   => true,
-					'_builtin' => true,
+					// '_builtin' => true,
 				),
-				'description'      => __( 'supported post types lorem ipsum', 'read-offline' ),
+				'description'      => __( 'Supported post types', 'read-offline' ),
 				'default'          => array(
 					'post'                 => true,
 					'page'                 => true,

@@ -90,12 +90,12 @@ class Read_Offline_UX extends Read_Offline {
 
 		// POST TYPE CHECK
 
-		$post_types = array_keys(array_intersect_assoc(
+		$post_types = array_keys(array_intersect(
+			parent::$options['where']['post_types'],
 			array(
 				 'post' => 1,
-			'page' => 1,
+				 'page' => 1,
 			)
-			, parent::$options['where']['post_types']
 		));
 
 		if ( is_singular( $post_types ) && isset( $placements['top'] ) ) {
