@@ -83,9 +83,6 @@ Please [see the CHANGELOG.md](CHANGELOG.md) file.
 	* `icon="false"`, default: `icon="true"`
 
 
-
-([shortcode](https://github.com/soderlind/read-offline/issues/6) and [widget](https://github.com/soderlind/read-offline/issues/10) comming soon)
-
 ## Screenshots ##
 
 ###1. Read Offline -> General Options###
