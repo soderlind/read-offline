@@ -70,11 +70,24 @@ For full PDF font support, you must add the [Read Offline Fonts](https://github.
 1. Upload the extracted `read-offline` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 
-== Use ==
 
-There are 2 ways you can add the Read Offline link
 
-1. Add it to the top or bottom of each post and/or page (See Settings->Read Offline).
+== Credits ==
+
+* [mPDF](https://github.com/mpdf/mpdf) is written by Ian Back and is released under the GNU GPL v2 license.
+* [PHPePub](https://github.com/Grandt/PHPePub) is written by Asbjorn Grandt and is released under the GNU Lesser General Public License v2.1
+* [phpMobi](https://github.com/raiju/phpMobi) is written by Sander Kromwijk and is released under the Apache license (version 2.0)
+* [Admin Page Framework](https://github.com/michaeluno/admin-page-framework) is written by Michael Uno and is released under the following licenses:
+	* Admin Page Framework (Framework Files) MIT license
+	* Admin Page Framework - Loader (WordPress Plugin) GPL v2
+
+== Frequently Asked Questions ==
+
+= How do I add download links? =
+
+There are 2 ways you can add the Read Offline links:
+
+1. Add it to the top or bottom of each post and/or page (See Read Offline->General Options).
 1. `[pdf]`, `[epub]`, `[mobi]` and `[print]` shortcodes, attributes:
 	* `text="Download link text"`, default: `text="Download PDF"` etc.
 	* `icon="false"`, default: `icon="true"`

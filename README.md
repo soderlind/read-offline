@@ -77,7 +77,10 @@ Please [see the CHANGELOG.md](CHANGELOG.md) file.
 
 ## Use ##
 
-Add it to the top or bottom of each post and/or page (See Settings->Read Offline)
+1. Add it to the top or bottom of each post and/or page (See Read Offline->General Options).
+1. `[pdf]`, `[epub]`, `[mobi]` and `[print]` shortcodes, attributes:
+	* `text="Download link text"`, default: `text="Download PDF"` etc.
+	* `icon="false"`, default: `icon="true"`
 
 
 
