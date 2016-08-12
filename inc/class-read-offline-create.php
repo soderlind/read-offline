@@ -736,7 +736,7 @@ class Read_Offline_Create extends Read_Offline {
 		$pdf->showWatermarkImage = true; // @codingStandardsIgnoreLine
 		$pdf->showWatermarkText  = true; // @codingStandardsIgnoreLine
 
-		if ( '1' == self::$options['pdf_layout']['annotations'] ) {
+		if ( '1' == parent::$options['pdf_layout']['annotations'] ) {
 			$html = $this->_pdf_add_annotations( $html );
 		}
 
