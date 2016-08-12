@@ -42,18 +42,19 @@ class Read_Offline {
 			update_site_option( 'upload_filetypes', $new_upload_filetypes );
 		}
 
-		$post_types = array_keys(array_intersect_assoc(
+		$post_types = array_keys(array_intersect(
+			self::$options['where']['post_types'],
 			array(
 				 'post' => 1,
-			'page' => 1,
+				 'page' => 1,
 			)
-			, self::$options['where']['post_types']
 		));
 
-		foreach ( $post_types as $post_type ) {
-			add_action( 'save_post_' . $post_type, array( $this, 'save_as_attachment_to_post_type' ),10,2 );
+		if ( '1' == self::$options['misc']['cache'] ) {
+			foreach ( $post_types as $post_type ) {
+				add_action( 'save_post_' . $post_type, array( $this, 'save_as_attachment_to_post_type' ),10,2 );
+			}
 		}
-		//      add_action('save_post', array($this,'save_as_attachment_to_post_type'));
 	}
 
 	public static function query_url( $post_id, $name, $format, $refresh = false ) {
