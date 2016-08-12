@@ -1,6 +1,13 @@
 ## Change Log
 
-### upcoming (2016/08/09 18:42 +00:00)
+### 0.7.3 (2016/08/12 11:12 +00:00)
+- [571e1ab](https://github.com/soderlind/read-offline/commit/571e1ab5c9c4387caa0fa8e503bbb52ffa315043) FIX: reference to parent object (@soderlind)
+- [33e860b](https://github.com/soderlind/read-offline/commit/33e860bdf726e2249eabfa3fefd1790789079b3c) ADD: Annotations for PDF + "Don't include content" using a wrapper with class="not-readoffline", eg: <span class="not-readoffline"> don't include me in the PDF/ePub/mobi</span> (@soderlind)
+- [862274d](https://github.com/soderlind/read-offline/commit/862274d76527d7463dde799ffcb0addd5899198d) ADD: Annotations for PDF (@soderlind)
+- [89e3399](https://github.com/soderlind/read-offline/commit/89e33998e43b6f283a91fdc8f52bc5d63ccefeb4) FIX: Option to save, or not,  to media library (@soderlind)
+- [f06353e](https://github.com/soderlind/read-offline/commit/f06353e088ee25b1d0c7038cbc9ded44f4bc5656) 0.7.2 (@soderlind)
+- [a966ee9](https://github.com/soderlind/read-offline/commit/a966ee90b2201f42bac944c6396e4e9e752b272d) 0.7.2 (@soderlind)
+- [55d0509](https://github.com/soderlind/read-offline/commit/55d050992b38378f49f21e85c9d33a1111cb9d5b) 0.7.2 (@soderlind)
 - [1fca3e9](https://github.com/soderlind/read-offline/commit/1fca3e9037d602efa6774241e64d59680573227a) 0.7.2 (@soderlind)
 
 ### 0.7.2 (2016/08/09 18:10 +00:00)

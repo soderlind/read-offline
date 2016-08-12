@@ -96,10 +96,10 @@ Please [see the CHANGELOG.md](CHANGELOG.md) file.
 
 ## Developer Notes
 
-* Latest Stable Release: [0.7.2](https://github.com/soderlind/read-offline/releases/tag/0.7.2)
+* Latest Stable Release: [0.7.3](https://github.com/soderlind/read-offline/releases/tag/0.7.3)
 * Stable Branch: [master](https://github.com/soderlind/read-offline/tree/master)
 
-~Current Version: 0.7.2~
+~Current Version: 0.7.3~
 
 ## Credits ##
 

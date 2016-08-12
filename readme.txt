@@ -4,7 +4,7 @@ Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
 Tested up to: 4.6
-Stable tag: 0.7.2
+Stable tag: 0.7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,6 +43,7 @@ For full PDF font support, you must add the [Read Offline Fonts](https://github.
 * PDF features (set in Read Offline->PDF)
 	* Paper formats (A0 - A10, B0 - B10, C0 - C10, 4A0, 2A0, RA0 - RA4, SRA0 - SRA4, Letter, Legal, Executive, Folio, Demy and Royal)
 	* Table of Contents
+	* Annotations
 	* Cover Page
 	* Header and Footer
 	* Theme or Custom CSS
@@ -60,8 +61,9 @@ For full PDF font support, you must add the [Read Offline Fonts](https://github.
    * Custom print style
 * Permalink support (/read-offline/"postid"/"post-name"."type"). I've written a "[how-to add a permalink to your plugin](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)" guide at soderlind.no
 * Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
-* languages/read-offline.po for easy translation.
+* languages/read-offline.pot for easy translation.
 * Support for all mPDF fonts via the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin
+* Prevent content from being added by using a wrapper with `class="not-readoffline"`, eg: `<span class="not-readoffline"> don't include this content in the PDF/ePub/mobi</span>`
 
 
 == Installation ==
@@ -73,6 +75,8 @@ For full PDF font support, you must add the [Read Offline Fonts](https://github.
 
 
 == Credits ==
+
+Read Offline is using the following libraries:
 
 * [mPDF](https://github.com/mpdf/mpdf) is written by Ian Back and is released under the GNU GPL v2 license.
 * [PHPePub](https://github.com/Grandt/PHPePub) is written by Asbjorn Grandt and is released under the GNU Lesser General Public License v2.1
@@ -100,6 +104,10 @@ There are 2 ways you can add the Read Offline links:
 3. Read Offline -> Print
 
 == Changelog ==
+= 0.7.3 =
+* FIX: Option to save, or not, to media library.
+* ADD: Annotations for PDF. Converts foot- / endnotes to annotations. Enable in Read Offline->PDF
+* ADD: "Don't include content" using a wrapper with `class="not-readoffline"`, eg: `<span class="not-readoffline"> don't include this text in the PDF/ePub/mobi</span>`
 = 0.7.2 =
 * ADD: Support for custom post type
 = 0.7.1 =
