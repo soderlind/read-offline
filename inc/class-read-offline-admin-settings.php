@@ -169,7 +169,7 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 				'field_id'         => 'placements',
 				'section_id'       => 'where',
 				'title'            => 'Placements',
-				'description'      => __( 'Also available via the the Read Offline widget and the [readoffline] shortcode.' , 'read-offline' ),
+				'description'      => __( 'Also available via the [pdf], [epub], [mobi] and [print] shortcodes.' , 'read-offline' ),
 				'type'             => 'checkbox',
 				'label'            => array(
 					'top'                  => __( 'Top of post type', 'read-offline' ),
@@ -493,6 +493,22 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 					),
 					'help'         => __( 'Help text', 'read-offline' ),
 			   	),
+			),
+			array(  // Single set of radio buttons
+				'field_id'         => 'annotations',
+				'section_id'       => 'pdf_layout',
+				'title'            => __( 'Annotations', 'read-offline' ),
+				'description'      => __(
+					"(experimental feature) Automatically generate annotations from foot- and endnotes. Required format (as created by the <a href='https://wordpress.org/plugins/mammoth-docx-converter/' target='_blank' >Mammoth .docx converter</a>):
+					<pre>Mark:\n&lt;sup&gt;\n	&lt;a href=\"#post-992-footnote-2\"&gt;[1]&lt;/a&gt;\n&lt;/sup&gt;\nContent:\n&lt;ol&gt;\n	&lt;li id=\"post-992-footnote-2\"&gt;Annotation content&lt;/li&gt;\n&lt;/ol&gt;</pre>  " , 'read-offline'
+				),
+				'type'             => 'radio',
+				'label'            => array(
+					'1'                    => __( 'Yes', 'read-offline' ),
+					'0'                    => __( 'No', 'read-offline' ),
+				),
+				'default'          => '0',
+				// 'help'             => __( 'Use the Media Library as a cache', 'read-offline' ),
 			)
 			//  array(
 			//      'field_id'         => 'pdfa',
