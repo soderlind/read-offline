@@ -53,7 +53,7 @@ class Read_Offline_Create extends Read_Offline {
 		$html = '<h1 class="entry-title">' . get_the_title( $post->ID ) . '</h1>';
 		$content = $post->post_content;
 		$content = preg_replace( '/\[\\/?(pdf|epub|mobi|print)(\\s+.*?\]|\])/i', '', $content ); // remove all [readonline] shortcodes
-		$this->html .= apply_filters( 'the_content', $content );
+		$this->html .= $this->_remove_dont_readoffline( apply_filters( 'the_content', $content ) );
 	}
 
 	function pprint( $post ) {
@@ -736,6 +736,10 @@ class Read_Offline_Create extends Read_Offline {
 		$pdf->showWatermarkImage = true; // @codingStandardsIgnoreLine
 		$pdf->showWatermarkText  = true; // @codingStandardsIgnoreLine
 
+		if ( '1' == self::$options['pdf_layout']['annotations'] ) {
+			$html = $this->_pdf_add_annotations( $html );
+		}
+
 		$pdf->WriteHTML( $html );
 		$pdf->Output( $post->post_name . '.pdf', 'D' );
 
@@ -800,6 +804,82 @@ class Read_Offline_Create extends Read_Offline {
 			$img->parentNode->removeChild( $img ); // @codingStandardsIgnoreLine
 		}
 	 	return $doc->saveHTML();
+	}
+
+	private function _pdf_add_annotations( $content ) {
+
+		$anchors = array();
+		$doc = new DOMDocument();
+		// START LibXML error management.
+		// Modify state
+		$libxml_previous_state = libxml_use_internal_errors( true );
+		$doc->loadHTML( mb_convert_encoding( $content, 'HTML-ENTITIES', 'UTF-8' ) );
+		// handle errors
+		libxml_clear_errors();
+		// restore
+		libxml_use_internal_errors( $libxml_previous_state );
+		// END LibXML error management.
+
+		$sups = $doc->getElementsByTagName( 'sup' );
+		$tmp_sups = array();
+		$tmp_li = array();
+		foreach ( $sups as $sup ) {
+			// <sup><a id="footnote-ref-884344386868178-4" href="#footnote-884344386868178-4">[4]</a></sup>
+			$node = $sup->firstChild;  // @codingStandardsIgnoreLine
+			if ( XML_ELEMENT_NODE == $node->nodeType  && $node->hasAttribute( 'href' ) ) {
+
+				if ( false !== ( $ref = $node->getAttribute( 'href' ) ) &&  false !== stristr( $ref , 'note' ) ) {
+					$tmp_sups[] = $sup;
+					// find <li id="footnote-884344386868178-2" ..>
+					$li = $doc->getElementById( substr( $ref,1 ) ); // substr removes leading #
+					$tmp_li[] = $li;
+					$slug = $tmpslug = str_replace( '↑','', htmlspecialchars( wp_strip_all_tags( $li->nodeValue ), ENT_QUOTES ) ); // @codingStandardsIgnoreLine
+
+					// create annotation https://mpdf.github.io/reference/html-control-tags/annotation.html
+					$annotation = $doc->createElement( 'annotation' );
+					$annotation->setAttribute( 'content', $slug );
+					// $annotation->setAttribute( 'icon', 'Comment' );
+
+					$sup->parentNode->insertBefore( $annotation, $sup ); // @codingStandardsIgnoreLine
+				}
+			}
+		}
+
+		// remove sup
+		foreach ( $tmp_sups as $sup ) {
+			$sup->parentNode->removeChild( $sup ); // @codingStandardsIgnoreLine
+		}
+		// remove foot- / endnote list at the end of doc
+		foreach ( $tmp_li as $li ) {
+			$li->parentNode->removeChild( $li ); // @codingStandardsIgnoreLine
+		}
+
+		return $doc->saveHTML();
+	}
+
+	private function _remove_dont_readoffline( $content, $classname = 'not-readoffline' ) {
+
+		$doc = new DOMDocument();
+		// START LibXML error management.
+		// Modify state
+		$libxml_previous_state = libxml_use_internal_errors( true );
+		$doc->loadHTML( mb_convert_encoding( $content, 'HTML-ENTITIES', 'UTF-8' ) );
+		// handle errors
+		libxml_clear_errors();
+		// restore
+		libxml_use_internal_errors( $libxml_previous_state );
+		// END LibXML error management.
+		$finder = new DomXPath( $doc );
+
+		$nodes = $finder->query( "//*[contains(concat(' ', normalize-space(@class), ' '), ' $classname ')]" );
+		$tmp_nodes = array();
+		foreach ( $nodes as $node ) {
+			$tmp_nodes[] = $node;
+		}
+		foreach ( $tmp_nodes as $node ) {
+			$node->parentNode->removeChild( $node ); // @codingStandardsIgnoreLine
+		}
+		return $doc->saveHTML();
 	}
 
 	private function _get_child_array_key( $parent_element, $org ) {
