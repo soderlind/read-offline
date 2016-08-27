@@ -39,7 +39,7 @@ class Read_Offline_UX extends Read_Offline {
 	}
 
 	function embed_category( $title ) {
-		return 'XX ' . $title;
+		return $title;
 	}
 
 	function embed_post( $content ) {
