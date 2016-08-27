@@ -1,5 +1,9 @@
 ## Change Log
 
+### 0.7.4 (2016/08/27 19:43 +00:00)
+- [43ff983](https://github.com/soderlind/read-offline/commit/43ff98344a450da9bf33b70577995226825b743d) Removed "XX" that was prefixed to the archive title. (@soderlind)
+- [48486f6](https://github.com/soderlind/read-offline/commit/48486f63adab153d8d2f0f57b3d37399b2bce64a) 0.7.3 (@soderlind)
+
 ### 0.7.3 (2016/08/12 11:12 +00:00)
 - [571e1ab](https://github.com/soderlind/read-offline/commit/571e1ab5c9c4387caa0fa8e503bbb52ffa315043) FIX: reference to parent object (@soderlind)
 - [33e860b](https://github.com/soderlind/read-offline/commit/33e860bdf726e2249eabfa3fefd1790789079b3c) ADD: Annotations for PDF + "Don't include content" using a wrapper with class="not-readoffline", eg: <span class="not-readoffline"> don't include me in the PDF/ePub/mobi</span> (@soderlind)
