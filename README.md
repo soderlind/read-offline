@@ -3,7 +3,7 @@
 
 Read Offline allows you to download or print posts and pages. You can download the post as PDF, ePub or mobi
 
-[Demo examples](#demo-examples) | [Features](#features) | [Feedback & Support](#feedback--support) | [Todo](#todo) | [Changelog](#changelog) | [Installation](#installation) | [Use](#use) | [Screenshots](#screenshots)
+[Demo examples](#demo-examples) | [Features](#features) | [Feedback & Support](#feedback--support) | [Todo](#todo) | [Changelog](#changelog) | [Installation](#installation) | [Use](#use) | [Screenshots](#screenshots) | [Credits](#credits)
 
 ## Demo examples ##
 
