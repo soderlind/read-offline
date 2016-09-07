@@ -85,14 +85,20 @@ Please [see the CHANGELOG.md](CHANGELOG.md) file.
 
 ## Screenshots ##
 
-###1. Read Offline -> General Options###
+### 1. Read Offline -> General Options ###
 ![Read Offline -> General Options](assets/screenshot-1.jpg)
 
-###2. Read Offline -> PDF###
+### 2. Read Offline -> PDF ###
 ![Read Offline -> PDF](assets/screenshot-2.jpg)
 
-###3. Read Offline -> Print###
+### 3. Read Offline -> ePub ###
 ![Read Offline -> Print](assets/screenshot-3.jpg)
+
+### 4. Read Offline -> mobi ###
+![Read Offline -> Print](assets/screenshot-4.jpg)
+
+### 5. Read Offline -> print ###
+![Read Offline -> Print](assets/screenshot-5.jpg)
 
 ## Developer Notes
 

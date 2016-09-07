@@ -4,7 +4,7 @@ Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
 Tested up to: 4.6
-Stable tag: 0.7.4
+Stable tag: 0.7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,9 +101,13 @@ There are 2 ways you can add the Read Offline links:
 
 1. Read Offline -> General Options
 2. Read Offline -> PDF
-3. Read Offline -> Print
+3. Read Offline -> ePub
+4. Read Offline -> mobi
+5. Read Offline -> Print
 
 == Changelog ==
+= 0.7.4 =
+* Removed "XX" that was prefixed to the archive title.
 = 0.7.3 =
 * FIX: Option to save, or not, to media library.
 * ADD: Annotations for PDF. Converts foot- / endnotes to annotations. Enable in Read Offline->PDF
