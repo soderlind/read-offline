@@ -3,6 +3,8 @@
 
 Read Offline allows you to download or print posts and pages. You can download the post as PDF, ePub or mobi
 
+[Demo examples](#demo-examples) | [Features](#features) | [Changelog](#changelog) | [Installation](#installation) | [Use](#use) | [Screenshots](#screenshots)
+
 ## Demo examples ##
 
 Based on the [UTF-8 sampler from the Kermit project](http://www.columbia.edu/kermit/utf8.html):
