@@ -4,7 +4,7 @@ Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
 Tested up to: 4.6
-Stable tag: 0.7.3
+Stable tag: 0.7.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,7 +107,7 @@ There are 2 ways you can add the Read Offline links:
 
 = Does the plugin support RTL output? =
 
-1. RTL, right-to-left writing direction, is supported in PDF and ePub. For PDF, you'll most likely need the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin. 
+1. RTL, right-to-left writing direction, is supported in PDF and ePub. For PDF, you'll most likely need the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin.
 
 
 == Screenshots ==
@@ -120,6 +120,8 @@ There are 2 ways you can add the Read Offline links:
 
 
 == Changelog ==
+= 0.7.5 =
+* Linted CSS files
 = 0.7.4 =
 * Removed "XX" that was prefixed to the archive title.
 = 0.7.3 =

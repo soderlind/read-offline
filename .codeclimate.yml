@@ -12,10 +12,12 @@ engines:
        enabled: true
        env:
           jquery: true
+       config:
+           config: .eslintrc
        exclude_paths:
            - Gruntfile.js
     csslint:
-       enabled: false
+       enabled: true
     fixme:
        enabled: true
     phpcodesniffer:

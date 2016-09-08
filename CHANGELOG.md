@@ -1,5 +1,16 @@
 ## Change Log
 
+### 0.7.5 (2016/09/08 22:33 +00:00)
+- [58b2d79](https://github.com/soderlind/read-offline/commit/58b2d796b440773fefd75812fc56806e03a4b245) Lint CSS files (@soderlind)
+- [50ea96e](https://github.com/soderlind/read-offline/commit/50ea96ea310b2888666fa807cea5445906a6cf5e) Add FAQ (@soderlind)
+- [2e26460](https://github.com/soderlind/read-offline/commit/2e26460848df5dfa407ab8e6913be82a1f78dc3a) Update links to sections (@soderlind)
+- [c805d8e](https://github.com/soderlind/read-offline/commit/c805d8e9fc3283749bc2a4679861318c4ce4f868) Update links to sections (@soderlind)
+- [f6ea80b](https://github.com/soderlind/read-offline/commit/f6ea80b95246929d9eac4af654c7229cb49b2d70) Add links to sections (@soderlind)
+- [27f4b33](https://github.com/soderlind/read-offline/commit/27f4b3385800a8df139dae504af216d4942446d2) Update assets and screenshots (@soderlind)
+- [862966e](https://github.com/soderlind/read-offline/commit/862966e09e7f8e6225a39c059065ff0e502ebef6) Change asset banners (@soderlind)
+- [fd56bb7](https://github.com/soderlind/read-offline/commit/fd56bb7817ff74b158cbc4e5cc312de035f48691) Add PHP 7.1 test (@soderlind)
+- [4c59353](https://github.com/soderlind/read-offline/commit/4c593536299323e517e59942f8f9b3d500b8297e) 0.7.4 (@soderlind)
+
 ### 0.7.4 (2016/08/27 19:43 +00:00)
 - [43ff983](https://github.com/soderlind/read-offline/commit/43ff98344a450da9bf33b70577995226825b743d) Removed "XX" that was prefixed to the archive title. (@soderlind)
 - [48486f6](https://github.com/soderlind/read-offline/commit/48486f63adab153d8d2f0f57b3d37399b2bce64a) 0.7.3 (@soderlind)
