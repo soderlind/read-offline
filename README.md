@@ -3,7 +3,7 @@
 
 Read Offline allows you to download or print posts and pages. You can download the post as PDF, ePub or mobi
 
-[Demo examples](#demo-examples) | [Features](#features) | [Feedback & Support](#feedback--support) | [Todo](#todo) | [Changelog](#changelog) | [Installation](#installation) | [Use](#use) | [Screenshots](#screenshots) | [Credits](#credits)
+[Demo examples](#demo-examples) | [Features](#features) | [Feedback & Support](#feedback--support) | [Todo](#todo) | [Changelog](#changelog) | [Installation](#installation) | [Use](#use) | [FAQ](#faq) | [Screenshots](#screenshots) | [Credits](#credits)
 
 ## Demo examples ##
 
@@ -83,6 +83,22 @@ Please [see the CHANGELOG.md](CHANGELOG.md) file.
 1. `[pdf]`, `[epub]`, `[mobi]` and `[print]` shortcodes, attributes:
 	* `text="Download link text"`, default: `text="Download PDF"` etc.
 	* `icon="false"`, default: `icon="true"`
+
+
+## FAQ ##
+
+### How do I add download links? ###
+
+There are 2 ways you can add the Read Offline links:
+
+1. Add it to the top or bottom of each post and/or page (See Read Offline->General Options).
+1. `[pdf]`, `[epub]`, `[mobi]` and `[print]` shortcodes, attributes:
+	* `text="Download link text"`, default: `text="Download PDF"` etc.
+	* `icon="false"`, default: `icon="true"`
+
+### Does the plugin support RTL output? ###
+
+1. RTL, right-to-left writing direction, is supported in PDF and ePub. For PDF, you'll most likely need the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin.
 
 
 ## Screenshots ##

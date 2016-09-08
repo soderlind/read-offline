@@ -68,11 +68,20 @@ For full PDF font support, you must add the [Read Offline Fonts](https://github.
 
 == Installation ==
 
+You know the drill:
+
+1. In WordPress Admin, go to `Plugins->Add New`
+1. Search for `Read Offline`
+1. Install and Activate
+1. Go to `Read Offline` in the main admin menu and configure the plugin.
+
+or
+
 1. Download the plugin and extract the read-offline.zip
 1. Upload the extracted `read-offline` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 
-
+The plugin is also [available at GitHub](https://github.com/soderlind/read-offline)
 
 == Credits ==
 
@@ -96,6 +105,10 @@ There are 2 ways you can add the Read Offline links:
 	* `text="Download link text"`, default: `text="Download PDF"` etc.
 	* `icon="false"`, default: `icon="true"`
 
+= Does the plugin support RTL output? =
+
+1. RTL, right-to-left writing direction, is supported in PDF and ePub. For PDF, you'll most likely need the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin. 
+
 
 == Screenshots ==
 
@@ -104,6 +117,7 @@ There are 2 ways you can add the Read Offline links:
 3. Read Offline -> ePub
 4. Read Offline -> mobi
 5. Read Offline -> Print
+
 
 == Changelog ==
 = 0.7.4 =
