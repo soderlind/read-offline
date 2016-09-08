@@ -20,13 +20,16 @@ h2 {
   margin-top: 25px;
 }
 
-blockquote, ul {
+blockquote,
+ul {
   margin: 0;
 }
 
-ul {list-style: none}
+ul {
+  list-style: none;
+}
 
-li:before {
+li::before {
   content: "» ";
 }
 
@@ -35,11 +38,12 @@ a:visited {
   text-decoration: underline;
 }
 
-a[href^="#"]:after {
+a[href^="#"]::after {
   display: none;
 }
 
-a[href^="http://"]:after, a[href^="https://"]:after {
+a[href^="http://"]::after,
+a[href^="https://"]::after {
   content: " (" attr(href) ")";
 }
 

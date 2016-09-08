@@ -1,10 +1,11 @@
 @page {
-	size: 8.5in 11in;  /*<length>{1,2} | auto | portrait | landscape  ('em' 'ex' and % are not allowed; length values are width height*/
 	margin: 10%; /*any of the usual CSS values for margins (% of page-box width for LR, of height for TB)*/
 	margin-header: 5mm; /*any of the usual CSS values for margins*/
 	margin-footer: 5mm; /*any of the usual CSS values for margins*/
 	marks: none;	 /* crop | cross | none */
-	/*
+	size: 8.5in 11in;  /*<length>{1,2} | auto | portrait | landscape  ('em' 'ex' and % are not allowed; length values are width height*/
+
+  /*
 	background: ...
 	background-image: ...
 	background-position ...
@@ -16,69 +17,92 @@
 
 /* LISTS */
 
-ul, ol { margin-top: 0.83em; margin-bottom: 0.83em; }
-ul ul, ul ol, ol ul, ol ol { margin-top: 0; margin-bottom: 0; }
+ul,
+ol {
+  margin-bottom: 0.83em;
+  margin-top: 0.83em;
+}
+
+ul ul,
+ul ol,
+ol ul,
+ol ol {
+  margin-bottom: 0;
+  margin-top: 0;
+}
 
 /* INDEXES */
-div.mpdf_index_main {
-	font-family: sans-serif;
-	line-height: normal;
+.mpdf_index_main {
+  font-family: sans-serif;
+  line-height: normal;
 }
-div.mpdf_index_entry {
-	line-height: normal;
-	text-indent: -1.5em;
+
+.mpdf_index_entry {
+  line-height: normal;
+  text-indent: -1.5em;
 }
-div.mpdf_index_letter {
-	font-family: sans-serif;
-	font-size: 1.8em;
-	font-weight: bold;
-	line-height: normal;
-	text-transform: uppercase;
-	page-break-after: avoid; 
-	margin-top: 0.3em; 
-	margin-collapse: collapse;
+
+.mpdf_index_letter {
+  font-family: sans-serif;
+  font-size: 1.8em;
+  font-weight: bold;
+  line-height: normal;
+  margin-top: 0.3em;
+  page-break-after: avoid;
+  text-transform: uppercase;
 }
-a.mpdf_index_link { 
-	color: #000000; 
-	text-decoration: none; 
+
+.mpdf_index_link {
+  color: #000;
+  text-decoration: none;
 }
 
 /* TABLE OF CONTENTS */
-div.mpdf_toc {
-	font-family: sans-serif;
-	line-height: normal;
+.mpdf_toc {
+  font-family: sans-serif;
+  line-height: normal;
 }
-a.mpdf_toc_a  {
-	text-decoration: none;
-	color: black;
+
+.mpdf_toc_a {
+  color: black;
+  text-decoration: none;
 }
-div.mpdf_toc_level_0 {		/* Whole line level 0 */
-	line-height: 1.5;
-	margin-left: 0;
-	padding-right: 0em;	/* should match the outdent specified for ToC; 0 is default; suggested value 2em */
+
+.mpdf_toc_level_0 {		/* Whole line level 0 */
+  line-height: 1.5;
+  margin-left: 0;
+  padding-right: 0;	/* should match the outdent specified for ToC; 0 is default; suggested value 2em */
 }
-span.mpdf_toc_t_level_0 {	/* Title level 0 - may be inside <a> */
-	font-weight: bold;
+
+.mpdf_toc_t_level_0 {	/* Title level 0 - may be inside <a> */
+  font-weight: bold;
 }
-span.mpdf_toc_p_level_0 {	/* Page no. level 0 - may be inside <a> */
+
+.mpdf_toc_p_level_0 {	/* Page no. level 0 - may be inside <a> */
 }
-div.mpdf_toc_level_1 {		/* Whole line level 1 */
-	margin-left: 2em;
-	text-indent: -2em;
-	padding-right: 0em;	/* should match the outdent specified for ToC; 0 is default; suggested value 2em */
+
+.mpdf_toc_level_1 {		/* Whole line level 1 */
+  margin-left: 2em;
+  padding-right: 0;	/* should match the outdent specified for ToC; 0 is default; suggested value 2em */
+  text-indent: -2em;
 }
-span.mpdf_toc_t_level_1 {	/* Title level 1 */
-	font-style: italic;
-	font-weight: bold;
+
+.mpdf_toc_t_level_1 {	/* Title level 1 */
+  font-style: italic;
+  font-weight: bold;
 }
-span.mpdf_toc_p_level_1  {	/* Page no. level 1 - may be inside <a> */
+
+.mpdf_toc_p_level_1 {	/* Page no. level 1 - may be inside <a> */
 }
-div.mpdf_toc_level_2 {		/* Whole line level 2 */
-	margin-left: 4em;
-	text-indent: -2em;
-	padding-right: 0em;	/* should match the outdent specified for ToC; 0 is default; suggested value 2em */
+
+.mpdf_toc_level_2 {		/* Whole line level 2 */
+  margin-left: 4em;
+  padding-right: 0;	/* should match the outdent specified for ToC; 0 is default; suggested value 2em */
+  text-indent: -2em;
 }
-span.mpdf_toc_t_level_2 {	/* Title level 2 */
+
+.mpdf_toc_t_level_2 {	/* Title level 2 */
 }
-span.mpdf_toc_p_level_2 {	/* Page no. level 2 - may be inside <a> */
+
+.mpdf_toc_p_level_2 {	/* Page no. level 2 - may be inside <a> */
 }
