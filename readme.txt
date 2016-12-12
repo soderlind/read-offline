@@ -3,8 +3,8 @@ Contributors: PerS
 Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
-Tested up to: 4.6
-Stable tag: 0.7.5
+Tested up to: 4.7
+Stable tag: 0.7.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -120,6 +120,8 @@ There are 2 ways you can add the Read Offline links:
 
 
 == Changelog ==
+= 0.7.6 =
+* Tested & found compatible with WP 4.7.
 = 0.7.5 =
 * Linted CSS files
 = 0.7.4 =
