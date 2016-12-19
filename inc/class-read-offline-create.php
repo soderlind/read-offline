@@ -47,7 +47,7 @@ class Read_Offline_Create extends Read_Offline {
 
 		$this->subject = (count( wp_get_post_categories( $post->ID ) )) ? implode( ' ,',array_map( 'get_cat_name', wp_get_post_categories( $post->ID ) ) ) : '';
 		$this->keywords = $this->_get_taxonomies_terms( $post );
-		$this->generator = 'Read Offline '. READOFFLINE_VERSION . ' by Per Soderlind, http://wordpress.org/extend/plugins/read-offline/';
+		$this->generator = 'Read Offline ' . READOFFLINE_VERSION . ' by Per Soderlind, http://wordpress.org/extend/plugins/read-offline/';
 
 		// content
 		$html = '<h1 class="entry-title">' . get_the_title( $post->ID ) . '</h1>';
@@ -308,7 +308,7 @@ class Read_Offline_Create extends Read_Offline {
 		$title = urlencode( substr( $title, 0, 12 ) );
 
 		//Send the mobi file as download
-		$zip_data = $mobi->download( $title.'.mobi' );
+		$zip_data = $mobi->download( $title . '.mobi' );
 	}
 
 
@@ -561,7 +561,7 @@ class Read_Offline_Create extends Read_Offline {
 		 * Default CSS
 		 */
 		if ( 'default_header' == $header || 'default_footer' == $footer ) {
-			$pdf->WriteHTML( file_get_contents( READOFFLINE_PATH. '/templates/pdf/default-print.css' ),1 );
+			$pdf->WriteHTML( file_get_contents( READOFFLINE_PATH . '/templates/pdf/default-print.css' ),1 );
 		}
 
 		/**
@@ -1100,13 +1100,13 @@ class Read_Offline_MobiFile extends MobiFile {
 	private function addTOC( $str, $entries ) {
 		$this->resolveFilepos( $str, self::TOC_LINK );
 		$str->append( '<h2>' . __( 'Contentssss', 'read-offline' ) . '</h2>' );
-		$str->append( "<blockquote><table summary='" .  __( 'Table of Contents', 'read-offline' ) . "'><col/><tbody>" );
+		$str->append( '<blockquote><table summary="' . __( 'Table of Contents', 'read-offline' ) . '"><col/><tbody>' );
 		for ( $i = 0, $len = sizeof( $entries ); $i < $len; $i++ ) {
 			$entry = $entries[ $i ];
 
-			$str->append( "<tr><td><a href='#".$entry['id']."' filepos=" );
+			$str->append( '<tr><td><a href="#' . $entry['id'] . '" filepos=' );
 			$this->addFilepos( $str, $entry['id'] );
-			$str->append( '>'.$entry['title'].'</a></td></tr>' );
+			$str->append( '>' . $entry['title'] . '</a></td></tr>' );
 		}
 		$str->append( '</tbody></b></table></blockquote><mbp:pagebreak/>' );
 	}
