@@ -61,12 +61,12 @@ class Read_Offline {
 		$code = base64_encode( AUTH_KEY );
 		if ( get_option( 'permalink_structure' ) ) {
 			return sprintf('%s/read-offline/%s/%s.%s%s',
-				home_url(),$post_id,$name,$format,
+				site_url(),$post_id,$name,$format,
 				( $refresh ) ? '?read-offline-code=' . $code  : ''
 			);
 		} else {
 			return sprintf('%s/index.php?read_offline_id=%s&read_offline_name=%s&&read_offline_format=%s%s',
-				home_url(),$post_id,$name,$format,
+				site_url(),$post_id,$name,$format,
 				( $refresh ) ? '&read-offline-code=' . $code  : ''
 			);
 		}
