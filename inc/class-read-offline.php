@@ -6,11 +6,7 @@ class Read_Offline {
 
 	public static $options;
 
-	public static $mime_types = array(
-			'epub' => 'application/epub+zip',
-			'mobi' => 'application/x-mobipocket-ebook',
-			'pdf'  => 'application/pdf',
-		);
+	public static $mime_types = array();
 
 	private static $instance;
 
@@ -27,6 +23,18 @@ class Read_Offline {
 	private function __construct() {
 
 		self::$options = get_option( 'Read_Offline_Admin_Settings' );
+
+		// Only generate files for formats selected in plugin settings
+		if( (bool) self::$options['what']['formats']['epub'] ) {
+			self::$mime_types['epub'] = 'application/epub+zip';
+		}
+		if( (bool) self::$options['what']['formats']['mobi'] ) {
+			self::$mime_types['mobi'] = 'application/x-mobipocket-ebook';
+		}
+		if( (bool) self::$options['what']['formats']['pdf'] ) {
+			self::$mime_types['pdf'] = 'application/pdf';
+		}
+		
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( $this, 'read_offline_update' ) );
 		}
