@@ -1,14 +1,14 @@
-# Copyright (C) 2016 Per Soderlind
+# Copyright (C) 2017 Per Soderlind
 # This file is distributed under the same license as the Read Offline package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Read Offline 0.7.6\n"
+"Project-Id-Version: Read Offline 0.7.7\n"
 "Report-Msgid-Bugs-To: https://github.com/soderlind/read-offline/issues/new\n"
-"POT-Creation-Date: 2016-12-12 20:50:58+00:00\n"
+"POT-Creation-Date: 2017-05-18 08:32:35+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2016-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2017-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: grunt-wp-i18n 0.5.4\n"
@@ -752,17 +752,17 @@ msgstr ""
 msgid "Text:"
 msgstr ""
 
-#: inc/class-read-offline.php:178
+#: inc/class-read-offline.php:186
 msgid "wp_upload_bits failed,  error: \"<strong>%s</strong>"
 msgstr ""
 
-#: inc/class-read-offline.php:284
+#: inc/class-read-offline.php:292
 msgid ""
 "Unable to create directory \"<strong>%s</strong>\". Is its parent directory "
 "writable by the server?"
 msgstr ""
 
-#: inc/class-read-offline.php:309
+#: inc/class-read-offline.php:317
 msgid ""
 "Unable to remove cache directory \"<strong>%s</strong>\". Is it and its "
 "directories writable by the server?"

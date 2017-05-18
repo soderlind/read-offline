@@ -4,7 +4,7 @@ Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
 Requires at least: 4.0
 Tested up to: 4.7
-Stable tag: 0.7.6
+Stable tag: 0.7.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -120,6 +120,9 @@ There are 2 ways you can add the Read Offline links:
 
 
 == Changelog ==
+= 0.7.7 =
+* [Prevents formats not selected in plugin settings from being saved](https://github.com/soderlind/read-offline/pull/82)
+* [Fixes query url of attachment to use site url instead of home](https://github.com/soderlind/read-offline/pull/79) (allows alternate site url to not break the plugin)
 = 0.7.6 =
 * Tested & found compatible with WP 4.7.
 = 0.7.5 =
