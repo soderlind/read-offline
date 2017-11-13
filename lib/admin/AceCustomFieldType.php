@@ -3,7 +3,7 @@
  * AceCustomFieldType, for the  Admin Page Framework by Michael Uno, is written by Per Soderlind - http://soderlind.no
  */
 if ( ! class_exists( 'AceCustomFieldType' ) ) :
-class AceCustomFieldType extends AdminPageFramework_FieldType {
+class AceCustomFieldType extends Read_Offline_Settings_AdminPageFramework_FieldType {
 
     /**
      * Defines the field type slugs used for this field type.
@@ -185,7 +185,7 @@ class AceCustomFieldType extends AdminPageFramework_FieldType {
             . "<div class='admin-page-framework-input-label-container'>"
                 . "<label for='{$aField['input_id']}'>"
                     . $aField['before_input']
-                    . "<textarea " . $this->generateAttributes( $aInputAttributes  ) . " >" 
+                    . "<textarea " . $this->generateAttributes( $aInputAttributes  ) . " >"
                             . $aField['value']
                     . "</textarea>"
                     . $aField['after_input']

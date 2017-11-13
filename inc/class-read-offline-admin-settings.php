@@ -2,13 +2,13 @@
 
 
 // Include the library
-if ( ! class_exists( 'AdminPageFramework' ) ) {
+if ( ! class_exists( 'Read_Offline_Settings_AdminPageFramework' ) ) {
 	//include_once( dirname( __FILE__ ) . '/lib/source/admin-page-framework.php' );
-	include_once( READOFFLINE_PATH . '/lib/admin/admin-page-framework.min.php' );
+	include_once( READOFFLINE_PATH . '/lib/admin/admin-page-framework.php' );
 }
 
 // extend the class
-class Read_Offline_Admin_Settings extends AdminPageFramework {
+class Read_Offline_Admin_Settings extends Read_Offline_Settings_AdminPageFramework {
 
 	public function start_Read_Offline_Admin_Settings() {
 		// start_{extended class name} - this method gets automatically triggered at the end of the class constructor.
@@ -26,7 +26,9 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 
 	}
 
-
+	public function isDebugMode() {
+		return false;
+	}
 
 	public function replyToInsertPluginTitle( $content ) {
 		return  "<div class='plugin_icon' style='height:64px;width:64px;float:left;'>"
