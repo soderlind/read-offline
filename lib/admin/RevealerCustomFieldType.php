@@ -97,7 +97,7 @@ class RevealerCustomFieldType extends Read_Offline_Settings_AdminPageFramework_F
 
         return
             $aField['before_label']
-            . "<div class='admin-page-framework-input-label-container admin-page-framework-select-label' style='min-width: " . $this->sanitizeLength( $aField['label_min_width'] ) . ";'>"
+            . "<div class='admin-page-framework-input-label-container admin-page-framework-select-label' style='min-width: " . $this->getLengthSanitized( $aField['label_min_width'] ) . ";'>"
                 . "<label for='{$aField['input_id']}'>"
                     . $aField['before_input']
                     . "<span class='admin-page-framework-input-container'>"
