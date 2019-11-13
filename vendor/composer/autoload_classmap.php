@@ -6,13 +6,20 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'FPDF_TPL' => $vendorDir . '/setasign/fpdi/fpdf_tpl.php',
+    'FPDI' => $vendorDir . '/setasign/fpdi/fpdi.php',
+    'FilterASCII85' => $vendorDir . '/setasign/fpdi/filters/FilterASCII85.php',
+    'FilterASCIIHexDecode' => $vendorDir . '/setasign/fpdi/filters/FilterASCIIHexDecode.php',
+    'FilterLZW' => $vendorDir . '/setasign/fpdi/filters/FilterLZW.php',
     'RelativePath' => $vendorDir . '/grandt/relativepath/RelativePath.php',
-    'UUID' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
-    'UUIDException' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
-    'UUIDStorage' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
-    'UUIDStorageException' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
-    'UUIDStorageStable' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
-    'UUIDStorageVolatile' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
+    'UUID' => $vendorDir . '/soderlind/phpepub/src/lib.uuid.php',
+    'UUIDException' => $vendorDir . '/soderlind/phpepub/src/lib.uuid.php',
+    'UUIDStorage' => $vendorDir . '/soderlind/phpepub/src/lib.uuid.php',
+    'UUIDStorageException' => $vendorDir . '/soderlind/phpepub/src/lib.uuid.php',
+    'UUIDStorageStable' => $vendorDir . '/soderlind/phpepub/src/lib.uuid.php',
+    'UUIDStorageVolatile' => $vendorDir . '/soderlind/phpepub/src/lib.uuid.php',
     'com\\grandt\\BinString' => $vendorDir . '/grandt/binstring/BinString.php',
     'com\\grandt\\BinStringStatic' => $vendorDir . '/grandt/binstring/BinStringStatic.php',
+    'fpdi_pdf_parser' => $vendorDir . '/setasign/fpdi/fpdi_pdf_parser.php',
+    'pdf_context' => $vendorDir . '/setasign/fpdi/pdf_context.php',
 );

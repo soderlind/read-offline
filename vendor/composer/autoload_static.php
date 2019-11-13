@@ -6,6 +6,10 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit0897881f349ba3813e3d5770bb679280
 {
+    public static $files = array (
+        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'g' => 
         array (
@@ -20,8 +24,17 @@ class ComposerStaticInit0897881f349ba3813e3d5770bb679280
         ),
         'P' => 
         array (
+            'Psr\\Log\\' => 8,
             'PHPePub\\' => 8,
             'PHPZip\\Zip\\' => 11,
+        ),
+        'M' => 
+        array (
+            'Mpdf\\' => 5,
+        ),
+        'D' => 
+        array (
+            'DeepCopy\\' => 9,
         ),
     );
 
@@ -46,26 +59,45 @@ class ComposerStaticInit0897881f349ba3813e3d5770bb679280
         array (
             0 => __DIR__ . '/..' . '/grandt/phpzipmerge/src/ZipMerge',
         ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+        ),
         'PHPePub\\' => 
         array (
-            0 => __DIR__ . '/..' . '/grandt/phpepub/src/PHPePub',
+            0 => __DIR__ . '/..' . '/soderlind/phpepub/src/PHPePub',
         ),
         'PHPZip\\Zip\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpzip/phpzip/src/Zip',
         ),
+        'Mpdf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mpdf/mpdf/src',
+        ),
+        'DeepCopy\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
+        ),
     );
 
     public static $classMap = array (
+        'FPDF_TPL' => __DIR__ . '/..' . '/setasign/fpdi/fpdf_tpl.php',
+        'FPDI' => __DIR__ . '/..' . '/setasign/fpdi/fpdi.php',
+        'FilterASCII85' => __DIR__ . '/..' . '/setasign/fpdi/filters/FilterASCII85.php',
+        'FilterASCIIHexDecode' => __DIR__ . '/..' . '/setasign/fpdi/filters/FilterASCIIHexDecode.php',
+        'FilterLZW' => __DIR__ . '/..' . '/setasign/fpdi/filters/FilterLZW.php',
         'RelativePath' => __DIR__ . '/..' . '/grandt/relativepath/RelativePath.php',
-        'UUID' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
-        'UUIDException' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
-        'UUIDStorage' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
-        'UUIDStorageException' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
-        'UUIDStorageStable' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
-        'UUIDStorageVolatile' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
+        'UUID' => __DIR__ . '/..' . '/soderlind/phpepub/src/lib.uuid.php',
+        'UUIDException' => __DIR__ . '/..' . '/soderlind/phpepub/src/lib.uuid.php',
+        'UUIDStorage' => __DIR__ . '/..' . '/soderlind/phpepub/src/lib.uuid.php',
+        'UUIDStorageException' => __DIR__ . '/..' . '/soderlind/phpepub/src/lib.uuid.php',
+        'UUIDStorageStable' => __DIR__ . '/..' . '/soderlind/phpepub/src/lib.uuid.php',
+        'UUIDStorageVolatile' => __DIR__ . '/..' . '/soderlind/phpepub/src/lib.uuid.php',
         'com\\grandt\\BinString' => __DIR__ . '/..' . '/grandt/binstring/BinString.php',
         'com\\grandt\\BinStringStatic' => __DIR__ . '/..' . '/grandt/binstring/BinStringStatic.php',
+        'fpdi_pdf_parser' => __DIR__ . '/..' . '/setasign/fpdi/fpdi_pdf_parser.php',
+        'pdf_context' => __DIR__ . '/..' . '/setasign/fpdi/pdf_context.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

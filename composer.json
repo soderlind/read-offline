@@ -1,6 +1,13 @@
 {
     "require": {
-		"grandt/phpepub": ">=4.0.3",
-        "php": ">=5.3.0"
-    }
+		"soderlind/phpepub": "dev-feature/php-72-compat",
+		"mpdf/mpdf": "^7.1"
+	},
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "git@github.com:soderlind/phpepub.git"
+        }
+    ]
 }
+
