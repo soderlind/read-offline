@@ -144,7 +144,7 @@ class Read_Offline_Create extends Read_Offline {
 
 				case 'feature_image':
 					$image_url = wp_get_attachment_url( get_post_thumbnail_id( $post->ID, 'thumbnail' ) );
-					if ( false !== $this->_url_exists( $image_url ) ) {
+					if ( false !== $image_url && false !== $this->_url_exists( $image_url ) ) {
 						$attachment_data = wp_get_attachment_metadata( get_post_thumbnail_id( $post->ID, 'thumbnail' ) );
 
 						$image_path = $upload_dir['basedir'] . '/' . $attachment_data['file'];
@@ -785,9 +785,13 @@ class Read_Offline_Create extends Read_Offline {
 
 		$url = esc_url_raw( $url );
 
+		if ( ! isset( $url ) ) {
+			return false;
+		}
+
 		// Relative URL
-		if ( strpos( $href, '//' ) !== 0 && in_array( $href[0], [ '/', '#', '?' ], true ) ) {
-				$href = get_bloginfo( 'url' ) . $href;
+		if ( strpos( $url, '//' ) !== 0 && in_array( $url[0], [ '/', '#', '?' ], true ) ) {
+				$url = get_bloginfo( 'url' ) . $url;
 		}
 
 		// No redirects
