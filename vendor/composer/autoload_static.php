@@ -4,15 +4,16 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0897881f349ba3813e3d5770bb679280
+class ComposerStaticInitf096ae664ae02e00ef256c951490e367
 {
+    public static $files = array (
+        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
-        'g' => 
+        's' => 
         array (
-            'grandt\\ResizeGif\\Structure\\' => 27,
-            'grandt\\ResizeGif\\Files\\' => 23,
-            'grandt\\ResizeGif\\Debug\\' => 23,
-            'grandt\\ResizeGif\\' => 17,
+            'setasign\\Fpdi\\' => 14,
         ),
         'Z' => 
         array (
@@ -20,50 +21,61 @@ class ComposerStaticInit0897881f349ba3813e3d5770bb679280
         ),
         'P' => 
         array (
+            'Psr\\Log\\' => 8,
             'PHPePub\\' => 8,
             'PHPZip\\Zip\\' => 11,
+        ),
+        'M' => 
+        array (
+            'Mpdf\\' => 5,
+        ),
+        'J' => 
+        array (
+            'JKingWeb\\DrUUID\\' => 16,
+        ),
+        'D' => 
+        array (
+            'DeepCopy\\' => 9,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'grandt\\ResizeGif\\Structure\\' => 
+        'setasign\\Fpdi\\' => 
         array (
-            0 => __DIR__ . '/..' . '/grandt/phpresizegif/src/ResizeGif/Structure',
-        ),
-        'grandt\\ResizeGif\\Files\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/grandt/phpresizegif/src/ResizeGif/Files',
-        ),
-        'grandt\\ResizeGif\\Debug\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/grandt/phpresizegif/src/ResizeGif/Debug',
-        ),
-        'grandt\\ResizeGif\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/grandt/phpresizegif/src/ResizeGif',
+            0 => __DIR__ . '/..' . '/setasign/fpdi/src',
         ),
         'ZipMerge\\' => 
         array (
             0 => __DIR__ . '/..' . '/grandt/phpzipmerge/src/ZipMerge',
         ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+        ),
         'PHPePub\\' => 
         array (
-            0 => __DIR__ . '/..' . '/grandt/phpepub/src/PHPePub',
+            0 => __DIR__ . '/..' . '/soderlind/phpepub/src/PHPePub',
         ),
         'PHPZip\\Zip\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpzip/phpzip/src/Zip',
         ),
+        'Mpdf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mpdf/mpdf/src',
+        ),
+        'JKingWeb\\DrUUID\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/jkingweb/druuid/lib',
+        ),
+        'DeepCopy\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
+        ),
     );
 
     public static $classMap = array (
         'RelativePath' => __DIR__ . '/..' . '/grandt/relativepath/RelativePath.php',
-        'UUID' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
-        'UUIDException' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
-        'UUIDStorage' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
-        'UUIDStorageException' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
-        'UUIDStorageStable' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
-        'UUIDStorageVolatile' => __DIR__ . '/..' . '/grandt/phpepub/src/lib.uuid.php',
         'com\\grandt\\BinString' => __DIR__ . '/..' . '/grandt/binstring/BinString.php',
         'com\\grandt\\BinStringStatic' => __DIR__ . '/..' . '/grandt/binstring/BinStringStatic.php',
     );
@@ -71,9 +83,9 @@ class ComposerStaticInit0897881f349ba3813e3d5770bb679280
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0897881f349ba3813e3d5770bb679280::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0897881f349ba3813e3d5770bb679280::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit0897881f349ba3813e3d5770bb679280::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitf096ae664ae02e00ef256c951490e367::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitf096ae664ae02e00ef256c951490e367::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitf096ae664ae02e00ef256c951490e367::$classMap;
 
         }, null, ClassLoader::class);
     }

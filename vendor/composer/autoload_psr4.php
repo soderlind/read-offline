@@ -6,11 +6,12 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'grandt\\ResizeGif\\Structure\\' => array($vendorDir . '/grandt/phpresizegif/src/ResizeGif/Structure'),
-    'grandt\\ResizeGif\\Files\\' => array($vendorDir . '/grandt/phpresizegif/src/ResizeGif/Files'),
-    'grandt\\ResizeGif\\Debug\\' => array($vendorDir . '/grandt/phpresizegif/src/ResizeGif/Debug'),
-    'grandt\\ResizeGif\\' => array($vendorDir . '/grandt/phpresizegif/src/ResizeGif'),
+    'setasign\\Fpdi\\' => array($vendorDir . '/setasign/fpdi/src'),
     'ZipMerge\\' => array($vendorDir . '/grandt/phpzipmerge/src/ZipMerge'),
-    'PHPePub\\' => array($vendorDir . '/grandt/phpepub/src/PHPePub'),
+    'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
+    'PHPePub\\' => array($vendorDir . '/soderlind/phpepub/src/PHPePub'),
     'PHPZip\\Zip\\' => array($vendorDir . '/phpzip/phpzip/src/Zip'),
+    'Mpdf\\' => array($vendorDir . '/mpdf/mpdf/src'),
+    'JKingWeb\\DrUUID\\' => array($vendorDir . '/jkingweb/druuid/lib'),
+    'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
 );

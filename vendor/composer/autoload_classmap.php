@@ -7,12 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'RelativePath' => $vendorDir . '/grandt/relativepath/RelativePath.php',
-    'UUID' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
-    'UUIDException' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
-    'UUIDStorage' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
-    'UUIDStorageException' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
-    'UUIDStorageStable' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
-    'UUIDStorageVolatile' => $vendorDir . '/grandt/phpepub/src/lib.uuid.php',
     'com\\grandt\\BinString' => $vendorDir . '/grandt/binstring/BinString.php',
     'com\\grandt\\BinStringStatic' => $vendorDir . '/grandt/binstring/BinStringStatic.php',
 );

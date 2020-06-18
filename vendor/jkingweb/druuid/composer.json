@@ -1,0 +1,27 @@
+{
+	"name": "jkingweb/druuid",
+	"type": "library",
+	"description": "DrUUID RFC 4122 library for PHP",
+	"keywords": ["uuid"],
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "J. King",
+			"email": "jking@jkingweb.ca",
+			"homepage": "https://jkingweb.ca/"
+		}
+	],
+	"require": {
+		"php": ">=5.3.0"
+	},
+	"suggest": {
+		"ext-gmp": "Recommended on 32-bit installations for time-base UUIDs",
+		"ext-bcmath": "Supported alternative to GMP on 32-bit systems",
+		"phpseclib/phpseclib": "Supported alternative to GMP or BC Math on 32-bit systems (either v1.x or v2.x)"
+	},
+	"autoload": {
+		"psr-4": {
+			"JKingWeb\\DrUUID\\": "lib/"
+		}
+	}
+}
