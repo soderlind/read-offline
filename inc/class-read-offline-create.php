@@ -8,7 +8,7 @@ use PHPePub\Helpers\CalibreHelper;
 use PHPePub\Helpers\URLHelper;
 use PHPZip\Zip\File\Zip;
 
-require_once( READOFFLINE_PATH . '/lib/phpMobi/MOBIClass/MOBI.php' );
+require_once READOFFLINE_PATH . '/lib/phpMobi/MOBIClass/MOBI.php';
 
 class Read_Offline_Create extends Read_Offline {
 
@@ -37,51 +37,53 @@ class Read_Offline_Create extends Read_Offline {
 	private $html;
 
 	function init( $post ) {
-		if ( '' !== get_the_author_meta( 'user_firstname',$post->post_author )  && '' !== get_the_author_meta( 'user_lastname',$post->post_author ) ) {
-			$this->author_firstlast = sprintf( '%s %s',get_the_author_meta( 'user_firstname',$post->post_author ),get_the_author_meta( 'user_lastname',$post->post_author ) );
-			$this->author_lastfirst = sprintf( '%s, %s',get_the_author_meta( 'user_firstname',$post->post_author ),get_the_author_meta( 'user_lastname',$post->post_author ) );
+		if ( '' !== get_the_author_meta( 'user_firstname', $post->post_author ) && '' !== get_the_author_meta( 'user_lastname', $post->post_author ) ) {
+			$this->author_firstlast = sprintf( '%s %s', get_the_author_meta( 'user_firstname', $post->post_author ), get_the_author_meta( 'user_lastname', $post->post_author ) );
+			$this->author_lastfirst = sprintf( '%s, %s', get_the_author_meta( 'user_firstname', $post->post_author ), get_the_author_meta( 'user_lastname', $post->post_author ) );
 		} else {
-			$this->author_firstlast = get_the_author_meta( 'display_name',$post->post_author );
-			$this->author_lastfirst = get_the_author_meta( 'display_name',$post->post_author );
+			$this->author_firstlast = get_the_author_meta( 'display_name', $post->post_author );
+			$this->author_lastfirst = get_the_author_meta( 'display_name', $post->post_author );
 		}
 
-		$this->subject = (count( wp_get_post_categories( $post->ID ) )) ? implode( ' ,',array_map( 'get_cat_name', wp_get_post_categories( $post->ID ) ) ) : '';
-		$this->keywords = $this->_get_taxonomies_terms( $post );
+		$this->subject   = ( count( wp_get_post_categories( $post->ID ) ) ) ? implode( ' ,', array_map( 'get_cat_name', wp_get_post_categories( $post->ID ) ) ) : '';
+		$this->keywords  = $this->_get_taxonomies_terms( $post );
 		$this->generator = 'Read Offline ' . READOFFLINE_VERSION . ' by Per Soderlind, http://wordpress.org/extend/plugins/read-offline/';
 
 		// content
-		$html = '<h1 class="entry-title">' . get_the_title( $post->ID ) . '</h1>';
-		$content = $post->post_content;
-		$content = preg_replace( '/\[\\/?(pdf|epub|mobi|print)(\\s+.*?\]|\])/i', '', $content ); // remove all [readonline] shortcodes
+		$html        = '<h1 class="entry-title">' . get_the_title( $post->ID ) . '</h1>';
+		$content     = $post->post_content;
+		$content     = preg_replace( '/\[\\/?(pdf|epub|mobi|print)(\\s+.*?\]|\])/i', '', $content ); // remove all [readonline] shortcodes
 		$this->html .= $this->_remove_dont_readoffline( apply_filters( 'the_content', $content ) );
 	}
 
 	function pprint( $post ) {
 		$print_header = '';
-		$print_css  = '';
+		$print_css    = '';
 		if ( '0' != parent::$options['print']['header'] ) {
-			$print_header = sprintf('BODY:before {  display: block;  content: "%s";  margin-bottom: 10px;  border: 1px solid #bbb;  padding: 3px 5px;  font-style: italic;}'
-				, $this->_parse_header_footer( $post, parent::$options['print']['headertext'], true )
+			$print_header = sprintf(
+				'BODY:before {  display: block;  content: "%s";  margin-bottom: 10px;  border: 1px solid #bbb;  padding: 3px 5px;  font-style: italic;}',
+				$this->_parse_header_footer( $post, parent::$options['print']['headertext'], true )
 			);
 
 		}
 
-		$print_style = $this->_get_child_array_key( 'print',parent::$options['print']['style'] );
+		$print_style = $this->_get_child_array_key( 'print', parent::$options['print']['style'] );
 		switch ( $print_style ) {
 			case 'theme_style':
 				$print_css = file_get_contents( get_stylesheet_uri() );
 				break;
 
 			case 'css':
-				$print_css = ( '' != parent::$options['print']['css']) ? parent::$options['print']['css'] : '';
+				$print_css = ( '' != parent::$options['print']['css'] ) ? parent::$options['print']['css'] : '';
 				break;
 		}
-		printf('<!DOCTYPE html><html%s><head><meta charset="UTF-8"><title>%s</title><style type="text/css" media="print">%s%s</style></head><body>%s</body></html>'
-			, (is_rtl()) ? " dir='rtl'" : ''
-			, get_the_title( $post->ID )
-			, $print_css
-			, $print_header
-			, $this->html
+		printf(
+			'<!DOCTYPE html><html%s><head><meta charset="UTF-8"><title>%s</title><style type="text/css" media="print">%s%s</style></head><body>%s</body></html>',
+			( is_rtl() ) ? " dir='rtl'" : '',
+			get_the_title( $post->ID ),
+			$print_css,
+			$print_header,
+			$this->html
 		);
 	}
 
@@ -95,7 +97,7 @@ class Read_Offline_Create extends Read_Offline {
 			$writing_direction = EPub::DIRECTION_LEFT_TO_RIGHT;
 		}
 
-		$epub = new EPub( EPub::BOOK_VERSION_EPUB3, $iso6391, $writing_direction );
+		$epub            = new EPub( EPub::BOOK_VERSION_EPUB3, $iso6391, $writing_direction );
 		$epub->isLogging = false; // @codingStandardsIgnoreLine
 		/*
 		 * Social DRM:
@@ -104,7 +106,7 @@ class Read_Offline_Create extends Read_Offline {
 		 * - The last page contains a disclaimer and logo, and has a corresponding entry in the table of contents.
 		 */
 		$epub->setGenerator( $this->generator );
-		$epub->setTitle( $post->post_title ); //setting specific options to the EPub library
+		$epub->setTitle( $post->post_title ); // setting specific options to the EPub library
 		$epub->setIdentifier( $post->guid, EPub::IDENTIFIER_URI );
 		$epub->setLanguage( $iso6391 );
 		$epub->setAuthor( $this->author_firstlast, $this->author_lastfirst ); // "Firstname Lastname", "Lastname, First names"
@@ -112,25 +114,25 @@ class Read_Offline_Create extends Read_Offline {
 		$epub->setSourceURL( $post->guid );
 		$epub->rootLevel();
 
-		$print_css = '';
-		$print_style = $this->_get_child_array_key( 'epub',parent::$options['epub']['style'] );
+		$print_css   = '';
+		$print_style = $this->_get_child_array_key( 'epub', parent::$options['epub']['style'] );
 		switch ( $print_style ) {
 			case 'theme_style':
-				//$print_css = file_get_contents(get_stylesheet_uri());
+				// $print_css = file_get_contents(get_stylesheet_uri());
 				break;
 
 			case 'css':
-				$print_css = ( '' != parent::$options['epub']['css']) ? parent::$options['epub']['css'] : '';
+				$print_css = ( '' != parent::$options['epub']['css'] ) ? parent::$options['epub']['css'] : '';
 				break;
 		}
 		if ( '' != $print_css ) {
 			$epub->addCSSFile( 'styles.css', 'css1', $print_css );
-			//$epub->setCoverCss($print_css);
+			// $epub->setCoverCss($print_css);
 		}
 		/**
 		 * Coverart
 		 */
-		$coverart = $this->_get_child_array_key( 'epub',parent::$options['epub']['art'] );
+		$coverart   = $this->_get_child_array_key( 'epub', parent::$options['epub']['art'] );
 		$upload_dir = wp_upload_dir();
 		if ( 'none' != $coverart ) {
 
@@ -169,10 +171,10 @@ class Read_Offline_Create extends Read_Offline {
 			. "</head>\n"
 			. "<body>\n";
 		*/
-		$content_start = sprintf( '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="styles.css" /><title>%s</title></head><body%s>', $post->post_title, (is_rtl()) ? " dir='rtl'" : '' );
-		$content_end = "\n</body>\n</html>\n";
+		$content_start = sprintf( '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="styles.css" /><title>%s</title></head><body%s>', $post->post_title, ( is_rtl() ) ? " dir='rtl'" : '' );
+		$content_end   = "\n</body>\n</html>\n";
 
-		$cover = $content_start . sprintf( "<h1>%s</h1>\n<h2>%s: %s</h2>\n",$post->post_title, _x( 'By', 'Rererence between title and author: Title By: Author Name' ) , $this->author_firstlast ) . $content_end;
+		$cover = $content_start . sprintf( "<h1>%s</h1>\n<h2>%s: %s</h2>\n", $post->post_title, _x( 'By', 'Rererence between title and author: Title By: Author Name' ), $this->author_firstlast ) . $content_end;
 		$epub->addChapter( 'Notices', 'Cover.html', $cover );
 
 		/*
@@ -181,17 +183,20 @@ class Read_Offline_Create extends Read_Offline {
 
 		$html = $this->html;
 
-		$add_toc = $this->_get_child_array_key( 'epub',parent::$options['epub']['add_toc'] );
-		$toc     = $this->_get_child_array_key( 'epub',parent::$options['epub']['toc'] );
+		$add_toc = $this->_get_child_array_key( 'epub', parent::$options['epub']['add_toc'] );
+		$toc     = $this->_get_child_array_key( 'epub', parent::$options['epub']['toc'] );
 		$content = array();
 		if ( 0 !== $add_toc && 0 !== $toc ) {
 			$content = $this->_split_content( $html, $toc );
 			if ( 0 != count( $content ) ) {
 				$chapter_num = 1;
 				$epub->buildTOC( null, 'toc', __( 'Table of Contents', 'read-offline' ), true, false );
-				$levels = array_map( function( $paragraphs ) {
-					return $paragraphs['level'];
-			  	}, $content );
+				$levels    = array_map(
+					function( $paragraphs ) {
+						return $paragraphs['level'];
+					},
+					$content
+				);
 				$top_level = min( $levels );
 				$epub->setCurrentLevel( 1 );
 				foreach ( $content as $paragraph ) {
@@ -200,24 +205,24 @@ class Read_Offline_Create extends Read_Offline {
 					// // $level = $paragraph['level'];
 					// // if ( $epub->getCurrentLevel() < $level ) {
 					// while ( $epub->getCurrentLevel() < $level ) {
-					// 	$epub->subLevel();
+					// $epub->subLevel();
 					// }
-					// 	// for ( $i = $epub->getCurrentLevel(); $i < $level; $i++ ) {
-					// 	// 	$epub->subLevel();
-					// 	// }
+					// for ( $i = $epub->getCurrentLevel(); $i < $level; $i++ ) {
+					// $epub->subLevel();
+					// }
 					// // } elseif ( $epub->getCurrentLevel() > $level ) {
-					// 	// $epub->setCurrentLevel( $level );
+					// $epub->setCurrentLevel( $level );
 					// while ( $epub->getCurrentLevel() > $level ) {
-					// 	$epub->backLevel();
+					// $epub->backLevel();
 					// }
-					// 	// for ( $i = $epub->getCurrentLevel(); $i > $level; $i-- ) {
-					// 	// 	$epub->backLevel();
-					// 	// }
+					// for ( $i = $epub->getCurrentLevel(); $i > $level; $i-- ) {
+					// $epub->backLevel();
+					// }
 					// // }
 					// // $epub->setCurrentLevel( $level );
 
-					$header = ('' !== $paragraph['title'] ) ?  sprintf( '<h%s>%s</h%s>', $paragraph['level'], $paragraph['title'], $paragraph['level'] ) : '';
-					$epub->addChapter( $paragraph['title'], sprintf( 'Chapter%03d.html',$chapter_num ), $content_start . $header . $paragraph['content'] . $content_end, true, EPub::EXTERNAL_REF_ADD );
+					$header = ( '' !== $paragraph['title'] ) ? sprintf( '<h%s>%s</h%s>', $paragraph['level'], $paragraph['title'], $paragraph['level'] ) : '';
+					$epub->addChapter( $paragraph['title'], sprintf( 'Chapter%03d.html', $chapter_num ), $content_start . $header . $paragraph['content'] . $content_end, true, EPub::EXTERNAL_REF_ADD );
 					$chapter_num++;
 				}
 				$epub->rootLevel();
@@ -255,8 +260,8 @@ class Read_Offline_Create extends Read_Offline {
 		version
 		 */
 
-		$add_toc = $this->_get_child_array_key( 'mobi',parent::$options['mobi']['add_toc'] );
-		$toc     = $this->_get_child_array_key( 'mobi',parent::$options['mobi']['toc'] );
+		$add_toc = $this->_get_child_array_key( 'mobi', parent::$options['mobi']['add_toc'] );
+		$toc     = $this->_get_child_array_key( 'mobi', parent::$options['mobi']['toc'] );
 		$content = array();
 		if ( 0 !== $add_toc && 0 !== $toc ) {
 			$content = $this->_split_content( $html, $toc );
@@ -280,8 +285,8 @@ class Read_Offline_Create extends Read_Offline {
 						$mobi_content->appendChapterTitle( wp_strip_all_tags( $paragraph['title'] ) );
 					}
 					// if ( false !== ($imgurl = $this->_get_first_imageurl( $paragraph )) ) {
-					// 	$img = $this->_image_create_from_url( $imgurl );
-					// 	$mobi_content->appendImage( $img );
+					// $img = $this->_image_create_from_url( $imgurl );
+					// $mobi_content->appendImage( $img );
 					// }
 					$mobi_content->appendParagraph( $this->_strip_img( $paragraph['content'] ) );
 					$mobi_content->appendPageBreak();
@@ -304,10 +309,11 @@ class Read_Offline_Create extends Read_Offline {
 			$mobi->setOptions( $options );
 		}
 		$title = $post->post_name;
-		if ( false === $title ) { $title = 'file'; }
+		if ( false === $title ) {
+			$title = 'file'; }
 		$title = urlencode( substr( $title, 0, 12 ) );
 
-		//Send the mobi file as download
+		// Send the mobi file as download
 		$zip_data = $mobi->download( $title . '.mobi' );
 	}
 
@@ -317,70 +323,73 @@ class Read_Offline_Create extends Read_Offline {
 
 		$html = $this->html;
 
-		define( '_MPDF_TEMP_PATH',  READOFFLINE_CACHE . '/tmp/' );
-		define( '_MPDF_TTFONTDATAPATH',READOFFLINE_CACHE . '/font/' );
+		define( '_MPDF_TEMP_PATH', READOFFLINE_CACHE . '/tmp/' );
+		define( '_MPDF_TTFONTDATAPATH', READOFFLINE_CACHE . '/font/' );
 		if ( defined( 'READ_OFFLINE_FONTS' ) ) {
 			define( '_MPDF_TTFONTPATH', READ_OFFLINE_FONTS );
 		}
-		require_once( READOFFLINE_PATH . '/lib/mpdf610/mpdf.php' );
+		// require_once READOFFLINE_PATH . '/lib/mpdf610/mpdf.php';
 
-		$paper_format = sprintf("'%s-%s'",
-			('custom_paper_format' == $this->_get_child_array_key( 'pdf_layout',parent::$options['pdf_layout']['paper_format'] )) ? parent::$options['pdf_layout']['custom_paper_format'] : parent::$options['pdf_layout']['paper_format'],
+		$paper_format = sprintf(
+			"'%s-%s'",
+			( 'custom_paper_format' == $this->_get_child_array_key( 'pdf_layout', parent::$options['pdf_layout']['paper_format'] ) ) ? parent::$options['pdf_layout']['custom_paper_format'] : parent::$options['pdf_layout']['paper_format'],
 			parent::$options['pdf_layout']['paper_orientation']
 		);
 
-		$pdf = new mPDF(
-			'', // $mode=''
-			$paper_format, // $format='A4'
-			0,  // $default_font_size=0
-			'', // $default_font=''
-			15, // $mgl=15 - margin_left
-			15, // $mgr=15 - margin right
-			16, // $mgt=16 - margin top
-			16, // $mgb=16 - margin bottom
-			9,  // $mgh=9 - margin header
-			9,  // $mgf=9 - margin footer
-			parent::$options['pdf_layout']['paper_orientation'] // $orientation='P'
+		$pdf = new \Mpdf\Mpdf(
+			array(
+				'mode'              => 'utf-8',
+				'format'            => $paper_format,
+				'default_font_size' => 0,
+				'default_font'      => 'dejavusans',
+				'margin_left'       => 15,
+				'margin_right'      => 15,
+				'margin_top'        => 16,
+				'margin_bottom'     => 16,
+				'margin_header'     => 9,
+				'margin_footer'     => 9,
+				'orientation'       => parent::$options['pdf_layout']['paper_orientation'],
+			)
 		);
 
 		if ( ! defined( 'READ_OFFLINE_FONTS' ) ) {
 			$pdf->fontdata = array(
-				'dejavusanscondensed' => array(
-					'R' => 'DejaVuSansCondensed.ttf',
-					'B' => 'DejaVuSansCondensed-Bold.ttf',
-					'I' => 'DejaVuSansCondensed-Oblique.ttf',
-					'BI' => 'DejaVuSansCondensed-BoldOblique.ttf',
-					'useOTL' => 0xFF,
+				'dejavusanscondensed'  => array(
+					'R'          => 'DejaVuSansCondensed.ttf',
+					'B'          => 'DejaVuSansCondensed-Bold.ttf',
+					'I'          => 'DejaVuSansCondensed-Oblique.ttf',
+					'BI'         => 'DejaVuSansCondensed-BoldOblique.ttf',
+					'useOTL'     => 0xFF,
 					'useKashida' => 75,
-					),
-				'dejavusans' => array(
-					'R' => 'DejaVuSans.ttf',
-					'B' => 'DejaVuSans-Bold.ttf',
-					'I' => 'DejaVuSans-Oblique.ttf',
-					'BI' => 'DejaVuSans-BoldOblique.ttf',
-					'useOTL' => 0xFF,
+				),
+				'dejavusans'           => array(
+					'R'          => 'DejaVuSans.ttf',
+					'B'          => 'DejaVuSans-Bold.ttf',
+					'I'          => 'DejaVuSans-Oblique.ttf',
+					'BI'         => 'DejaVuSans-BoldOblique.ttf',
+					'useOTL'     => 0xFF,
 					'useKashida' => 75,
-					),
-				'dejavuserif' => array(
-					'R' => 'DejaVuSerif.ttf',
-					'B' => 'DejaVuSerif-Bold.ttf',
-					'I' => 'DejaVuSerif-Italic.ttf',
+				),
+				'dejavuserif'          => array(
+					'R'  => 'DejaVuSerif.ttf',
+					'B'  => 'DejaVuSerif-Bold.ttf',
+					'I'  => 'DejaVuSerif-Italic.ttf',
 					'BI' => 'DejaVuSerif-BoldItalic.ttf',
-					),
+				),
 				'dejavuserifcondensed' => array(
-					'R' => 'DejaVuSerifCondensed.ttf',
-					'B' => 'DejaVuSerifCondensed-Bold.ttf',
-					'I' => 'DejaVuSerifCondensed-Italic.ttf',
+					'R'  => 'DejaVuSerifCondensed.ttf',
+					'B'  => 'DejaVuSerifCondensed-Bold.ttf',
+					'I'  => 'DejaVuSerifCondensed-Italic.ttf',
 					'BI' => 'DejaVuSerifCondensed-BoldItalic.ttf',
-					),
-				'dejavusansmono' => array(
-					'R' => 'DejaVuSansMono.ttf',
-					'B' => 'DejaVuSansMono-Bold.ttf',
-					'I' => 'DejaVuSansMono-Oblique.ttf',
-					'BI' => 'DejaVuSansMono-BoldOblique.ttf',
-					'useOTL' => 0xFF,
+				),
+				'dejavusansmono'       => array(
+					'R'          => 'DejaVuSansMono.ttf',
+					'B'          => 'DejaVuSansMono-Bold.ttf',
+					'I'          => 'DejaVuSansMono-Oblique.ttf',
+					'BI'         => 'DejaVuSansMono-BoldOblique.ttf',
+					'useOTL'     => 0xFF,
 					'useKashida' => 75,
-					),
+				),
 			);
 		} else {
 
@@ -404,12 +413,16 @@ class Read_Offline_Create extends Read_Offline {
 		$pdf->ignore_invalid_utf8 = true; // @codingStandardsIgnoreLine
 		$pdf->useSubstitutions    = false; // @codingStandardsIgnoreLine
 		$pdf->simpleTables        = true; // @codingStandardsIgnoreLine
-		$pdf->h2bookmarks         = array( 'H1' => 0, 'H2' => 1, 'H3' => 2 );
+		$pdf->h2bookmarks         = array(
+			'H1' => 0,
+			'H2' => 1,
+			'H3' => 2,
+		);
 		$pdf->title2annots        = true;
 		/**
 		 * Watermark
 		 */
-		$watermark = $this->_get_child_array_key( 'pdf_watermark',parent::$options['pdf_watermark']['watermark'] );
+		$watermark = $this->_get_child_array_key( 'pdf_watermark', parent::$options['pdf_watermark']['watermark'] );
 		switch ( $watermark ) {
 			case 'watermark_text':
 				$pdf->SetWatermarkText(
@@ -429,19 +442,21 @@ class Read_Offline_Create extends Read_Offline {
 		/**
 		 * Protection
 		 */
-		$has_protection = $this->_get_child_array_key( 'pdf_protection',parent::$options['pdf_protection']['protection'] );
+		$has_protection = $this->_get_child_array_key( 'pdf_protection', parent::$options['pdf_protection']['protection'] );
 		if ( 'password_owner' == $has_protection ) {
-			$user_can = array_keys(array_intersect_key(
-				array(
-	                      'copy'               => 1,
-	                      'print'              => 1,
-	                      'modify'             => 1,
-	                      'extract'            => 1,
-	                      'assemble'           => 1,
-	                      'print-highres'      => 1,
+			$user_can       = array_keys(
+				array_intersect_key(
+					array(
+						'copy'          => 1,
+						'print'         => 1,
+						'modify'        => 1,
+						'extract'       => 1,
+						'assemble'      => 1,
+						'print-highres' => 1,
 					),
-				array_filter( parent::$options['pdf_protection']['user_can_do'] )
-			));
+					array_filter( parent::$options['pdf_protection']['user_can_do'] )
+				)
+			);
 			$password_user  = parent::$options['pdf_protection']['password_user'];
 			$password_owner = parent::$options['pdf_protection']['password_owner'];
 			$pdf->SetProtection( $user_can, $password_user, $password_owner, 128 );
@@ -450,7 +465,7 @@ class Read_Offline_Create extends Read_Offline {
 		/**
 		 * PDFA
 		 */
-		if ( '1' == parent::$options['pdf_layout']['pdfa'] ) {
+		if ( isset( parent::$options['pdf_layout']['pdfa'] ) && '1' == parent::$options['pdf_layout']['pdfa'] ) {
 			/*
 			PDFA Fatal Errors
 			Some issues cannot be fixed automatically by mPDF and will generate fatal errors:
@@ -472,38 +487,41 @@ class Read_Offline_Create extends Read_Offline {
 		 * header and footer
 		 */
 		$print_css = '';
-		$header    = $this->_get_child_array_key( 'pdf_header',parent::$options['pdf_header']['header'] );
+		$header    = $this->_get_child_array_key( 'pdf_header', parent::$options['pdf_header']['header'] );
 		switch ( $header ) {
 			case 'default_header':
-				if ( ('0' == parent::$options['pdf_header']['default_header'][0] &&
+				if ( ( '0' == parent::$options['pdf_header']['default_header'][0] &&
 					 '0' == parent::$options['pdf_header']['default_header'][1] &&
 					 '0' == parent::$options['pdf_header']['default_header'][2] ) ) {
 					break;
 				}
-				$pdf->DefHeaderByName('pdfheader', array(
-				    'L' => array(
-				      'content' => ('0' != parent::$options['pdf_header']['default_header'][0]) ? $this->_header_footer( $post, parent::$options['pdf_header']['default_header'][0] ) : '',
-				      'font-size' => 10,
-				      'font-style' => 'B',
-				      'font-family' => 'serif',
-				      'color' => '#000000',
-				    ),
-				    'C' => array(
-				      'content' => ('0' != parent::$options['pdf_header']['default_header'][1]) ? $this->_header_footer( $post, parent::$options['pdf_header']['default_header'][1] ) : '',
-				      'font-size' => 10,
-				      'font-style' => 'B',
-				      'font-family' => 'serif',
-				      'color' => '#000000',
-				    ),
-				    'R' => array(
-				      'content' => ('0' != parent::$options['pdf_header']['default_header'][2]) ? $this->_header_footer( $post, parent::$options['pdf_header']['default_header'][2] ) : '',
-				      'font-size' => 10,
-				      'font-style' => 'B',
-				      'font-family' => 'serif',
-				      'color' => '#000000',
-				    ),
-				    'line' => 1,
-				));
+				$pdf->DefHeaderByName(
+					'pdfheader',
+					array(
+						'L'    => array(
+							'content'     => ( '0' != parent::$options['pdf_header']['default_header'][0] ) ? $this->_header_footer( $post, parent::$options['pdf_header']['default_header'][0] ) : '',
+							'font-size'   => 10,
+							'font-style'  => 'B',
+							'font-family' => 'serif',
+							'color'       => '#000000',
+						),
+						'C'    => array(
+							'content'     => ( '0' != parent::$options['pdf_header']['default_header'][1] ) ? $this->_header_footer( $post, parent::$options['pdf_header']['default_header'][1] ) : '',
+							'font-size'   => 10,
+							'font-style'  => 'B',
+							'font-family' => 'serif',
+							'color'       => '#000000',
+						),
+						'R'    => array(
+							'content'     => ( '0' != parent::$options['pdf_header']['default_header'][2] ) ? $this->_header_footer( $post, parent::$options['pdf_header']['default_header'][2] ) : '',
+							'font-size'   => 10,
+							'font-style'  => 'B',
+							'font-family' => 'serif',
+							'color'       => '#000000',
+						),
+						'line' => 1,
+					)
+				);
 				break;
 			case 'custom_header':
 				$pdf->DefHTMLHeaderByName(
@@ -513,38 +531,42 @@ class Read_Offline_Create extends Read_Offline {
 				break;
 		}
 
-		$footer = $this->_get_child_array_key( 'pdf_footer',parent::$options['pdf_footer']['footer'] );
+		$footer = $this->_get_child_array_key( 'pdf_footer', parent::$options['pdf_footer']['footer'] );
 		switch ( $footer ) {
 			case 'default_footer':
-				if ( ('0' == parent::$options['pdffooter']['default_footer'][0] &&
+				if ( ! isset( parent::$options['pdffooter'], parent::$options['pdffooter']['default_footer'] ) ||
+					( '0' == parent::$options['pdffooter']['default_footer'][0] &&
 					 '0' == parent::$options['pdffooter']['default_footer'][1] &&
 					 '0' == parent::$options['pdffooter']['default_footer'][2] ) ) {
 					break;
 				}
-				$pdf->DefFooterByName('pdffooter',array(
-				    'L' => array(
-				      'content' => ('0' != parent::$options['pdf_footer']['default_footer'][0]) ? $this->_header_footer( $post, parent::$options['pdf_footer']['default_footer'][0] ) : '',
-				      'font-size' => 10,
-				      'font-style' => 'B',
-				      'font-family' => 'serif',
-				      'color' => '#000000',
-				    ),
-				    'C' => array(
-				      'content' => ('0' != parent::$options['pdf_footer']['default_footer'][1]) ? $this->_header_footer( $post, parent::$options['pdf_footer']['default_footer'][1] ) : '',
-				      'font-size' => 10,
-				      'font-style' => 'B',
-				      'font-family' => 'serif',
-				      'color' => '#000000',
-				    ),
-				    'R' => array(
-				      'content' => ('0' != parent::$options['pdf_footer']['default_footer'][2]) ? $this->_header_footer( $post, parent::$options['pdf_footer']['default_footer'][2] ) : '',
-				      'font-size' => 10,
-				      'font-style' => 'B',
-				      'font-family' => 'serif',
-				      'color' => '#000000',
-				    ),
-				    'line' => 1,
-				));
+				$pdf->DefFooterByName(
+					'pdffooter',
+					array(
+						'L'    => array(
+							'content'     => ( '0' != parent::$options['pdf_footer']['default_footer'][0] ) ? $this->_header_footer( $post, parent::$options['pdf_footer']['default_footer'][0] ) : '',
+							'font-size'   => 10,
+							'font-style'  => 'B',
+							'font-family' => 'serif',
+							'color'       => '#000000',
+						),
+						'C'    => array(
+							'content'     => ( '0' != parent::$options['pdf_footer']['default_footer'][1] ) ? $this->_header_footer( $post, parent::$options['pdf_footer']['default_footer'][1] ) : '',
+							'font-size'   => 10,
+							'font-style'  => 'B',
+							'font-family' => 'serif',
+							'color'       => '#000000',
+						),
+						'R'    => array(
+							'content'     => ( '0' != parent::$options['pdf_footer']['default_footer'][2] ) ? $this->_header_footer( $post, parent::$options['pdf_footer']['default_footer'][2] ) : '',
+							'font-size'   => 10,
+							'font-style'  => 'B',
+							'font-family' => 'serif',
+							'color'       => '#000000',
+						),
+						'line' => 1,
+					)
+				);
 				break;
 			case 'custom_footer':
 				$pdf->DefHTMLFooterByName(
@@ -561,32 +583,32 @@ class Read_Offline_Create extends Read_Offline {
 		 * Default CSS
 		 */
 		if ( 'default_header' == $header || 'default_footer' == $footer ) {
-			$pdf->WriteHTML( file_get_contents( READOFFLINE_PATH . '/templates/pdf/default-print.css' ),1 );
+			$pdf->WriteHTML( file_get_contents( READOFFLINE_PATH . '/templates/pdf/default-print.css' ), 1 );
 		}
 
 		/**
 		 * Theme / Custom CSS, overrides default css
 		 */
 
-		$css = $this->_get_child_array_key( 'pdf_css',parent::$options['pdf_css']['custom_css'] );
+		$css = $this->_get_child_array_key( 'pdf_css', parent::$options['pdf_css']['custom_css'] );
 		switch ( $css ) {
 			case 'theme_style':
 				// $post_styles = $this->_get_post_styles($post->ID);
 				// $link = "";
 				// foreach ($post_styles as $post_style) {
-				// 	$f = file_get_contents($post_style);
-				// 	if (false !== $f) {
-				// 		$link = $link . "\n" . $f;
-				// 	}
+				// $f = file_get_contents($post_style);
+				// if (false !== $f) {
+				// $link = $link . "\n" . $f;
+				// }
 
 				// }
 				// $pdf->CSSselectMedia = 'all';
 				// $pdf->WriteHTML($link,1);
 
-				$pdf->WriteHTML( file_get_contents( get_stylesheet_uri() ),1 );
+				$pdf->WriteHTML( file_get_contents( get_stylesheet_uri() ), 1 );
 				break;
 			case 'css':
-				$pdf->WriteHTML( parent::$options['pdf_css']['css'],1 );
+				$pdf->WriteHTML( parent::$options['pdf_css']['css'], 1 );
 				break;
 
 		}
@@ -594,7 +616,7 @@ class Read_Offline_Create extends Read_Offline {
 		/**
 		 * Coverart
 		 */
-		$coverart = $this->_get_child_array_key( 'pdf_cover',parent::$options['pdf_cover']['art'] );
+		$coverart = $this->_get_child_array_key( 'pdf_cover', parent::$options['pdf_cover']['art'] );
 
 		if ( 'none' != $coverart ) {
 			// $paper_format = ('custom_paper_format' == $this->_get_child_array_key('pdf_layout',parent::$options['pdf_layout']['paper_format'])) ? parent::$options['pdf_layout']['custom_paper_format'] : parent::$options['pdf_layout']['paper_format'];
@@ -610,13 +632,16 @@ class Read_Offline_Create extends Read_Offline {
 					// $image_data = wp_get_attachment_metadata(get_post_thumbnail_id($post->ID, 'thumbnail'));
 					// $left = ($w / 2) - ($image_data['width']  / 2);
 					// $top  = ($h / 2) - ($image_data['height'] / 2);
-					//$pdf->AddPage('','','','','on');
+					// $pdf->AddPage('','','','','on');
 					if ( '' != $image_url ) {
-						$pdf->AddPageByArray(array(
-					    	'suppress' => 'on', // supress header
-					    ));
+						$pdf->AddPageByArray(
+							array(
+								'suppress' => 'on', // supress header
+							)
+						);
 						$pdf->WriteHTML(
-							sprintf('
+							sprintf(
+								'
 								<div style="position: absolute; left:0; right: 0; top: 0; bottom: 0;">
 									<img src="%s" style="width: 210mm; height: 297mm; margin: 1mm;" />
 								</div>',
@@ -631,13 +656,19 @@ class Read_Offline_Create extends Read_Offline {
 					// $image_data = wp_get_attachment_metadata(get_post_thumbnail_id($post->ID, 'thumbnail'));
 					// $left = ($w / 2) - ($image_data['width']  / 2);
 					// $top  = ($h / 2) - ($image_data['height'] / 2);
-					//$pdf->AddPage('','','','','on');
+					// $pdf->AddPage('','','','','on');
 					if ( '' != $image_url ) {
-						$pdf->AddPageByArray(array(
-					    	'suppress' => 'on', // supress header
-					    ));
-						$pdf->WriteHTML(sprintf('<div style="position: absolute; left:0; right: 0; top: 0; bottom: 0;">
-							<img src="%s" style="width: 210mm; height: 297mm; margin: 30;" /></div>',$image_url)
+						$pdf->AddPageByArray(
+							array(
+								'suppress' => 'on', // supress header
+							)
+						);
+						$pdf->WriteHTML(
+							sprintf(
+								'<div style="position: absolute; left:0; right: 0; top: 0; bottom: 0;">
+							<img src="%s" style="width: 210mm; height: 297mm; margin: 30;" /></div>',
+								$image_url
+							)
 						);
 					}
 					break;
@@ -648,88 +679,92 @@ class Read_Offline_Create extends Read_Offline {
 			$pdf->showWatermarkText  = false; // @codingStandardsIgnoreLine
 		}
 
-		$toc = $this->_get_child_array_key( 'pdf_layout',parent::$options['pdf_layout']['add_toc'] );
-		$pdf->AddPageByArray(array(
-		    'suppress' => 'off', // don't supress headers
-		    'ohname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
-		    'ehname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
-		    'ofname' => ('0' != $footer ) ? ('custom_footer' == $footer) ? 'html_pdffooter' : 'pdffooter' : '',
-		    'efname' => ('0' != $footer ) ? ('custom_footer' == $footer) ? 'html_pdffooter' : 'pdffooter' : '',
-		    'ohvalue' => ('0' != $header ) ? 1 : 0,
-		    'ehvalue' => ('0' != $header ) ? 1 : 0,
-		    'ofvalue' => ('0' != $footer ) ? 1 : 0,
-		    'efvalue' => ('0' != $footer ) ? 1 : 0,
-		    'resetpagenum' => ('0' != $toc) ? 2 : 1,
-	    ));
+		$toc = $this->_get_child_array_key( 'pdf_layout', parent::$options['pdf_layout']['add_toc'] );
+		$pdf->AddPageByArray(
+			array(
+				'suppress'     => 'off', // don't supress headers
+				'ohname'       => ( '0' != $header ) ? ( 'custom_header' == $header ) ? 'html_pdfheader' : 'pdfheader' : '',
+				'ehname'       => ( '0' != $header ) ? ( 'custom_header' == $header ) ? 'html_pdfheader' : 'pdfheader' : '',
+				'ofname'       => ( '0' != $footer ) ? ( 'custom_footer' == $footer ) ? 'html_pdffooter' : 'pdffooter' : '',
+				'efname'       => ( '0' != $footer ) ? ( 'custom_footer' == $footer ) ? 'html_pdffooter' : 'pdffooter' : '',
+				'ohvalue'      => ( '0' != $header ) ? 1 : 0,
+				'ehvalue'      => ( '0' != $header ) ? 1 : 0,
+				'ofvalue'      => ( '0' != $footer ) ? 1 : 0,
+				'efvalue'      => ( '0' != $footer ) ? 1 : 0,
+				'resetpagenum' => ( '0' != $toc ) ? 2 : 1,
+			)
+		);
 
-	    /**
-	     * Table og contents
-	     */
+		/**
+		 * Table og contents
+		 */
 
-	    if ( '0' !== $toc ) {
-	    	$toc_start = ('0' == parent::$options['pdf_layout']['toc'][0]) ? 1 : parent::$options['pdf_layout']['toc'][0];
-	    	$toc_stop  = ('0' == parent::$options['pdf_layout']['toc'][1]) ? 2 : parent::$options['pdf_layout']['toc'][1];
-	    	if ( $toc_start > $toc_stop ) {
-	    		$toc_stop = $toc_start + 1;
-	    	}
-	    	$toc_arr = array();
-	    	$j = 0;
-	    	for ( $i = $toc_start; $i <= $toc_stop; $i++ ) {
-	    		$toc_arr[ sprintf( 'H%s',$i ) ] = $j++;
-	    	}
-		    $pdf->h2toc       = $toc_arr;
-			$pdf->TOCpagebreakByArray(array(
-			    // 'tocfont' => '',
-			    // 'tocfontsize' => '',
-			    // 'outdent' => '2em',
-			    'TOCusePaging' => true,
-			    'TOCuseLinking' => true,
-			    // 'toc_orientation' => '',
-			    // 'toc_mgl' => '',
-			    // 'toc_mgr' => '',
-			    // 'toc_mgt' => '',
-			    // 'toc_mgb' => '',
-			    // 'toc_mgh' => '',
-			    // 'toc_mgf' => '',
-			    // 'toc_ohname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
-			    // 'toc_ehname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
-			    // 'toc_ofname' => ('0' != $footer ) ? ('custom_footer' == $footer) ? 'html_pdffooter' : 'pdffooter' : '',
-			    // 'toc_efname' => ('0' != $footer ) ? ('custom_footer' == $footer) ? 'html_pdffooter' : 'pdffooter' : '',
-			    // 'toc_ohvalue' => ('0' != $header ) ? 1 : 0,
-			    // 'toc_ehvalue' => ('0' != $header ) ? 1 : 0,
-			    // 'toc_ofvalue' => ('0' != $footer ) ? 1 : 0,
-			    // 'toc_efvalue' => ('0' != $footer ) ? 1 : 0,
-			    'toc_ohvalue' => -1,
-			    'toc_ehvalue' => -1,
-			    'toc_ofvalue' => -1,
-			    'toc_efvalue' => -1,
-			    'toc_preHTML' => __( '<h1>Contents</h1>', 'read-offline' ),
-			    'toc_postHTML' => '',
-			    'toc_bookmarkText' => __( 'Contents', 'read-offline' ),
-			    'resetpagenum' => 2,
-			    'pagenumstyle' => '',
-			    'suppress' => 'off',
-			    'orientation' => '',
-			    // 'mgl' => '',
-			    // 'mgr' => '',
-			    // 'mgt' => '',
-			    // 'mgb' => '',
-			    // 'mgh' => '',
-			    // 'mgf' => '',
-			    // 'ohname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
-			    // 'ehname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
-			    // 'ofname' => ('0' != $footer ) ? ('custom_footer' == $footer) ? 'html_pdffooter' : 'pdffooter' : '',
-			    // 'efname' => ('0' != $footer ) ? ('custom_footer' == $footer) ? 'html_pdffooter' : 'pdffooter' : '',
-			    // 'ohvalue' => ('0' != $header ) ? 1 : 0,
-			    // 'ehvalue' => ('0' != $header ) ? 1 : 0,
-			    // 'ofvalue' => ('0' != $footer ) ? 1 : 0,
-			    // 'efvalue' => ('0' != $footer ) ? 1 : 0,
-			    // 'toc_id' => 0,
-			    // 'pagesel' => '',
-			    // 'toc_pagesel' => '',
-			    // 'sheetsize' => '',
-			    // 'toc_sheetsize' => '',
-			));
+		if ( '0' !== $toc ) {
+			$toc_start = ( '0' == parent::$options['pdf_layout']['toc'][0] ) ? 1 : parent::$options['pdf_layout']['toc'][0];
+			$toc_stop  = ( '0' == parent::$options['pdf_layout']['toc'][1] ) ? 2 : parent::$options['pdf_layout']['toc'][1];
+			if ( $toc_start > $toc_stop ) {
+				$toc_stop = $toc_start + 1;
+			}
+			$toc_arr = array();
+			$j       = 0;
+			for ( $i = $toc_start; $i <= $toc_stop; $i++ ) {
+				$toc_arr[ sprintf( 'H%s', $i ) ] = $j++;
+			}
+			$pdf->h2toc = $toc_arr;
+			$pdf->TOCpagebreakByArray(
+				array(
+					// 'tocfont' => '',
+					// 'tocfontsize' => '',
+					// 'outdent' => '2em',
+					'TOCusePaging'     => true,
+					'TOCuseLinking'    => true,
+					// 'toc_orientation' => '',
+					// 'toc_mgl' => '',
+					// 'toc_mgr' => '',
+					// 'toc_mgt' => '',
+					// 'toc_mgb' => '',
+					// 'toc_mgh' => '',
+					// 'toc_mgf' => '',
+					// 'toc_ohname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
+					// 'toc_ehname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
+					// 'toc_ofname' => ('0' != $footer ) ? ('custom_footer' == $footer) ? 'html_pdffooter' : 'pdffooter' : '',
+					// 'toc_efname' => ('0' != $footer ) ? ('custom_footer' == $footer) ? 'html_pdffooter' : 'pdffooter' : '',
+					// 'toc_ohvalue' => ('0' != $header ) ? 1 : 0,
+					// 'toc_ehvalue' => ('0' != $header ) ? 1 : 0,
+					// 'toc_ofvalue' => ('0' != $footer ) ? 1 : 0,
+					// 'toc_efvalue' => ('0' != $footer ) ? 1 : 0,
+					'toc_ohvalue'      => -1,
+					'toc_ehvalue'      => -1,
+					'toc_ofvalue'      => -1,
+					'toc_efvalue'      => -1,
+					'toc_preHTML'      => __( '<h1>Contents</h1>', 'read-offline' ),
+					'toc_postHTML'     => '',
+					'toc_bookmarkText' => __( 'Contents', 'read-offline' ),
+					'resetpagenum'     => 2,
+					'pagenumstyle'     => '',
+					'suppress'         => 'off',
+					'orientation'      => '',
+				// 'mgl' => '',
+				// 'mgr' => '',
+				// 'mgt' => '',
+				// 'mgb' => '',
+				// 'mgh' => '',
+				// 'mgf' => '',
+				// 'ohname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
+				// 'ehname' => ('0' != $header ) ? ('custom_header' == $header) ? 'html_pdfheader' : 'pdfheader' : '',
+				// 'ofname' => ('0' != $footer ) ? ('custom_footer' == $footer) ? 'html_pdffooter' : 'pdffooter' : '',
+				// 'efname' => ('0' != $footer ) ? ('custom_footer' == $footer) ? 'html_pdffooter' : 'pdffooter' : '',
+				// 'ohvalue' => ('0' != $header ) ? 1 : 0,
+				// 'ehvalue' => ('0' != $header ) ? 1 : 0,
+				// 'ofvalue' => ('0' != $footer ) ? 1 : 0,
+				// 'efvalue' => ('0' != $footer ) ? 1 : 0,
+				// 'toc_id' => 0,
+				// 'pagesel' => '',
+				// 'toc_pagesel' => '',
+				// 'sheetsize' => '',
+				// 'toc_sheetsize' => '',
+				)
+			);
 		}
 
 		// if waters are set, show them
@@ -750,7 +785,7 @@ class Read_Offline_Create extends Read_Offline {
 	 *
 	 * @author soderlind
 	 * @version 0.6.3
-	 * @param   string    $url URL to test
+	 * @param   string $url URL to test
 	 * @return  boolean   result, false if URL is 404
 	 */
 	function _url_exists( $url ) {
@@ -759,24 +794,27 @@ class Read_Offline_Create extends Read_Offline {
 
 		// Relative URL
 		if ( strpos( $href, '//' ) !== 0 && in_array( $href[0], array( '/', '#', '?' ), true ) ) {
-		        $href = get_bloginfo( 'url' ) . $href;
+				$href = get_bloginfo( 'url' ) . $href;
 		}
 
 		// No redirects
-		$response = wp_safe_remote_get( $href, array(
-		        'timeout' => 15,
-		        // Use an explicit user-agent
-		        'user-agent' => 'Read Offline Test',
-		) );
+		$response = wp_safe_remote_get(
+			$href,
+			array(
+				'timeout'    => 15,
+				// Use an explicit user-agent
+				'user-agent' => 'Read Offline Test',
+			)
+		);
 
 		$url_exists = true;
 
 		if ( is_wp_error( $response ) ) {
-		    if ( strpos( $response->get_error_message(), 'resolve host' ) !== false ) {
-		        $url_exists = false;
-		    }
+			if ( strpos( $response->get_error_message(), 'resolve host' ) !== false ) {
+				$url_exists = false;
+			}
 		} elseif ( wp_remote_retrieve_response_code( $response ) === 404 ) {
-		    $url_exists = false;
+			$url_exists = false;
 		}
 		return $url_exists;
 	}
@@ -796,20 +834,20 @@ class Read_Offline_Create extends Read_Offline {
 		$doc->preserveWhiteSpace = false; // @codingStandardsIgnoreLine
 		// Here we strip all the img tags in the document
 		$images = $doc->getElementsByTagName( 'img' );
-		$imgs = array();
+		$imgs   = array();
 		foreach ( $images as $img ) {
 			$imgs[] = $img;
 		}
 		foreach ( $imgs as $img ) {
 			$img->parentNode->removeChild( $img ); // @codingStandardsIgnoreLine
 		}
-	 	return $doc->saveHTML();
+		return $doc->saveHTML();
 	}
 
 	private function _pdf_add_annotations( $content ) {
 
 		$anchors = array();
-		$doc = new DOMDocument();
+		$doc     = new DOMDocument();
 		// START LibXML error management.
 		// Modify state
 		$libxml_previous_state = libxml_use_internal_errors( true );
@@ -820,18 +858,18 @@ class Read_Offline_Create extends Read_Offline {
 		libxml_use_internal_errors( $libxml_previous_state );
 		// END LibXML error management.
 
-		$sups = $doc->getElementsByTagName( 'sup' );
+		$sups     = $doc->getElementsByTagName( 'sup' );
 		$tmp_sups = array();
-		$tmp_li = array();
+		$tmp_li   = array();
 		foreach ( $sups as $sup ) {
 			// <sup><a id="footnote-ref-884344386868178-4" href="#footnote-884344386868178-4">[4]</a></sup>
 			$node = $sup->firstChild;  // @codingStandardsIgnoreLine
-			if ( XML_ELEMENT_NODE == $node->nodeType  && $node->hasAttribute( 'href' ) ) {
+			if ( XML_ELEMENT_NODE == $node->nodeType && $node->hasAttribute( 'href' ) ) {
 
-				if ( false !== ( $ref = $node->getAttribute( 'href' ) ) &&  false !== stristr( $ref , 'note' ) ) {
+				if ( false !== ( $ref = $node->getAttribute( 'href' ) ) && false !== stristr( $ref, 'note' ) ) {
 					$tmp_sups[] = $sup;
 					// find <li id="footnote-884344386868178-2" ..>
-					$li = $doc->getElementById( substr( $ref,1 ) ); // substr removes leading #
+					$li       = $doc->getElementById( substr( $ref, 1 ) ); // substr removes leading #
 					$tmp_li[] = $li;
 					$slug = $tmpslug = str_replace( '↑','', htmlspecialchars( wp_strip_all_tags( $li->nodeValue ), ENT_QUOTES ) ); // @codingStandardsIgnoreLine
 
@@ -871,7 +909,7 @@ class Read_Offline_Create extends Read_Offline {
 		// END LibXML error management.
 		$finder = new DomXPath( $doc );
 
-		$nodes = $finder->query( "//*[contains(concat(' ', normalize-space(@class), ' '), ' $classname ')]" );
+		$nodes     = $finder->query( "//*[contains(concat(' ', normalize-space(@class), ' '), ' $classname ')]" );
 		$tmp_nodes = array();
 		foreach ( $nodes as $node ) {
 			$tmp_nodes[] = $node;
@@ -883,7 +921,7 @@ class Read_Offline_Create extends Read_Offline {
 	}
 
 	private function _get_child_array_key( $parent_element, $org ) {
-		//$org: #fieldrow-pdf_header_default_header
+		// $org: #fieldrow-pdf_header_default_header
 		if ( false !== strpos( $org, '#fieldrow' ) ) {
 			if ( false !== strpos( $org, ',' ) ) {
 				$parts = explode( ',', $org );
@@ -900,25 +938,25 @@ class Read_Offline_Create extends Read_Offline {
 		switch ( $type ) {
 			case 'document_title':
 				$val = $post->post_title;
-			break;
+				break;
 			case 'author':
-				$val = get_the_author_meta( 'display_name',$post->post_author );
-			break;
+				$val = get_the_author_meta( 'display_name', $post->post_author );
+				break;
 			case 'document_url':
 				$val = get_permalink( $post->ID );
-			break;
+				break;
 			case 'site_url':
 				$val = home_url();
-			break;
+				break;
 			case 'site_title':
 				$val = get_bloginfo( 'name' );
-			break;
+				break;
 			case 'page_number':
 				$val = '{PAGENO}/{nbpg}';
-			break;
+				break;
 			case 'date':
 				$val = get_the_date( get_option( 'date_format' ), $post );
-			break;
+				break;
 		}
 		return $val;
 	}
@@ -929,13 +967,13 @@ class Read_Offline_Create extends Read_Offline {
 			$html = addslashes( strip_tags( $html ) );
 		}
 
-		$html = str_replace( '{DATE}',     get_the_date( get_option( 'date_format' ), $post ),     $html );
-		$html = str_replace( '{TODAY}',    sprintf( '{DATE %s}',get_option( 'date_format' ) ),         $html );
-		$html = str_replace( '{TITLE}',    $post->post_title,                                      $html );
-		$html = str_replace( '{AUTHOR}',   get_the_author_meta( 'display_name',$post->post_author ), $html );
-		$html = str_replace( '{DOCURL}',   get_permalink( $post->ID ),                               $html );
-		$html = str_replace( '{SITENAME}', get_bloginfo( 'name' ),                                   $html );
-		$html = str_replace( '{SITEURL}',  home_url(),                                             $html );
+		$html = str_replace( '{DATE}', get_the_date( get_option( 'date_format' ), $post ), $html );
+		$html = str_replace( '{TODAY}', sprintf( '{DATE %s}', get_option( 'date_format' ) ), $html );
+		$html = str_replace( '{TITLE}', $post->post_title, $html );
+		$html = str_replace( '{AUTHOR}', get_the_author_meta( 'display_name', $post->post_author ), $html );
+		$html = str_replace( '{DOCURL}', get_permalink( $post->ID ), $html );
+		$html = str_replace( '{SITENAME}', get_bloginfo( 'name' ), $html );
+		$html = str_replace( '{SITEURL}', home_url(), $html );
 		return $html;
 	}
 
@@ -959,7 +997,7 @@ class Read_Offline_Create extends Read_Offline {
 			}
 		}
 
-		return (count( $out )) ? implode( ', ', $out ) : '';
+		return ( count( $out ) ) ? implode( ', ', $out ) : '';
 	}
 
 	// from https://philipnewcomer.net/2012/11/get-the-attachment-id-from-an-image-url-in-wordpress/
@@ -985,16 +1023,17 @@ class Read_Offline_Create extends Read_Offline {
 
 	private function _get_post_styles( $post_id ) {
 		$transient_id = 'read_offline_post_styles_' . $post_id;
-		$transient = get_transient( $transient_id );
+		$transient    = get_transient( $transient_id );
 		return get_transient( $transient_id );
 	}
 
 	/**
 	 * Split html on header tag (h1-h6)
+	 *
 	 * @author soderlind
 	 * @version 0.6.4
-	 * @param   string    $html   HTML content
-	 * @param   string    $header 1-6 or 'all'
+	 * @param   string $html   HTML content
+	 * @param   string $header 1-6 or 'all'
 	 * @return  array
 	 */
 	private function _split_content( $html, $header ) {
@@ -1013,7 +1052,7 @@ class Read_Offline_Create extends Read_Offline {
 					case '<h' . trim( $header ) . '>':
 					case ( $all_tags && ( preg_match( '/<h(\d*)>/i', $value, $matches ) ? $value : ! $value ) ):
 						$have_title = 'start';
-						$level      = ($all_tags && isset( $matches ) ) ?  $matches[1] : $header;
+						$level      = ( $all_tags && isset( $matches ) ) ? $matches[1] : $header;
 						$title      = '';
 						break;
 					case '</h' . trim( $header ) . '>':
@@ -1073,23 +1112,23 @@ class Read_Offline_Create extends Read_Offline {
 	function _image_create_from_url( $url ) {
 		$info = pathinfo( $url );
 		switch ( $info['extension'] ) {
-	        case 'jpeg':
-	        case 'jpg':
-	            return imagecreatefromjpeg( $url );
-	        break;
+			case 'jpeg':
+			case 'jpg':
+				return imagecreatefromjpeg( $url );
+			break;
 
-	        case 'png':
-	            return imagecreatefrompng( $url );
-	        break;
+			case 'png':
+				return imagecreatefrompng( $url );
+			break;
 
-	        case 'gif':
-	            return imagecreatefromgif( $url );
-	        break;
+			case 'gif':
+				return imagecreatefromgif( $url );
+			break;
 
-	        // default:
-	        //     throw new InvalidArgumentException('File "'.$filename.'" is not valid jpg, png or gif image.');
-	        // break;
-	    }
+			// default:
+			// throw new InvalidArgumentException('File "'.$filename.'" is not valid jpg, png or gif image.');
+			// break;
+		}
 	}
 }
 
