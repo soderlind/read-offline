@@ -2,9 +2,10 @@
 Contributors: PerS
 Donate link: http://soderlind.no/donate/
 Tags: pdf, epub, mobi, print
-Requires at least: 4.0
-Tested up to: 4.7
-Stable tag: 0.7.7
+Requires at least: 5.0
+Requires PHP: 7.3
+Tested up to: 5.4
+Stable tag: 0.8.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
