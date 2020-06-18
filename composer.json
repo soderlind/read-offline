@@ -1,6 +1,16 @@
 {
-    "require": {
-		"grandt/phpepub": ">=4.0.3",
-        "php": ">=5.3.0"
-    }
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"repositories": {
+		"phpepub": {
+			"type": "vcs",
+			"url": "git@github.com:soderlind/phpepub.git",
+			"reference": "master"
+		}
+	},
+	"require": {
+		"soderlind/phpepub": "4.0.8.1",
+		"php": "~7.3",
+		"mpdf/mpdf": "8.0.6"
+	}
 }
