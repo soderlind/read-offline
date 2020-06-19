@@ -2,9 +2,89 @@
 
 ## What changes after fork
 
-1. Remove `each` function that deprecated in php 7.2.
-2. When download epub, let it use utf8filename.
+Ran `phpcs -p . --standard=PHPCompatibility` and fixed the following:
 
+```
+FILE: tests/EPub.Example1.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE
+--------------------------------------------------------------------------------
+ 246 | WARNING | Function each() is deprecated since PHP 7.2; Use a foreach
+     |         | loop instead
+--------------------------------------------------------------------------------
+
+
+FILE: tests/EPub.Example2.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE
+--------------------------------------------------------------------------------
+ 219 | WARNING | Function each() is deprecated since PHP 7.2; Use a foreach
+     |         | loop instead
+--------------------------------------------------------------------------------
+
+
+FILE: tests/EPub.Example2b.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE
+--------------------------------------------------------------------------------
+ 236 | WARNING | Function each() is deprecated since PHP 7.2; Use a foreach
+     |         | loop instead
+--------------------------------------------------------------------------------
+
+
+FILE: legacy/EPub.Test.Example.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE
+--------------------------------------------------------------------------------
+ 228 | WARNING | Function each() is deprecated since PHP 7.2; Use a foreach
+     |         | loop instead
+--------------------------------------------------------------------------------
+
+
+FILE: src/PHPePub/Core/EPubChapterSplitter.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 2 WARNINGS AFFECTING 2 LINES
+--------------------------------------------------------------------------------
+ 147 | WARNING | Function each() is deprecated since PHP 7.2; Use a foreach
+     |         | loop instead
+ 155 | WARNING | Function each() is deprecated since PHP 7.2; Use a foreach
+     |         | loop instead
+--------------------------------------------------------------------------------
+
+
+FILE: src/PHPePub/Core/EPub.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 2 WARNINGS AFFECTING 2 LINES
+--------------------------------------------------------------------------------
+ 287 | WARNING | Function each() is deprecated since PHP 7.2; Use a foreach
+     |         | loop instead
+ 305 | WARNING | Function each() is deprecated since PHP 7.2; Use a foreach
+     |         | loop instead
+--------------------------------------------------------------------------------
+
+
+FILE: src/PHPePub/Core/Structure/Ncx.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE
+--------------------------------------------------------------------------------
+ 295 | WARNING | Function each() is deprecated since PHP 7.2; Use a foreach
+     |         | loop instead
+--------------------------------------------------------------------------------
+
+
+FILE: src/PHPePub/Core/Structure/OPF/MetaValue.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE
+--------------------------------------------------------------------------------
+ 107 | WARNING | Function each() is deprecated since PHP 7.2; Use a foreach
+     |         | loop instead
+--------------------------------------------------------------------------------
+
+
+FILE: src/lib.uuid.php
+
+Removed, replaced with, in composer.json, jkingweb/druuid
+```
 ---
 
 ## Below is original content
@@ -37,7 +117,7 @@ If you already have Composer installed, skip this part.
 
 [Packagist](https://packagist.org/), the main composer repository has a neat and very short guide.
 Or you can look at the guide at the [Composer site](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx).
- 
+
 The easiest for first time users, is to have the composer installed in the same directory as your composer.json file, though there are better options.
 
 Run this from the command line:
