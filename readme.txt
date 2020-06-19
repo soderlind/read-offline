@@ -121,6 +121,10 @@ There are 2 ways you can add the Read Offline links:
 
 
 == Changelog ==
+= 0.8.0 =
+* Require PHP 7.3
+* Update mPDF to version 8.0.6
+* PHPePub supports PHP 7.3
 = 0.7.7 =
 * [Prevents formats not selected in plugin settings from being saved](https://github.com/soderlind/read-offline/pull/82)
 * [Fixes query url of attachment to use site url instead of home](https://github.com/soderlind/read-offline/pull/79) (allows alternate site url to not break the plugin)
@@ -152,7 +156,7 @@ There are 2 ways you can add the Read Offline links:
 * Add RTL for PDF, ePub and print. PDF needs the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin.
 = 0.6.0 =
 * Add support for all mPDF fonts via the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin
-* Update mPDF to verion 6.1
+* Update mPDF to version 6.1
 = 0.5.0 =
 * Add Table of Contents to ePub and mobi, default off. Set it in Read Offline->ePub and Read Offline->mobi
 * Readded mobi cover page (kind of catch 22, you must have Table of Contents to get a cover page)
