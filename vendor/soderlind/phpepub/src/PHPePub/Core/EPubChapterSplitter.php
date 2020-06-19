@@ -146,7 +146,7 @@ class EPubChapterSplitter {
                         reset($domClonedPath);
                         // $oneDomClonedPath = each($domClonedPath);
                         // while ($oneDomClonedPath) {
-						foreach( $domClonedPath as $oneDomClonedPath)
+						foreach( $domClonedPath as $oneDomClonedPath) {
                             /** @noinspection PhpUnusedLocalVariableInspection */
                             list($k, $v) = $oneDomClonedPath;
                             /** @var $v \DOMNode */
