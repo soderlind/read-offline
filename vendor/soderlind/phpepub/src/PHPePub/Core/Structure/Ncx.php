@@ -384,6 +384,9 @@ class Ncx {
 
             $li = "";
             foreach ($this->referencesOrder as $item => $descriptive) {
+				if ( empty( $descriptive ) ) {
+					continue;
+				}
             // while (list($item, $descriptive) = each($this->referencesOrder)) {
                 if (array_key_exists($item, $this->referencesList)) {
                     $li .= "\t\t\t\t\t<li><a epub:type=\""

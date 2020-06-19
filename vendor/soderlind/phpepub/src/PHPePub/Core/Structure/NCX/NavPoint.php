@@ -266,11 +266,13 @@ class NavPoint extends AbstractNavEntry {
 
         $nav .= $indent . "<li id=\"" . $this->id . "\"" . $dir . ">\n";
 
-        if (isset($this->contentSrc)) {
-            $nav .= $indent . "\t<a href=\"" . $this->contentSrc . "\"" . $dir . ">" . $this->label . "</a>\n";
-        } else {
-            $nav .= $indent . "\t<span" . $dir . ">" . $this->label . "</span>\n";
-        }
+		if ( isset( $dir, $this->label ) ) {
+			if (isset($this->contentSrc)) {
+				$nav .= $indent . "\t<a href=\"" . $this->contentSrc . "\"" . $dir . ">" . $this->label . "</a>\n";
+			} else {
+				$nav .= $indent . "\t<span" . $dir . ">" . $this->label . "</span>\n";
+			}
+		}
 
         if (sizeof($this->navPoints) > 0) {
             $maxLevel++;

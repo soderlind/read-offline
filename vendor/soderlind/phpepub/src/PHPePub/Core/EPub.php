@@ -2174,7 +2174,8 @@ class EPub {
                 // while (list($chapterName, $navPoint) = each($this->ncx->chapterList)) {
                     /** @var $navPoint NavPoint */
                     $fileName = $navPoint->getContentSrc();
-                    $level = $navPoint->getLevel() - 2;
+					$level = $navPoint->getLevel() - 2;
+					$chapterName = ( empty( $chapterName ) ) ? basename( $fileName, '.xhtml' ) : $chapterName;
                     $tocData .= "\t<p class='level" . ($level+1) . "'>"
                         /* . str_repeat(" &#160;  &#160;  &#160;", $level) . */
                         . "<a href=\"" . $fileName . "\">" . $chapterName . "</a></p>\n";
