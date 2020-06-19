@@ -171,11 +171,15 @@ class Read_Offline_Create extends Read_Offline {
 			. "</head>\n"
 			. "<body>\n";
 		*/
-		$content_start = sprintf( '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="styles.css" /><title>%s</title></head><body%s>', $post->post_title, ( is_rtl() ) ? " dir='rtl'" : '' );
-		$content_end   = "\n</body>\n</html>\n";
+		if ( '' != $print_css ) {
+			$content_start = sprintf( '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="styles.css" /><title>%s</title></head><body%s>', $post->post_title, ( is_rtl() ) ? " dir='rtl'" : '' );
+		} else {
+			$content_start = sprintf( '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8" /><title>%s</title></head><body%s>', $post->post_title, ( is_rtl() ) ? " dir='rtl'" : '' );
+		}
+		$content_end = "\n</body>\n</html>\n";
 
 		$cover = $content_start . sprintf( "<h1>%s</h1>\n<h2>%s: %s</h2>\n", $post->post_title, _x( 'By', 'Rererence between title and author: Title By: Author Name' ), $this->author_firstlast ) . $content_end;
-		$epub->addChapter( 'Notices', 'Cover.html', $cover );
+		$epub->addChapter( 'Notices', 'Cover.xhtml', $cover );
 
 		/*
 		$epub->addFileToMETAINF("com.apple.ibooks.display-options.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<display_options>\n    <platform name=\"*\">\n        <option name=\"fixed-layout\">true</option>\n        <option name=\"interactive\">true</option>\n        <option name=\"specified-fonts\">true</option>\n    </platform>\n</display_options>");
@@ -222,7 +226,7 @@ class Read_Offline_Create extends Read_Offline {
 					// // $epub->setCurrentLevel( $level );
 
 					$header = ( '' !== $paragraph['title'] ) ? sprintf( '<h%s>%s</h%s>', $paragraph['level'], $paragraph['title'], $paragraph['level'] ) : '';
-					$epub->addChapter( $paragraph['title'], sprintf( 'Chapter%03d.html', $chapter_num ), $content_start . $header . $paragraph['content'] . $content_end, true, EPub::EXTERNAL_REF_ADD );
+					$epub->addChapter( $paragraph['title'], sprintf( 'Chapter%03d.xhtml', $chapter_num ), $content_start . $header . $paragraph['content'] . $content_end, true, EPub::EXTERNAL_REF_ADD );
 					$chapter_num++;
 				}
 				$epub->rootLevel();
@@ -230,7 +234,7 @@ class Read_Offline_Create extends Read_Offline {
 		}
 
 		if ( 0 === $add_toc || 0 === count( $content ) ) {
-			$epub->addChapter( 'Body', 'Body.html', $content_start . $html . $content_end, true, EPub::EXTERNAL_REF_ADD );
+			$epub->addChapter( 'Body', 'Body.xhtml', $content_start . $html . $content_end, true, EPub::EXTERNAL_REF_ADD );
 		}
 		$epub->finalize();
 		$zip_data = $epub->sendBook( $post->post_name );
