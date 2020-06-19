@@ -4,7 +4,7 @@ Plugin Name: Read Offline
 Plugin URI: http://soderlind.no/archives/2012/10/01/read-offline/
 Description: Read Offline allows you to download or print posts and pages. You can download the posts as PDF, ePub or mobi
 Author: Per Soderlind
-Version: 0.8.0
+Version: 0.8.1
 Author URI: http://soderlind.no
 Text Domain: read-offline
 Domain Path: /languages
