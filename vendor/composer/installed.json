@@ -549,17 +549,17 @@
     },
     {
         "name": "soderlind/phpepub",
-        "version": "4.0.8.5",
-        "version_normalized": "4.0.8.5",
+        "version": "4.0.8.7",
+        "version_normalized": "4.0.8.7",
         "source": {
             "type": "git",
             "url": "https://github.com/soderlind/PHPePub.git",
-            "reference": "307a11a595800e6db47d24ff4fe5860d8a382ae1"
+            "reference": "a3f6d444fb573745c4e06ab694d4555bf9b51596"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/soderlind/PHPePub/zipball/307a11a595800e6db47d24ff4fe5860d8a382ae1",
-            "reference": "307a11a595800e6db47d24ff4fe5860d8a382ae1",
+            "url": "https://api.github.com/repos/soderlind/PHPePub/zipball/a3f6d444fb573745c4e06ab694d4555bf9b51596",
+            "reference": "a3f6d444fb573745c4e06ab694d4555bf9b51596",
             "shasum": ""
         },
         "require": {
@@ -567,7 +567,7 @@
             "php": ">=5.3.0",
             "phpzip/phpzip": "2.0.8"
         },
-        "time": "2020-06-19T21:42:16+00:00",
+        "time": "2020-06-21T22:43:28+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -605,7 +605,7 @@
             "epub"
         ],
         "support": {
-            "source": "https://github.com/soderlind/PHPePub/tree/4.0.8.5"
+            "source": "https://github.com/soderlind/PHPePub/tree/4.0.8.7"
         }
     }
 ]

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f0ac06ac978007d8897b9cd64ceb119e",
+    "content-hash": "f35d080f824d8d44cb84be980b262cc3",
     "packages": [
         {
             "name": "grandt/binstring",
@@ -536,16 +536,16 @@
         },
         {
             "name": "soderlind/phpepub",
-            "version": "4.0.8.5",
+            "version": "4.0.8.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/soderlind/PHPePub.git",
-                "reference": "307a11a595800e6db47d24ff4fe5860d8a382ae1"
+                "reference": "a3f6d444fb573745c4e06ab694d4555bf9b51596"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/soderlind/PHPePub/zipball/307a11a595800e6db47d24ff4fe5860d8a382ae1",
-                "reference": "307a11a595800e6db47d24ff4fe5860d8a382ae1",
+                "url": "https://api.github.com/repos/soderlind/PHPePub/zipball/a3f6d444fb573745c4e06ab694d4555bf9b51596",
+                "reference": "a3f6d444fb573745c4e06ab694d4555bf9b51596",
                 "shasum": ""
             },
             "require": {
@@ -589,9 +589,9 @@
                 "epub"
             ],
             "support": {
-                "source": "https://github.com/soderlind/PHPePub/tree/4.0.8.5"
+                "source": "https://github.com/soderlind/PHPePub/tree/4.0.8.7"
             },
-            "time": "2020-06-19T21:42:16+00:00"
+            "time": "2020-06-21T22:43:28+00:00"
         }
     ],
     "packages-dev": [],
