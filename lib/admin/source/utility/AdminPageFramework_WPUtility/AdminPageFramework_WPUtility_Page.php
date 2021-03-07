@@ -122,7 +122,7 @@ class AdminPageFramework_WPUtility_Page extends AdminPageFramework_WPUtility_HTM
                 
         if ( 'edit.php' != self::getPageNow() ) return false;
         
-        $_aPostTypes = is_array( $asPostTypes ) ? $asPostTypes : empty( $asPostTypes ) ? array() : array( $asPostTypes ) ;
+        $_aPostTypes = is_array( $asPostTypes ) ? $asPostTypes : ( empty( $asPostTypes ) ? array() : array( $asPostTypes ) );
         
         if ( ! isset( $_GET['post_type'] )  ) return in_array( 'post', $_aPostTypes );
 
