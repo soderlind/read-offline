@@ -100,7 +100,7 @@ class AdminPageFramework_WPUtility_Page extends AdminPageFramework_WPUtility_HTM
      */
     static public function isPostDefinitionPage( $asPostTypes=array() ) {
         
-        $_aPostTypes = is_array( $asPostTypes ) ? $asPostTypes : empty( $asPostTypes ) ? array() : array( $asPostTypes );
+        $_aPostTypes = is_array( $asPostTypes ) ? $asPostTypes : ( empty( $asPostTypes ) ? array() : array( $asPostTypes ) );
 
         // If it's not the post definition page, 
         if ( ! in_array( self::getPageNow(), array( 'post.php', 'post-new.php', ) ) ) return false;
