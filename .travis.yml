@@ -24,6 +24,10 @@ matrix:
     - php: '7.2'
     # aliased to a recent 7.3.x version
     - php: '7.3'
+    # aliased to a recent 7.4.x version
+    - php: '7.4'    
+    # aliased to a recent 7.4.x version
+    - php: '8.0'    
     # aliased to a recent hhvm version
     - php: 'hhvm'
 
