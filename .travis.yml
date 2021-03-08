@@ -22,11 +22,6 @@ matrix:
     - php: '7.4'    
     # aliased to a recent 7.4.x version
     - php: '8.0'    
-    # aliased to a recent hhvm version
-    - php: 'hhvm'
-
-  allow_failures:
-    - php: 'hhvm'
 
 before_script:
   - export PHPCS_DIR=/tmp/phpcs
