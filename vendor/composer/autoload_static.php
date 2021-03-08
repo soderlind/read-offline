@@ -8,6 +8,8 @@ class ComposerStaticInitf096ae664ae02e00ef256c951490e367
 {
     public static $files = array (
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        'f9f43f7522ae63283deb4b9d9aa8fb82' => __DIR__ . '/..' . '/wallabag/php-mobi/MOBIClass/MOBI.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -18,6 +20,10 @@ class ComposerStaticInitf096ae664ae02e00ef256c951490e367
         'Z' => 
         array (
             'ZipMerge\\' => 9,
+        ),
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
         ),
         'P' => 
         array (
@@ -47,6 +53,10 @@ class ComposerStaticInitf096ae664ae02e00ef256c951490e367
         'ZipMerge\\' => 
         array (
             0 => __DIR__ . '/..' . '/grandt/phpzipmerge/src/ZipMerge',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
         'Psr\\Log\\' => 
         array (

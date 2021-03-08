@@ -8,6 +8,7 @@ $baseDir = dirname($vendorDir);
 return array(
     'setasign\\Fpdi\\' => array($vendorDir . '/setasign/fpdi/src'),
     'ZipMerge\\' => array($vendorDir . '/grandt/phpzipmerge/src/ZipMerge'),
+    'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
     'PHPePub\\' => array($vendorDir . '/soderlind/phpepub/src/PHPePub'),
     'PHPZip\\Zip\\' => array($vendorDir . '/phpzip/phpzip/src/Zip'),

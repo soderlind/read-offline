@@ -3,12 +3,12 @@
 
 // Include the library
 if ( ! class_exists( 'AdminPageFramework' ) ) {
-	//include_once( dirname( __FILE__ ) . '/lib/source/admin-page-framework.php' );
-	include_once( READOFFLINE_PATH . '/lib/admin/admin-page-framework.min.php' );
+	// include_once( dirname( __FILE__ ) . '/lib/admin/source/admin-page-framework.php' );
+	include_once( READOFFLINE_PATH . '/lib/admin/admin-page-framework.php' );
 }
 
 // extend the class
-class Read_Offline_Admin_Settings extends AdminPageFramework {
+class Read_Offline_Admin_Settings extends Read_Offline_AdminPageFramework {
 
 	public function start_Read_Offline_Admin_Settings() {
 		// start_{extended class name} - this method gets automatically triggered at the end of the class constructor.
@@ -17,12 +17,12 @@ class Read_Offline_Admin_Settings extends AdminPageFramework {
 			include_once( READOFFLINE_PATH . '/lib/admin/RevealerCustomFieldType.php' ); }
 
 		if ( ! class_exists( 'AceCustomFieldType' ) ) {
-			include_once( READOFFLINE_PATH . '/lib/admin/AceCustomFieldType.php' ); }
+			include_once( READOFFLINE_PATH . '/lib/admin/custom-field-types/ace-custom-field-type/AceCustomFieldType.php' ); }
 
 		$class_name = get_class( $this );
 
 		new RevealerCustomFieldType( $class_name );
-		new AceCustomFieldType( $class_name );
+		new Read_Offline_AceCustomFieldType( $class_name );
 
 	}
 

@@ -7,4 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     '6124b4c8570aa390c21fafd04a26c69f' => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+    '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => $vendorDir . '/symfony/polyfill-mbstring/bootstrap.php',
+    'f9f43f7522ae63283deb4b9d9aa8fb82' => $vendorDir . '/wallabag/php-mobi/MOBIClass/MOBI.php',
 );
