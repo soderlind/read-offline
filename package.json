@@ -1,8 +1,8 @@
 {
   "name": "read-offline",
   "title": "Read Offline",
-  "version": "0.8.1",
-  "git_tag": "0.8.1",
+  "version": "0.9.1",
+  "git_tag": "0.9.1",
   "description": "Read Offline allows you to download or print posts and pages. You can download the posts as PDF, ePub or mobi",
   "main": "read-offline.php",
   "scripts": {
@@ -18,10 +18,8 @@
     "url": "https://github.com/soderlind/read-offline/issues/new"
   },
   "devDependencies": {
-    "eslint": ">=7.2.0",
-    "eslint-config-inpsyde": "^2.2.0",
     "git-changelog": "^2.0.0",
-    "grunt": "^1.1.0",
+    "grunt": "^1.3.0",
     "grunt-changelog": "^0.3.2",
     "grunt-cli": "~1.3.2",
     "grunt-composer": "^0.4.5",
