@@ -8,7 +8,7 @@ use PHPePub\Helpers\CalibreHelper;
 use PHPePub\Helpers\URLHelper;
 use PHPZip\Zip\File\Zip;
 
-require_once READOFFLINE_PATH . '/lib/phpMobi/MOBIClass/MOBI.php';
+// require_once READOFFLINE_PATH . '/lib/phpMobi/MOBIClass/MOBI.php';
 
 class Read_Offline_Create extends Read_Offline {
 
@@ -179,7 +179,7 @@ class Read_Offline_Create extends Read_Offline {
 		$content_end = "\n</body>\n</html>\n";
 
 		$cover = $content_start . sprintf( "<h1>%s</h1>\n<h2>%s: %s</h2>\n", $post->post_title, _x( 'By', 'Rererence between title and author: Title By: Author Name' ), $this->author_firstlast ) . $content_end;
-		$epub->addChapter( 'Notices', 'Cover.xhtml', $cover );
+		$epub->addChapter( 'Cover', 'Cover.xhtml', $cover );
 
 		/*
 		$epub->addFileToMETAINF("com.apple.ibooks.display-options.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<display_options>\n    <platform name=\"*\">\n        <option name=\"fixed-layout\">true</option>\n        <option name=\"interactive\">true</option>\n        <option name=\"specified-fonts\">true</option>\n    </platform>\n</display_options>");
