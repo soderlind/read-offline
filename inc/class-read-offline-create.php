@@ -794,33 +794,26 @@ class Read_Offline_Create extends Read_Offline {
 	 */
 	function _url_exists( $url ) {
 
-		$url = esc_url_raw( $url );
+
+		if ( '' === $url ) {
+			return false;
+		}
+
+		$href = esc_url_raw( $url );
 
 		// Relative URL
-		if ( strpos( $href, '//' ) !== 0 && in_array( $href[0], array( '/', '#', '?' ), true ) ) {
+		if ( strpos( $href, '//' ) !== 0 && in_array( substr( $href, 0, 1 ) , array( '/', '#', '?' ), true ) ) {
 				$href = get_bloginfo( 'url' ) . $href;
 		}
 
-		// No redirects
-		$response = wp_safe_remote_get(
-			$href,
-			array(
-				'timeout'    => 15,
-				// Use an explicit user-agent
-				'user-agent' => 'Read Offline Test',
-			)
-		);
-
-		$url_exists = true;
-
-		if ( is_wp_error( $response ) ) {
-			if ( strpos( $response->get_error_message(), 'resolve host' ) !== false ) {
-				$url_exists = false;
-			}
-		} elseif ( wp_remote_retrieve_response_code( $response ) === 404 ) {
-			$url_exists = false;
+		$response              = wp_remote_head( $href, array( 'timeout' => 5 ) );
+		$accepted_status_codes = array( 200, 301, 302 );
+		if ( ! is_wp_error( $response ) && in_array( wp_remote_retrieve_response_code( $response ), $accepted_status_codes, true ) ) {
+			return true;
 		}
-		return $url_exists;
+
+		return false;
+
 	}
 
 	private function _strip_img( $html ) {
