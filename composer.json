@@ -10,7 +10,7 @@
 	},
 	"require": {
 		"php": "~7.3",
-		"mpdf/mpdf": "8.0.10",
+		"mpdf/mpdf": "8.0.6",
 		"soderlind/phpepub": "4.0.8.7",
 		"wallabag/php-mobi": "1.1.0"
 	}
