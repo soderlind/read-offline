@@ -19,11 +19,14 @@ matrix:
     # aliased to a recent 7.3.x version
     - php: '7.3'
     # aliased to a recent 7.4.x version
-    - php: '7.4'    
+    - php: '7.4'
     # aliased to a recent 7.4.x version
-    - php: '8.0'    
+    - php: '8.0'
 
 before_script:
+  - travis_retry composer self-update
+  - travis_retry composer install --no-interaction --prefer-source
+  - if [[ "$php" != '8.0' ]]; then travis_retry composer remove symfony/polyfill-mbstring; fi
   - export PHPCS_DIR=/tmp/phpcs
   - export WPCS_DIR=/tmp/wpcs
   # Install CodeSniffer for WordPress Coding Standards checks.
