@@ -1,4 +1,24 @@
 {
+	"name": "soderlind/read-offline",
+	"description": "Read Offline allows you to download or print posts and pages. You can download the post as PDF, ePub and mobi",
+	"type": "wordpress-plugin",
+	"keywords": [
+		"pdf",
+		"epub",
+		"mobi"
+	],
+	"homepage": "https://github.com/soderlind/read-offline",
+	"license": [
+		"GPL-2.0-only"
+	],
+	"authors": [
+		{
+			"name": "Per Søderlind",
+			"role": "Developer",
+			"email": "per@soderlind.no",
+			"homepage": "https://soderlind.no"
+		}
+	],
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"repositories": {
