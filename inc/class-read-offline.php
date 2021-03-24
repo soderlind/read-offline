@@ -1,7 +1,9 @@
 <?php
 
-define( 'FS_CHMOD_DIR', ( 0755 & ~ umask() ) );
-
+if ( ! defined( 'FS_CHMOD_DIR' ) ) {
+	define( 'FS_CHMOD_DIR', ( 0755 & ~ umask() ) );
+}
+	
 class Read_Offline {
 
 	public static $options;
