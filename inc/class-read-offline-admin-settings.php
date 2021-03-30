@@ -56,7 +56,7 @@ class Read_Offline_Admin_Settings extends Read_Offline_AdminPageFramework {
 
 	public function replyToInsertDonationButton( $content ) {
 		return "<div class='donate' style=''>"
-			. "<a href='" . esc_url( 'http://soderlind.no/donate/' ) . "' target='_blank' >"
+			. "<a href='" . esc_url( 'https://paypal.me/PerSoderlind' ) . "' target='_blank' >"
 				. "<img src='" . READOFFLINE_URL . "/css/donation.gif' alt='" . esc_attr( __( 'Please donate!', 'admin-page-framework' ) ). "' />"
 			. '</a>'
 			. '</div>'
