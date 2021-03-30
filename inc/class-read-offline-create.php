@@ -50,7 +50,7 @@ class Read_Offline_Create extends Read_Offline {
 		$this->generator = 'Read Offline ' . READOFFLINE_VERSION . ' by Per Soderlind, http://wordpress.org/extend/plugins/read-offline/';
 
 		// content
-		$html        = '<h1 class="entry-title">' . get_the_title( $post->ID ) . '</h1>';
+		$this->html   = '<h1 class="entry-title">' . get_the_title( $post->ID ) . '</h1>';
 		$content     = $post->post_content;
 		$content     = preg_replace( '/\[\\/?(pdf|epub|mobi|print)(\\s+.*?\]|\])/i', '', $content ); // remove all [readonline] shortcodes
 		$this->html .= $this->_remove_dont_readoffline( apply_filters( 'the_content', $content ) );
@@ -1045,7 +1045,7 @@ class Read_Offline_Create extends Read_Offline {
 
 		foreach ( $html_array as $value ) {
 			if ( '' !== $value ) {
-				switch ( $value ) {
+				switch ( strtolower( $value ) ) {
 					case '<h' . trim( $header ) . '>':
 					case ( $all_tags && ( preg_match( '/<h(\d*)>/i', $value, $matches ) ? $value : ! $value ) ):
 						$have_title = 'start';
