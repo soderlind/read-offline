@@ -120,10 +120,10 @@ There are 2 ways you can add the Read Offline links:
 
 ## Developer Notes
 
-* Latest Stable Release: [0.9.9](https://github.com/soderlind/read-offline/releases/tag/0.9.9)
+* Latest Stable Release: [0.9.10](https://github.com/soderlind/read-offline/releases/tag/0.9.10)
 * Stable Branch: [master](https://github.com/soderlind/read-offline/tree/master)
 
-~Current Version: 0.9.9~
+~Current Version: 0.9.10~
 
 ## Credits ##
 
