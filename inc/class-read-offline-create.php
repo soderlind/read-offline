@@ -194,7 +194,7 @@ class Read_Offline_Create extends Read_Offline {
 			$content = $this->_split_content( $html, $toc );
 			if ( 0 != count( $content ) ) {
 				$chapter_num = 1;
-				$epub->buildTOC( null, 'toc', __( 'Table of Contents', 'read-offline' ), true, false );
+				// $epub->buildTOC( null, 'toc', __( 'Table of Contents', 'read-offline' ), true, false );
 				$levels    = array_map(
 					function( $paragraphs ) {
 						return $paragraphs['level'];
@@ -224,10 +224,11 @@ class Read_Offline_Create extends Read_Offline {
 					// }
 					// // }
 					// // $epub->setCurrentLevel( $level );
-
-					$header = ( '' !== $paragraph['title'] ) ? sprintf( '<h%s>%s</h%s>', $paragraph['level'], $paragraph['title'], $paragraph['level'] ) : '';
-					$epub->addChapter( $paragraph['title'], sprintf( 'Chapter%03d.xhtml', $chapter_num ), $content_start . $header . $paragraph['content'] . $content_end, false, EPub::EXTERNAL_REF_ADD );
-					$chapter_num++;
+					if ( '' !== $paragraph['title'] ) {
+						$header = sprintf( '<h%s>%s</h%s>', $paragraph['level'], $paragraph['title'], $paragraph['level'] );
+						$epub->addChapter( $paragraph['title'], sprintf( 'Chapter%03d.xhtml', $chapter_num ), $content_start . $header . $paragraph['content'] . $content_end, false, EPub::EXTERNAL_REF_ADD );
+						$chapter_num++;
+					}
 				}
 				$epub->rootLevel();
 			}
