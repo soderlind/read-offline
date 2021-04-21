@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d0e6f3be1d14693a10dee93efc73399",
+    "content-hash": "d95efa4c5012e505ccb716b01770a902",
     "packages": [
         {
             "name": "grandt/binstring",
@@ -47,6 +47,10 @@
                 "binary strings",
                 "mbstring"
             ],
+            "support": {
+                "issues": "https://github.com/Grandt/PHPBinString/issues",
+                "source": "https://github.com/Grandt/PHPBinString/tree/master"
+            },
             "time": "2015-08-13T06:14:41+00:00"
         },
         {
@@ -103,6 +107,10 @@
                 "stream",
                 "zip"
             ],
+            "support": {
+                "issues": "https://github.com/Grandt/PHPZipMerge/issues",
+                "source": "https://github.com/Grandt/PHPZipMerge/tree/master"
+            },
             "time": "2015-08-18T13:49:33+00:00"
         },
         {
@@ -144,6 +152,10 @@
             "keywords": [
                 "file path"
             ],
+            "support": {
+                "issues": "https://github.com/Grandt/PHPRelativePath/issues",
+                "source": "https://github.com/Grandt/PHPRelativePath/tree/master"
+            },
             "time": "2015-05-14T08:18:23+00:00"
         },
         {
@@ -189,6 +201,10 @@
             "keywords": [
                 "uuid"
             ],
+            "support": {
+                "issues": "https://github.com/JKingweb/DrUUID/issues",
+                "source": "https://github.com/JKingweb/DrUUID/tree/3.0.0"
+            },
             "time": "2017-02-09T14:17:01+00:00"
         },
         {
@@ -253,6 +269,11 @@
                 "php",
                 "utf-8"
             ],
+            "support": {
+                "docs": "http://mpdf.github.io",
+                "issues": "https://github.com/mpdf/mpdf/issues",
+                "source": "https://github.com/mpdf/mpdf"
+            },
             "funding": [
                 {
                     "url": "https://www.paypal.me/mpdf",
@@ -307,6 +328,10 @@
                 "object",
                 "object graph"
             ],
+            "support": {
+                "issues": "https://github.com/myclabs/DeepCopy/issues",
+                "source": "https://github.com/myclabs/DeepCopy/tree/1.10.2"
+            },
             "funding": [
                 {
                     "url": "https://tidelift.com/funding/github/packagist/myclabs/deep-copy",
@@ -358,6 +383,11 @@
                 "pseudorandom",
                 "random"
             ],
+            "support": {
+                "email": "info@paragonie.com",
+                "issues": "https://github.com/paragonie/random_compat/issues",
+                "source": "https://github.com/paragonie/random_compat"
+            },
             "time": "2020-10-15T08:29:30+00:00"
         },
         {
@@ -419,6 +449,10 @@
                 "stream",
                 "zip"
             ],
+            "support": {
+                "issues": "https://github.com/Grandt/PHPZip/issues",
+                "source": "https://github.com/Grandt/PHPZip/tree/master"
+            },
             "time": "2015-11-16T16:30:51+00:00"
         },
         {
@@ -466,6 +500,9 @@
                 "psr",
                 "psr-3"
             ],
+            "support": {
+                "source": "https://github.com/php-fig/log/tree/1.1.3"
+            },
             "time": "2020-03-23T09:12:05+00:00"
         },
         {
@@ -528,6 +565,10 @@
                 "fpdi",
                 "pdf"
             ],
+            "support": {
+                "issues": "https://github.com/Setasign/FPDI/issues",
+                "source": "https://github.com/Setasign/FPDI/tree/v2.3.6"
+            },
             "funding": [
                 {
                     "url": "https://tidelift.com/funding/github/packagist/setasign/fpdi",
@@ -656,6 +697,9 @@
                 "portable",
                 "shim"
             ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.22.1"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -714,6 +758,10 @@
             ],
             "description": "A Mobipocket file (.mobi) creator in PHP.",
             "homepage": "https://github.com/wallabag/php-mobi",
+            "support": {
+                "issues": "https://github.com/wallabag/php-mobi/issues",
+                "source": "https://github.com/wallabag/php-mobi/tree/1.1.0"
+            },
             "time": "2019-08-08T12:26:23+00:00"
         }
     ],
@@ -727,5 +775,5 @@
         "php": "~7.3"
     },
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }

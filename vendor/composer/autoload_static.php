@@ -85,6 +85,7 @@ class ComposerStaticInit6785bcfdf42e6eb04a58c3c2ace37cea
     );
 
     public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'RelativePath' => __DIR__ . '/..' . '/grandt/relativepath/RelativePath.php',
         'com\\grandt\\BinString' => __DIR__ . '/..' . '/grandt/binstring/BinString.php',
         'com\\grandt\\BinStringStatic' => __DIR__ . '/..' . '/grandt/binstring/BinStringStatic.php',
