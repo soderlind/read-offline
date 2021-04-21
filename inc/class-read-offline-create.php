@@ -1048,7 +1048,7 @@ class Read_Offline_Create extends Read_Offline {
 			if ( '' !== $value ) {
 				switch ( strtolower( $value ) ) {
 					case '<h' . trim( $header ) . '>':
-					case ( $all_tags && ( preg_match( '/<h(\d*)>/i', $value, $matches ) ? $value : ! $value ) ):
+					case ( $all_tags && ( preg_match( '/<h(\d).*?>/i', $value, $matches ) ? $value : ! $value ) ):
 						$have_title = 'start';
 						$level      = ( $all_tags && isset( $matches ) ) ? $matches[1] : $header;
 						$title      = '';
