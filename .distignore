@@ -21,3 +21,4 @@ phpcs.xml
 node_modules
 package-lock.json
 assets
+vendor/symfony/polyfill-mbstring
