@@ -1,252 +1,269 @@
 ## Change Log
 
-### upcoming (2021/03/08 15:03 +00:00)
-- [be74ce5](https://github.com/soderlind/read-offline/commit/be74ce5ba0fcb4dcbc0407c156741c9ec990eda3) Remove hhvm (@soderlind)
-- [242a601](https://github.com/soderlind/read-offline/commit/242a601f1f077ac442532f9fa94264fa70ccde2b) Remove PHP 7.0-7.2 (@soderlind)
+### 0.9.13
 
-### 0.9.0 (2021/03/08 13:24 +00:00)
-- [0b31e17](https://github.com/soderlind/read-offline/commit/0b31e17a2e64d4285e8ea96a773758074fd31e26) 0.9.0 (@soderlind)
-- [17bff6a](https://github.com/soderlind/read-offline/commit/17bff6aa3890d8257845995ffee3308a2cdf198e) # Conflicts: #	lib/admin/source/utility/AdminPageFramework_Utility/AdminPageFramework_Utility_URL.php #	lib/admin/source/utility/AdminPageFramework_WPUtility/AdminPageFramework_WPUtility_Page.php (@soderlind)
-- [a561285](https://github.com/soderlind/read-offline/commit/a561285faca2532e98d0febbfa035f43af2f7f37) Autoload php-mobi (@soderlind)
-- [960b68f](https://github.com/soderlind/read-offline/commit/960b68f6a769061910ac8f76a9b5e654fa11be7c) Update Admin Page Framework to v3.8.26 (@soderlind)
-- [12564a8](https://github.com/soderlind/read-offline/commit/12564a8d4fb8277d93f9bece81f5d13f17c1ca2d) Update AdminPageFramework_WPUtility_Page.php (@soderlind)
-- [5bb3379](https://github.com/soderlind/read-offline/commit/5bb3379346d9b024bdea42926e7b1a83878de6a7) Update AdminPageFramework_WPUtility_Page.php (@soderlind)
-- [607e8ff](https://github.com/soderlind/read-offline/commit/607e8ff244e9e103f208e84f1a0d7d13dda12544) Update AdminPageFramework_WPUtility_Page.php (@soderlind)
-- [51e08c8](https://github.com/soderlind/read-offline/commit/51e08c82e646ca895247a941e5b9636ea2f8055a) Update AdminPageFramework_Utility_URL.php (@soderlind)
-- [545a657](https://github.com/soderlind/read-offline/commit/545a65710099db810c381b7d8ba89dc69e473c9d) Add PHP 7.4 and 8.0 (@soderlind)
-- [e3320e8](https://github.com/soderlind/read-offline/commit/e3320e86c08c97fd4bd689571cad714e4cf01bc7) Create FUNDING.yml (@soderlind)
+* Update mPDF to version 8.0.12
 
-### 0.8.2 (2020/06/21 22:47 +00:00)
-- [902b0ad](https://github.com/soderlind/read-offline/commit/902b0adfe0a1e741174673e4bbafba87a8aec5f2) Fix ePub validation errors (@soderlind)
+### 0.9.12
 
-### 0.8.1 (2020/06/19 21:50 +00:00)
-- [78f3bc7](https://github.com/soderlind/read-offline/commit/78f3bc740580774b2fb1d67e4c285d72d12f9120) 0.8.1 (@soderlind)
-- [22e3e1a](https://github.com/soderlind/read-offline/commit/22e3e1aaf2bb0e25a4ea6750809a97e5bae88489) Fix epub validation errors (@soderlind)
-- [3d8471b](https://github.com/soderlind/read-offline/commit/3d8471b835cc32059d06a2d463c0f9ad1175eca3) Add changes after fork (@soderlind)
-- [b935ab8](https://github.com/soderlind/read-offline/commit/b935ab898e7e930f686a7785de018337ca97f151) Update soderlind/phpepub to version 4.0.8.5 (@soderlind)
-- [1c46c12](https://github.com/soderlind/read-offline/commit/1c46c12a2deb2c2e37c86fd26de68a206c825249) Update soderlind/phpepub to version 4.0.8.5 (@soderlind)
-- [5a7012d](https://github.com/soderlind/read-offline/commit/5a7012d5b78ad112a7b042113738a54926830c35) Merge branch 'master' of https://github.com/soderlind/read-offline (@soderlind)
-- [15e2810](https://github.com/soderlind/read-offline/commit/15e28105ded3681cd00e2a4606711392b1ddf164) Update PHPePub to version 4.0.8.2 (@soderlind)
-- [082672a](https://github.com/soderlind/read-offline/commit/082672a5295519c1aec1f87b561f9c283704cb7d) Delete package-lock.json (@soderlind)
-- [187b533](https://github.com/soderlind/read-offline/commit/187b533e027a3cfd78729bbd0fe6121b052df428) Add package-lock.json (@soderlind)
-- [170f2ef](https://github.com/soderlind/read-offline/commit/170f2efa698bb265a257f92bd571afe4a338b54a) Update (@soderlind)
-- [9aafad7](https://github.com/soderlind/read-offline/commit/9aafad7753f0256520b7c4ae5f102d1650416f65) Update libraries (@soderlind)
-- [d6c8445](https://github.com/soderlind/read-offline/commit/d6c8445949020fb30172eb5066c432251327743b) Change version number to 0.8.0 (@soderlind)
-- [508c191](https://github.com/soderlind/read-offline/commit/508c19118e75f5600a661456e4f39ccdb409dcc5) Add changelog (@soderlind)
-- [72f00d4](https://github.com/soderlind/read-offline/commit/72f00d473b70a8d498a3407a9874db4d08646d7b) Update (@soderlind)
-- [79944c2](https://github.com/soderlind/read-offline/commit/79944c248d1ada1550ad3f98f99cae71df8b3ac1) house keeping (@soderlind)
-- [c806520](https://github.com/soderlind/read-offline/commit/c806520dbde24d1aa858785666025b612b1fb425) Require PHP 7.3.* (@soderlind)
-- [6c06c09](https://github.com/soderlind/read-offline/commit/6c06c096af007028fbfd1d6366615903a3f28dbb) use mpdf 8.0.6 and phpepub 4.0.8.1 (@soderlind)
-- [#101](https://github.com/soderlind/read-offline/pull/101) Fix redeclaration of mb_str_split() (@nimah79)
-- [ba498c3](https://github.com/soderlind/read-offline/commit/ba498c359e59e95bf5a95190b77aaa7e490de9b1) Fix redeclaration of mb_str_split() (@nimah79)
-- [ba3fee1](https://github.com/soderlind/read-offline/commit/ba3fee1fdc9ca4a1e579aa8a7c649013679c4ff3) eslint >=4.18.2 (@soderlind)
-- [46cb813](https://github.com/soderlind/read-offline/commit/46cb8131dd1bb58b2a52199863f11f6dd2f2aa91) Add PHP 7.2 and 7.3 (@soderlind)
+* Remove buildTOC, TOC is in the .ncx file. Only add chapters with content
 
-### 0.7.7 (2017/05/18 08:32 +00:00)
-- [dd50abc](https://github.com/soderlind/read-offline/commit/dd50abc2aae794ad19e1aa7e3abff118075f86d5) Version 0.7.7 (@soderlind)
-- [#82](https://github.com/soderlind/read-offline/pull/82) Prevents formats not selected in plugin settings from being saved (@barrel)
-- [ca42601](https://github.com/soderlind/read-offline/commit/ca42601495ad23b041472c63858712265aa27e43) Prevents formats not selected in plugin settings from being saved (@bengodfrey)
-- [#79](https://github.com/soderlind/read-offline/pull/79) fixes query url of attachment to use site url instead of home (@barrel)
-- [#79](https://github.com/soderlind/read-offline/pull/79) fixes query url of attachment to use site url instead of home (@barrel)
-- [86a62c2](https://github.com/soderlind/read-offline/commit/86a62c2a3b03f23a70c4c4e2743a0fbd31c6b937) fixes query url of attachment to use site url instead of home (allows alternate site url to not break the plugin) (@bengodfrey)
-- [142f7c2](https://github.com/soderlind/read-offline/commit/142f7c24cfb00e9eda56b4b11d9c8512df97c13d) Fix syntax (@soderlind)
+### 0.9.11
 
-### 0.7.6 (2016/12/12 20:50 +00:00)
-- [96cbd4a](https://github.com/soderlind/read-offline/commit/96cbd4acaeab6f735c3faeeca08845f44f4d9065) Version 0.7.6 (@soderlind)
-- [dd8881c](https://github.com/soderlind/read-offline/commit/dd8881c6451eba53658116fb98ff5e9025dcee91) 0.7.5 (@soderlind)
+* Housekeeping
 
-### 0.7.5 (2016/09/08 22:33 +00:00)
-- [58b2d79](https://github.com/soderlind/read-offline/commit/58b2d796b440773fefd75812fc56806e03a4b245) Lint CSS files (@soderlind)
-- [50ea96e](https://github.com/soderlind/read-offline/commit/50ea96ea310b2888666fa807cea5445906a6cf5e) Add FAQ (@soderlind)
-- [2e26460](https://github.com/soderlind/read-offline/commit/2e26460848df5dfa407ab8e6913be82a1f78dc3a) Update links to sections (@soderlind)
-- [c805d8e](https://github.com/soderlind/read-offline/commit/c805d8e9fc3283749bc2a4679861318c4ce4f868) Update links to sections (@soderlind)
-- [f6ea80b](https://github.com/soderlind/read-offline/commit/f6ea80b95246929d9eac4af654c7229cb49b2d70) Add links to sections (@soderlind)
-- [27f4b33](https://github.com/soderlind/read-offline/commit/27f4b3385800a8df139dae504af216d4942446d2) Update assets and screenshots (@soderlind)
-- [862966e](https://github.com/soderlind/read-offline/commit/862966e09e7f8e6225a39c059065ff0e502ebef6) Change asset banners (@soderlind)
-- [fd56bb7](https://github.com/soderlind/read-offline/commit/fd56bb7817ff74b158cbc4e5cc312de035f48691) Add PHP 7.1 test (@soderlind)
-- [4c59353](https://github.com/soderlind/read-offline/commit/4c593536299323e517e59942f8f9b3d500b8297e) 0.7.4 (@soderlind)
+### 0.9.10
 
-### 0.7.4 (2016/08/27 19:43 +00:00)
-- [43ff983](https://github.com/soderlind/read-offline/commit/43ff98344a450da9bf33b70577995226825b743d) Removed "XX" that was prefixed to the archive title. (@soderlind)
-- [48486f6](https://github.com/soderlind/read-offline/commit/48486f63adab153d8d2f0f57b3d37399b2bce64a) 0.7.3 (@soderlind)
+* Add missing H1
 
-### 0.7.3 (2016/08/12 11:12 +00:00)
-- [571e1ab](https://github.com/soderlind/read-offline/commit/571e1ab5c9c4387caa0fa8e503bbb52ffa315043) FIX: reference to parent object (@soderlind)
-- [33e860b](https://github.com/soderlind/read-offline/commit/33e860bdf726e2249eabfa3fefd1790789079b3c) ADD: Annotations for PDF + "Don't include content" using a wrapper with class="not-readoffline", eg: <span class="not-readoffline"> don't include me in the PDF/ePub/mobi</span> (@soderlind)
-- [862274d](https://github.com/soderlind/read-offline/commit/862274d76527d7463dde799ffcb0addd5899198d) ADD: Annotations for PDF (@soderlind)
-- [89e3399](https://github.com/soderlind/read-offline/commit/89e33998e43b6f283a91fdc8f52bc5d63ccefeb4) FIX: Option to save, or not,  to media library (@soderlind)
-- [f06353e](https://github.com/soderlind/read-offline/commit/f06353e088ee25b1d0c7038cbc9ded44f4bc5656) 0.7.2 (@soderlind)
-- [a966ee9](https://github.com/soderlind/read-offline/commit/a966ee90b2201f42bac944c6396e4e9e752b272d) 0.7.2 (@soderlind)
-- [55d0509](https://github.com/soderlind/read-offline/commit/55d050992b38378f49f21e85c9d33a1111cb9d5b) 0.7.2 (@soderlind)
-- [1fca3e9](https://github.com/soderlind/read-offline/commit/1fca3e9037d602efa6774241e64d59680573227a) 0.7.2 (@soderlind)
+### 0.9.9
+* Set EPUB chapter autosplit to false
 
-### 0.7.2 (2016/08/09 18:10 +00:00)
-- [f2eb90c](https://github.com/soderlind/read-offline/commit/f2eb90c3738a085877b5e582116b91460f3855db) ADD: Support for custom post type (@soderlind)
+### 0.9.7
 
-### 0.7.1 (2016/08/09 16:11 +00:00)
-- [0131a52](https://github.com/soderlind/read-offline/commit/0131a529004426112c9c30b14954d11d6769bfd6) FIX: Bug in Table of Contents settings for ePub and mobi. (@soderlind)
-- [982b2f8](https://github.com/soderlind/read-offline/commit/982b2f8e2be2ae3c18f2d015a3c14e2cc0bf9117) Update (@soderlind)
-- [6f2c036](https://github.com/soderlind/read-offline/commit/6f2c03653dd2cb8eb15467af1c5495a9c1d1dd7f) 0.7.0 (@soderlind)
-- [2347f08](https://github.com/soderlind/read-offline/commit/2347f08226940cb23aa1242f28b4fc74431976a2) 0.7.0 (@soderlind)
-- [fb20613](https://github.com/soderlind/read-offline/commit/fb20613a83433257d82c76d5604e9031d584be7b) 0.7.0 (@soderlind)
+* Set FS_CHMOD_DIR if not defined
 
-### 0.7.0 (2016/08/08 16:17 +00:00)
-- [840b80b](https://github.com/soderlind/read-offline/commit/840b80be3e63bbced358535bad7a1c4d1791a2c7) Add shortcode for PDF, ePub, mobi and print (@soderlind)
+### 0.9.6
 
-### 0.6.4 (2016/08/07 19:05 +00:00)
-- [f5c68b7](https://github.com/soderlind/read-offline/commit/f5c68b7daef00d6de096f0e3d24a20c416efa2c9) Add, for ePub and mobi table of contents, option to select all headers (h1-h6) (@soderlind)
-- [a3351d3](https://github.com/soderlind/read-offline/commit/a3351d3ec3155f02974db86ceb39685630b506fd) Use wp_safe_remote_get instead of wp_remote_get (@soderlind)
+* Add license and copyright
 
-### 0.6.3 (2016/07/28 21:40 +00:00)
-- [790785a](https://github.com/soderlind/read-offline/commit/790785aa0cd06982571adef16aa400949a34ff69) Fix load feature image for ePub. (@soderlind)
-- [bb344bd](https://github.com/soderlind/read-offline/commit/bb344bde2faf5b5319f8087013efb1210f14450c) 0.6.2 (@soderlind)
+### 0.9.5
 
-### 0.6.2 (2016/07/27 06:15 +00:00)
-- [c379c36](https://github.com/soderlind/read-offline/commit/c379c368b085b547a533751051d5a3977590e849) Add // @codingStandardsIgnoreLine to methods from extended external classes. (@soderlind)
-- [214e2f8](https://github.com/soderlind/read-offline/commit/214e2f83e7b661b781a6a9369af9a2fe4afff093) Remove notice that you should upgrade to PHP 5.6 (bur really, you should). (@soderlind)
-- [cf838ce](https://github.com/soderlind/read-offline/commit/cf838cebf10cbe2390afaeac2f6c5889245db7cb) Add travis build badge (@soderlind)
-- [b34b99e](https://github.com/soderlind/read-offline/commit/b34b99e1f1422d28b86aef7e7dcdd7b49dbfad29) Update exclude rule (@soderlind)
-- [5832dee](https://github.com/soderlind/read-offline/commit/5832dee0867733b18eb47a52081e82d3342cb47d) Update .travis.yml (@soderlind)
-- [1c56958](https://github.com/soderlind/read-offline/commit/1c56958bcb6e74b9765de4d65753dabe676ecb6d) Update rule to WordPress-Core (@soderlind)
-- [f5b6e86](https://github.com/soderlind/read-offline/commit/f5b6e86a210b1f9c0bc6cc16ae2c2fe8c8f87dfb) remove unsupported php version (@soderlind)
-- [b35fdd5](https://github.com/soderlind/read-offline/commit/b35fdd5d3920ab65bc4ff9306dd5136e88a349ed) rename (@soderlind)
-- [4cd14a0](https://github.com/soderlind/read-offline/commit/4cd14a0bf6d6b42300ed39766c99969852b91729) update (@soderlind)
-- [b0fdeba](https://github.com/soderlind/read-offline/commit/b0fdeba11b6247ba4da27bace84e0a1451a99025) add travis script (@soderlind)
-- [b4162bc](https://github.com/soderlind/read-offline/commit/b4162bc402c86451e27387f485b910b905461b31) Add codeclimate badge (@soderlind)
-- [f850b6b](https://github.com/soderlind/read-offline/commit/f850b6b33682d9453cd9bc4b875434d36772df85) Update plugin to WPCS standards. (@soderlind)
-- [b93bb1e](https://github.com/soderlind/read-offline/commit/b93bb1e39b413b8671def3f6e38d65e495342703) add codeclimate config files (@soderlind)
-- [b668f55](https://github.com/soderlind/read-offline/commit/b668f5583ea218a7f18d38dad5b25d7dab6e5bdf) remove old shortcode-ui code (@soderlind)
-- [1596b8f](https://github.com/soderlind/read-offline/commit/1596b8fff5cceed155b02781ae43dcdedf3acbe9) remove old shortcode-ui code (@soderlind)
-- [9dc2293](https://github.com/soderlind/read-offline/commit/9dc229329215294383a6b6a22944ce6a884992d7) 0.6.1 (@soderlind)
-- [ec761ad](https://github.com/soderlind/read-offline/commit/ec761ad85631081376df6e0bd342c001f0ee55d9) Update RTL for PDF and ePub (@soderlind)
-- [b56b4dd](https://github.com/soderlind/read-offline/commit/b56b4dd6213413d581bf90504ac93227af9b8a14) Add RTL for PDF, ePub and mobi (@soderlind)
+* Upgrade mPDF tol v8.0.10 (PHP 8 support)
+* Don't test symfony/polyfill-mbstring if PHP < 8
 
-### 0.6.1 (2016/07/25 17:52 +00:00)
-- [c63c686](https://github.com/soderlind/read-offline/commit/c63c6862f1b70260df516a4496f6ef965b5f3a69) 0.6.1 (@soderlind)
-- [d006f94](https://github.com/soderlind/read-offline/commit/d006f94e0d033a2e4760f5626dda0b555defb978) Add RTL for PDF and ePub (@soderlind)
+### 0.9.4
 
-### 0.6.0 (2016/07/25 16:29 +00:00)
-- [58b847f](https://github.com/soderlind/read-offline/commit/58b847f4cb5540dd09167e83e65d3eca801c69a2) Update mPDF to version 6.1 (@soderlind)
-- [6425658](https://github.com/soderlind/read-offline/commit/64256588a9a4368debf7e34576497a5edb2138f0) 0.6.0 (@soderlind)
-- [0697d25](https://github.com/soderlind/read-offline/commit/0697d2588c937aa419b590d73c5b2c949448ccdb) Add support for all mPDF fonts via the Read Offline Fonts add-on plugin (@soderlind)
-- [9fd6b79](https://github.com/soderlind/read-offline/commit/9fd6b7966954524c3fbbe98fd7aa8173ae10c277) 0.5.0 (@soderlind)
-- [2636b4b](https://github.com/soderlind/read-offline/commit/2636b4b17f94a67809f172a1cc0b7fbcee8130e4) 0.5.0 (@soderlind)
-- [7b1ddb0](https://github.com/soderlind/read-offline/commit/7b1ddb05e7c4d8faa2afacd22267a7fbb7695a66) 0.5.0 (@soderlind)
-- [72e78ce](https://github.com/soderlind/read-offline/commit/72e78cebbab27ec4d032f0e5745d888cff459773) 0.5.0 (@soderlind)
-- [e149517](https://github.com/soderlind/read-offline/commit/e149517b453c519ded2eab4b4445e225c3358a70) Fix ePub date (@soderlind)
+* Tested up to WP 5.7
+* Revert to mPDF 8.0.6, 8.0.10 isn't compatible with PHP < 8.0
 
-### 0.5.0 (2016/07/24 12:46 +00:00)
-- [7f94281](https://github.com/soderlind/read-offline/commit/7f94281f5ae409f035ae62e6f8f8f1646fc81c6a) Add Table of Contents to ePub and mobi (@soderlind)
+### 0.9.3
 
-### 0.4.1 (2016/07/22 18:58 +00:00)
-- [d02f13c](https://github.com/soderlind/read-offline/commit/d02f13c4ec8a6c6046cb6239b7ae2984db3ef08b) 0.4.0 (@soderlind)
-- [fe71bd2](https://github.com/soderlind/read-offline/commit/fe71bd247c5a2cc1902a03d373acb9502fdbafe7) Add missing vendor folder to deployment routine (@soderlind)
-- [91d0dad](https://github.com/soderlind/read-offline/commit/91d0dad5091b0d8ff00542f643fd4a785d0945d0) Remove old file (@soderlind)
+* Update mPDF to version 8.0.10 (supports PHP 8)
 
-### 0.4.0 (2016/07/22 13:25 +00:00)
-- [7ac1880](https://github.com/soderlind/read-offline/commit/7ac18803ea6ff688e74a6b21e988cd6625c315c2) Version 0.4.0 (@soderlind)
-- [cd71bcc](https://github.com/soderlind/read-offline/commit/cd71bccca9f93db1ab146b14de7ca93ca14a03ac) Fix ePub and mobi bugs (@soderlind)
-- [93c3ee6](https://github.com/soderlind/read-offline/commit/93c3ee665e2ad2d20adeaa9481f60b906594d4f7) Add option in admin to select if you want to cache pdf, epub or mobi (@soderlind)
-- [de24945](https://github.com/soderlind/read-offline/commit/de24945bc2bd08e4e5bc6b2bc6ac2f4b9b2ffd41) Add option in admin to select if you want to cache pdf, epub or mobi (@soderlind)
-- [42e50ca](https://github.com/soderlind/read-offline/commit/42e50cac540cbb562ee0a405f3759b91ad82ab3c) Remove HTMLPurifier (@soderlind)
-- [72aeace](https://github.com/soderlind/read-offline/commit/72aeace371cab3d056ac9fb5696db3f45712de4c) Update phpMobi to latest version (@soderlind)
-- [25af9dc](https://github.com/soderlind/read-offline/commit/25af9dcfb9a1497ad69ff1d8c9c4454b036e1b34) remove old files (@soderlind)
-- [2d5a289](https://github.com/soderlind/read-offline/commit/2d5a289118866fbb5afdaeb3e2da59a8051e5584) Update PHPePub to 4.0.7 (@soderlind)
-- [e646ad2](https://github.com/soderlind/read-offline/commit/e646ad29dcf2771d02d47ee516d5ceb638f6d200) Update PHPePub to version 4.0.7 (@soderlind)
-- [1e6ca49](https://github.com/soderlind/read-offline/commit/1e6ca4992593839d04a628a921adf06ed4649a51) Added missing translation (@soderlind)
-- [1354256](https://github.com/soderlind/read-offline/commit/1354256726d64366369941222888aeafcd9f3310) Updated changelog (@soderlind)
-- [a2d7266](https://github.com/soderlind/read-offline/commit/a2d72661cf36ec63878769b614ec0702076d4ec6) Conflicts: 	Gruntfile.js (@soderlind)
+### 0.9.2
 
-### 0.3.1 (2015/08/06 18:12 +00:00)
-- [13eecff](https://github.com/soderlind/read-offline/commit/13eecff694c95de790b37daab8fb81ca85d046fd) Version 0.3.1 (@soderlind)
-- [70274d3](https://github.com/soderlind/read-offline/commit/70274d333b6f16293d030d80ebf941270b99effe) Fixed HTML purification (previous version stripped html P-tags, sorry). (@soderlind)
-- [102fcca](https://github.com/soderlind/read-offline/commit/102fcca01947bb2c090a2c6df0cc3651a21c6c53) Version 0.3.0 (@soderlind)
-- [20e57dc](https://github.com/soderlind/read-offline/commit/20e57dcf17628b7b1fbb7e64e8301342d004353c) Update Gruntfile.js (@soderlind)
-- [c66ae31](https://github.com/soderlind/read-offline/commit/c66ae31b463d30af6264008c7cd5de34da0d9949) updated (@soderlind)
-- [955817c](https://github.com/soderlind/read-offline/commit/955817c5c86e02b7eecfb51e4fee656afc5cb843) added (@soderlind)
-- [79b9dd8](https://github.com/soderlind/read-offline/commit/79b9dd8c04ff120eb5b3625852bfdbbfaf5b9a53) Updated CHANGELOG.md (@soderlind)
+* Fix bug in _url_exists
 
-### 0.3.0 (2015/06/29 22:04 +00:00)
-- [2f84119](https://github.com/soderlind/read-offline/commit/2f841198102f09b2cb053a66f28d0621c833e7c1) Version 0.3.0 (@soderlind)
-- [4826a0f](https://github.com/soderlind/read-offline/commit/4826a0f98a06008bb38c9dff49e09782540555a0) updated assets, removed shortcake (@soderlind)
-- [e9067d3](https://github.com/soderlind/read-offline/commit/e9067d3f140e0f919c785d225ef3c6367f8140f8) added multisite support for add epub and mobi as attachment (@soderlind)
-- [cde7f13](https://github.com/soderlind/read-offline/commit/cde7f136a2ed5c5ed497d9488425c37c9d8af9f1) Conflicts: 	include/class-read-offline.php (@soderlind)
-- [fd4a9f5](https://github.com/soderlind/read-offline/commit/fd4a9f5604cd96b5f75e5232dadc729c3924ca51) fixed bug saving pdf,epub and mobi as attachment (@soderlind)
-- [9d45f83](https://github.com/soderlind/read-offline/commit/9d45f83cc24253bbe9c2c70bc0e3ceb123bcd45e) not used .. yet, buggy proof of concept (@soderlind)
-- [7868e08](https://github.com/soderlind/read-offline/commit/7868e08d7f555f34edee0e6195dc2f2e596a8442) re-enabled htmlpurifier, replaced custom function with attachment_url_to_postid (@soderlind)
-- [f566281](https://github.com/soderlind/read-offline/commit/f56628127420fc9b0ffcbc914240e246023f4833) modified autoloader, removed widget (@soderlind)
-- [9a7741b](https://github.com/soderlind/read-offline/commit/9a7741b3d3d79268bd494ae93743ff98f3bcd32e) updated (@soderlind)
-- [cf4857a](https://github.com/soderlind/read-offline/commit/cf4857a99e4210c8e1822a6bb626de6fb8a85a46) updated, added prefix (@soderlind)
-- [0bb0d25](https://github.com/soderlind/read-offline/commit/0bb0d25f15b8661f1bba27e67451984ed047e452) updated (@soderlind)
-- [2e18fc5](https://github.com/soderlind/read-offline/commit/2e18fc5387011005a82a8914cba89ec5119082a8) update (@soderlind)
-- [3acf1cb](https://github.com/soderlind/read-offline/commit/3acf1cbc310989536cf453bcfd4b0f4bc1a274dc) save pdf, epu and mobi as attachment to post (@soderlind)
-- [4c18b0a](https://github.com/soderlind/read-offline/commit/4c18b0aa63f182f31619867f55853049b23f3005) added the htmlpurifier standalone library (@soderlind)
-- [9858560](https://github.com/soderlind/read-offline/commit/98585606f1d0b69e295de4c14693924d95168e5d) initial commit (@soderlind)
-- [34a09d3](https://github.com/soderlind/read-offline/commit/34a09d318bc2ca0f3303b6682dcc2194399ba3cf) Moved create doc (pdf, mobi, epub and print) to a new class: class-read-offline-create.php (@soderlind)
-- [4b209ba](https://github.com/soderlind/read-offline/commit/4b209ba23e52d1928e51f5032d0dd00fa87f3940) Update README.md (@soderlind)
-- [b5167dd](https://github.com/soderlind/read-offline/commit/b5167dd2b90ff4c4b4aaa5a368287a33d097352b) Added Shortcake (@soderlind)
-- [3ff7001](https://github.com/soderlind/read-offline/commit/3ff70016b8d7e44791fdac48a65d632294db76f4) Updated (@soderlind)
-- [0d2dcbe](https://github.com/soderlind/read-offline/commit/0d2dcbe733c73508d8c21f3361318898e2cdc667) Updated languages/read-offline.pot (@soderlind)
-- [a185aa2](https://github.com/soderlind/read-offline/commit/a185aa2d6ba1aaf4606f7b2f217cef1e310e9b10) Added makepot, creates languages/read-offline.pot (@soderlind)
-- [8f8608b](https://github.com/soderlind/read-offline/commit/8f8608b8d551517399c8fa8f1888b48f51476678) hotfix for issue #21 (@soderlind)
-- [001a58c](https://github.com/soderlind/read-offline/commit/001a58c77a0ad78bef9018980a2386fc76b929f4) Update README.md (@soderlind)
-- [a54188e](https://github.com/soderlind/read-offline/commit/a54188edef9284976a2dd048043d323b9e00d16c) Plugin management (@soderlind)
-- [635b74b](https://github.com/soderlind/read-offline/commit/635b74bc074636fe8a78cf9466028c0052cd4796) Added node_modules (@soderlind)
-- [ed47992](https://github.com/soderlind/read-offline/commit/ed4799291a7b1ad8cb05dc4b098c84ec1b1ede97) Added Shortcake (@soderlind)
-- [b2c9fb4](https://github.com/soderlind/read-offline/commit/b2c9fb4a54d1160d4e2bb77cc7c8689b34b06013) Added Shortcake (@soderlind)
-- [c6b48e7](https://github.com/soderlind/read-offline/commit/c6b48e7e3e1c95bd8f9f2aafb18dbd4a023f2550) moved files (@soderlind)
-- [e382bdc](https://github.com/soderlind/read-offline/commit/e382bdce0095585be12efad23e61ffbe2c33b9fa) changed folder names (@soderlind)
-- [32654f7](https://github.com/soderlind/read-offline/commit/32654f7e2e854d1ec315e0f3d44f37333ac048bf) reverted to orginal setCover method (@soderlind)
-- [c16d0f6](https://github.com/soderlind/read-offline/commit/c16d0f6de6f88c1362ed0dcb1e6aeee1eccf40e3) Merge branch 'master' of https://github.com/soderlind/read-offline (@soderlind)
-- [f424ee9](https://github.com/soderlind/read-offline/commit/f424ee9f8b0f0eab2f4fefe96cc4e50b491b8131) rewrote private function _create_tmp_directories (@soderlind)
-- [1a00d72](https://github.com/soderlind/read-offline/commit/1a00d72b4b16115409351f802880a55fd0234bfb) renamed folder (@soderlind)
-- [96856a3](https://github.com/soderlind/read-offline/commit/96856a3eac6d8e9836e131fe8bdadf1a4d2a3edf) moved classes to includes (@soderlind)
-- [0a66c1d](https://github.com/soderlind/read-offline/commit/0a66c1d47de472cc61679a532eb4eac3e38d1d42) Update README.md (@soderlind)
-- [3a5e3a1](https://github.com/soderlind/read-offline/commit/3a5e3a18e131eda72b4c6f7240834fa29e62e9a6) Fixed issue #18 (@soderlind)
-- [af45514](https://github.com/soderlind/read-offline/commit/af45514fa89131f648a1d25ab0cc6e8ea6c45283) Updated (@soderlind)
-- [7f4c1d7](https://github.com/soderlind/read-offline/commit/7f4c1d7e59a99f932a245a1d6076af7197b2384f) 0.2.8: rewrote routine for embedding images in epub (@soderlind)
-- [5fcd774](https://github.com/soderlind/read-offline/commit/5fcd774b2bd644400cfcb39d54bc793aa3ed8830) removed unnecessary files (@soderlind)
-- [3cd0d58](https://github.com/soderlind/read-offline/commit/3cd0d5860e8f60c3080722ae6a7a94921ba6751e) embed images in epub (@soderlind)
-- [b42961d](https://github.com/soderlind/read-offline/commit/b42961d92b368f8f2239367807d0c780989bff10) attach images to epub (@soderlind)
-- [dd1f9e5](https://github.com/soderlind/read-offline/commit/dd1f9e58959b050ffb8411963a5ed7a1ab70bf7b) v0.2.7, ePub validates using the EPUB validator (@soderlind)
-- [1dd4d18](https://github.com/soderlind/read-offline/commit/1dd4d183548cda97cf7314a0b47c75ed86343c45) Read Offline now works with Pages (@soderlind)
-- [e6905f2](https://github.com/soderlind/read-offline/commit/e6905f2efb40d0a80c1cd188a48697d17a0bd605) Fixed: Adding a custom CSS to PDF (@soderlind)
-- [0ba351b](https://github.com/soderlind/read-offline/commit/0ba351b2e09bb93fd6b7be38d6fe75cff143f082) v 0.2.4 (@soderlind)
-- [e191697](https://github.com/soderlind/read-offline/commit/e1916973b04d9bd9872efbd952fb154804f3cfdc) Merge branch 'master' of https://github.com/soderlind/read-offline (@soderlind)
-- [0578990](https://github.com/soderlind/read-offline/commit/05789902802440181d3e917b4ff6b71a72d19c43) fixed bug preventing custom css for epub (@soderlind)
-- [6a6c681](https://github.com/soderlind/read-offline/commit/6a6c681c352bc82916825989e6eaecdfa890e180) Fix minor typos (@soderlind)
-- [a072ebe](https://github.com/soderlind/read-offline/commit/a072ebe6783d3ff7342b98591ed4cad99319c52d) Update README.md (@soderlind)
-- [a1749b0](https://github.com/soderlind/read-offline/commit/a1749b065982fd1315c7e324255d0d265ffa1dca) Updated (@soderlind)
-- [8c601f2](https://github.com/soderlind/read-offline/commit/8c601f2f8424274ad42abe769b065e2780853753) Reduced mPDF library size, incl removed fonts (@soderlind)
-- [cdd14d2](https://github.com/soderlind/read-offline/commit/cdd14d28b42df9bc1b4dee770e8d6c47215537eb) Added localization (@soderlind)
-- [a6e5cf5](https://github.com/soderlind/read-offline/commit/a6e5cf54a37becc5c6d63b00b1807182deead2d4) Renamed folder (@soderlind)
-- [1fd337f](https://github.com/soderlind/read-offline/commit/1fd337f8277e1606904140dee1be786caf1bd806) 0.2.1 - see changelog (@soderlind)
-- [36b5ec8](https://github.com/soderlind/read-offline/commit/36b5ec8956d219d069ddd75a392bae7f1dd26d45) Update README.md (@soderlind)
-- [86607d5](https://github.com/soderlind/read-offline/commit/86607d598ce633ec32306e6227a4128f4f8e71b5) renamed (@soderlind)
-- [2eeef04](https://github.com/soderlind/read-offline/commit/2eeef048fb32ae2e6acc7876328c4d8ff320b167) renamed (@soderlind)
+### 0.9.1
 
-### 0.2.0 (2015/01/19 16:05 +00:00)
-- [0ed1774](https://github.com/soderlind/read-offline/commit/0ed1774e8c31cd64aa8d6ccbe6678c7e5ef36c72) Complete rewrite, see changelog in README (@soderlind)
-- [4cd3d63](https://github.com/soderlind/read-offline/commit/4cd3d636f005cdde77d7f7d7e110105510d00662) Clean Up (@soderlind)
-- [41e4221](https://github.com/soderlind/read-offline/commit/41e4221a19a138086e0ad86d4e565e3d5609d5b5) updated readme.txt (@soderlind)
-- [f85545f](https://github.com/soderlind/read-offline/commit/f85545f016a3ccfff94dca26df209a2f9c1b68f8) fixed permalink bug (@soderlind)
-- [caad56c](https://github.com/soderlind/read-offline/commit/caad56c731cbee45c89742dae837710af6a407db) updated readme.txt (@soderlind)
-- [d135244](https://github.com/soderlind/read-offline/commit/d135244ef4647b9063620a7a04436c5e65332d8a) updated readme.txt (@soderlind)
-- [97a4d51](https://github.com/soderlind/read-offline/commit/97a4d5178bd12e0098f937fcab3c2b950b2d346a) added event tracking for google analytics (@soderlind)
-- [abec93d](https://github.com/soderlind/read-offline/commit/abec93d012f2f781655587da9ff3e9156cc6cf0b) minor bugfix (@soderlind)
-- [1b3a936](https://github.com/soderlind/read-offline/commit/1b3a936d48a162015ad042219719744d1ba5bf02) updated readme.txt (@soderlind)
-- [19b106e](https://github.com/soderlind/read-offline/commit/19b106efe3a50d278e07d1515e32575986896ce7) updated readme.txt (@soderlind)
-- [2621328](https://github.com/soderlind/read-offline/commit/262132812977bf366cb153d1dae2fa6ef8a0d15c) Added the option to add custom css to PDF (@soderlind)
-- [1d3b4cf](https://github.com/soderlind/read-offline/commit/1d3b4cfc6b5a5a2a8980acb8df353acd43c36164) updated readme.txt (@soderlind)
-- [fa30eb8](https://github.com/soderlind/read-offline/commit/fa30eb8bd6789d9bb1b2a98d32b6694655e7387a) updated readme.txt (@soderlind)
-- [a0c0421](https://github.com/soderlind/read-offline/commit/a0c042184a9fe042346abc55b60c7e502d2377d3) added option for custom epub css, and languages/read-offline.po (@soderlind)
-- [8141bb3](https://github.com/soderlind/read-offline/commit/8141bb3dcc6c604904586163216ecab86d183b42) updated readme.txt (@soderlind)
-- [fb56901](https://github.com/soderlind/read-offline/commit/fb56901ed45a54ab1b331ee16958db131f18abb9) updated readme.txt (@soderlind)
-- [92edd3d](https://github.com/soderlind/read-offline/commit/92edd3d8923d6f35e63d3da46549ddd6f73ad1e4) added permalink support (@soderlind)
-- [e9eb20b](https://github.com/soderlind/read-offline/commit/e9eb20b466b054a811ea03a7201b330cc1230579) epub validates against http://www.epubconversion.com/ePub-validator-iBook.jsp (@soderlind)
-- [c0b9c37](https://github.com/soderlind/read-offline/commit/c0b9c376e1b1e095a2edb9137d3c6820132af85e) bugfix in download.php was including  Epub.inc.php,  correct is EPub.inc.php (@soderlind)
-- [d84f687](https://github.com/soderlind/read-offline/commit/d84f6873323e07910695ae6cff12fe35f9636c35) readme.txt update (@soderlind)
-- [807e66f](https://github.com/soderlind/read-offline/commit/807e66fc25617672c679a9e51f41476dbddfc985) bugfix (@soderlind)
-- [8cbe33d](https://github.com/soderlind/read-offline/commit/8cbe33d255f3c0676882ebc183112ae1da1150ac) added shortcode and option to add a Read Offline link to posts and pages (@soderlind)
-- [ae21562](https://github.com/soderlind/read-offline/commit/ae21562a1b57839cd81a3f709f3faeb7c58a6c17) Initial version in the plugin directory (@soderlind)
-- [d500ed3](https://github.com/soderlind/read-offline/commit/d500ed3f03ec335ab53373e6d3a9219c129a174d) adding read-offline by PerS (@soderlind)
+* Housekeeping
+
+### 0.9.0
+
+* Update Admin Page Framework to v3.8.26
+
+### 0.8.2
+
+* Fix ePub validation errors
+
+### 0.8.1
+
+* Fix epub validation errors
+* Add changes after fork
+* Update soderlind/phpepub to version 4.0.8.5
+* Require PHP 7.3
+
+### 0.8.0
+
+* Require PHP 7.3
+* Update mPDF to version 8.0.6
+* PHPePub supports PHP 7.3
+
+### 0.7.7
+
+* [Prevents formats not selected in plugin settings from being saved](https://github.com/soderlind/read-offline/pull/82)
+* [Fixes query url of attachment to use site url instead of home](https://github.com/soderlind/read-offline/pull/79) (allows alternate site url to not break the plugin)
+
+### 0.7.6
+
+* Tested & found compatible with WP 4.7.
+
+### 0.7.5
+
+* Linted CSS files
+
+### 0.7.4
+
+* Removed "XX" that was prefixed to the archive title.
+
+### 0.7.3
+
+* FIX: Option to save, or not, to media library.
+* ADD: Annotations for PDF. Converts foot- / endnotes to annotations. Enable in Read Offline->PDF
+* ADD: "Don't include content" using a wrapper with `class="not-readoffline"`, eg: `<span class="not-readoffline"> don't include this text in the PDF/ePub/mobi</span>`
+
+### 0.7.2
+
+* ADD: Support for custom post type
+
+### 0.7.1
+
+* FIX: Bug in Table of Contents settings for ePub and mobi.
+
+### 0.7.0
+
+* Add `[pdf]`, `[epub]`, `[mobi]` and `[print]` shortcodes.
+
+### 0.6.4
+
+* Add, for ePub and mobi table of contents, option to select all headers (h1-h6).
+* Use `wp_safe_remote_get()` instead og `wp_remote_get()`
+
+### 0.6.3
+
+* Fix load feature image for ePub.
+* Tested & found compatible with WP 4.6.
+
+### 0.6.2
+
+* Remove notice that you should upgrade to PHP 5.6 (bur really, you should).
+
+### 0.6.1
+
+* Add RTL for PDF, ePub and print. PDF needs the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin.
+
+### 0.6.0
+
+* Add support for all mPDF fonts via the [Read Offline Fonts](https://github.com/soderlind/read-offline-fonts) add-on plugin
+* Update mPDF to version 6.1
+
+### 0.5.0
+
+* Add Table of Contents to ePub and mobi, default off. Set it in Read Offline->ePub and Read Offline->mobi
+* Readded mobi cover page (kind of catch 22, you must have Table of Contents to get a cover page)
+
+### 0.4.1
+
+* Added missing folder
+
+### 0.4.0
+
+* Fix ePub and mobi bugs
+* Add option in admin to select if you want to cache pdf, epub or mobi files in the Media Libray, default is "No"
+* Update PHPePub to version 4.0.7
+* Update phpMobi to latest version
+* Remove HTMLPurifier
+
+### 0.3.1
+
+* Fixed HTML purification (previous version stripped html P-tags, sorry). html-purify is now only used when creating ePub
+
+### 0.3.0
+
+* A lot of changes since last commit, please see [CHANGELOG.md](https://github.com/soderlind/read-offline/blob/master/CHANGELOG.md) at GitHub
+
+### 0.2.8
+
+* ePub: rewrote routine for embedding images
+
+### 0.2.7
+
+* ePub: Added option to add Featured Image as a coverpage
+* ePub: Fixed bug with adding images
+* Read Offline ePub validates using the [EPUB Validator](http://validator.idpf.org/)
+
+### 0.2.6
+
+* Read Offline now works with Pages
+
+### 0.2.5
+
+* Solved a bug that prevented a user from adding a custom css to PDF
+
+### 0.2.4
+
+* Solved a bug that prevented a user from adding a custom css to ePub
+
+### 0.2.3
+
+* Reduced mPDF library size by 90% (!!), incl removing fonts. Only [DejaVu fonts](http://dejavu-fonts.org/) are included. Will add font management (i.e. option to add fonts) in later version. Please [tell me](https://github.com/soderlind/read-offline/issues/new) if this breaks the plugin.
+
+### 0.2.2
+
+* Added localization (that is, added missing `load_plugin_textdomain()`)
+
+### 0.2.1
+
+* New Feature: Read Offline->Print->Print Style  = "The site theme style"
+* Biugfixs
+   * PDF: Page numbering
+   * ePub: ePub-> Add cover page. Missing cover page gave error.
+   * Minor fixes.
+
+### 0.2.0
+
+* **Complete rewrite**. NOTE, I haven't added support for the `[readoffline]` shortcodes in this version, it will be added in 0.3.0
+* Added more PDF features
+   * Paper formats
+   * Table of Contents
+   * Cover Page
+   * Header and Footer
+   * Use Theme or Custom CSS
+   * Add Watermark
+   * Add Protection
+* **Print**: In addition to downloading a PDF, ePub or mobi, you can now print the page
+   * Add print header text
+   * Custom print style
+* Updated libraries should give better UTF-8 support for PDF, ePub and mobi.
+
+### 0.1.9
+
+* Fixed a bug in permalinks that gave 404 for blogs in a subdirectory. Also removed code that gave error when downloading an ePub.
+
+### 0.1.8
+
+* Added Google Analytics read-offline event tracking. You can find these under Content » Events in your Google Analytics reports. Assumes you’re using the [Asynchronous version of Google Analytics](http://code.google.com/apis/analytics/docs/tracking/asyncTracking.html)
+
+### 0.1.7
+
+*  Fixed a small bug
+
+### 0.1.6
+
+*  Added the option to add custom css to PDF
+
+
+### 0.1.5
+
+* In Settings->Read Offline, added the option to add custom css to ePub
+* Added languages/read-offline.po for easy translation.
+
+
+### 0.1.4
+
+* Added permalink support (/read-offline/"postid"/"post-name"."type"). I've written [a how-to add permalink to plugins guide at soderlind.no](http://soderlind.no/archives/2012/11/01/wordpress-plugins-and-permalinks-how-to-use-pretty-links-in-your-plugin/)
+* removed the obsolete download.php
+
+
+### 0.1.3
+
+* epub will now validate against http://www.epubconversion.com/ePub-validator-iBook.jsp
+* Added language variable to the epub file, ISO 639-1 two letter tag based on the WordPress get_locale()
+
+
+### 0.1.2
+
+* Fix typo in download.php, was including   "Epub.inc.php",  correct is "EPub.inc.php".
+
+
+### 0.1.1
+
+* bugfix
+
+
+### 0.1.0
+
+* Added the Read Offline shortcode
+* Added, in Settings->Read Offline, option to add Read Offline to top and/or bottom of post and page
+
+
+### 0.0.2
+
+* Filename based on the posts slug
+* Added meta data
+
+
+### 0.0.1
+
+* Initial release

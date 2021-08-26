@@ -5,7 +5,7 @@ Tags: pdf, epub, mobi, print
 Requires at least: 5.0
 Requires PHP: 7.3
 Tested up to: 5.7
-Stable tag: 0.9.12
+Stable tag: 0.9.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,41 @@ There are 2 ways you can add the Read Offline links:
 
 
 == Changelog ==
+= 0.9.13 =
+* Update mPDF to version 8.0.12
+= 0.9.12 =
+* Remove buildTOC, TOC is in the .ncx file. Only add chapters with content
+= 0.9.11 =
+* Housekeeping
+= 0.9.10 =
+* Add missing H1
+= 0.9.9
+* Set EPUB chapter autosplit to false
+= 0.9.7 =
+* Set FS_CHMOD_DIR if not defined
+= 0.9.6 =
+* Add license and copyright
+= 0.9.5 =
+* Upgrade mPDF tol v8.0.10 (PHP 8 support)
+* Don't test symfony/polyfill-mbstring if PHP < 8
+= 0.9.4 =
+* Tested up to WP 5.7
+* Revert to mPDF 8.0.6, 8.0.10 isn't compatible with PHP < 8.0
+= 0.9.3 =
+* Update mPDF to version 8.0.10 (supports PHP 8)
+= 0.9.2 =
+* Fix bug in _url_exists
+= 0.9.1 =
+* Housekeeping
+= 0.9.0 =
+* Update Admin Page Framework to v3.8.26
+= 0.8.2 =
+* Fix ePub validation errors
+= 0.8.1 =
+* Fix epub validation errors
+* Add changes after fork
+* Update soderlind/phpepub to version 4.0.8.5
+* Require PHP 7.3
 = 0.8.0 =
 * Require PHP 7.3
 * Update mPDF to version 8.0.6

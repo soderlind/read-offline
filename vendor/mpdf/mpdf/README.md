@@ -18,7 +18,7 @@ Requirements
 PHP versions and extensions
 ---------------------------
 
-- `mPDF >=7.0` is supported on PHP `^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0`
+- `mPDF >=7.0` is supported on `PHP ^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0`
 - `PHP 7.3` is supported since `mPDF v7.1.7`
 - `PHP 7.4` is supported since `mPDF v8.0.4`
 - `PHP 8.0` is supported since `mPDF v8.0.10`
@@ -88,7 +88,7 @@ $mpdf = new \Mpdf\Mpdf(['tempDir' => __DIR__ . '/tmp']);
 
 ```
 
-By default, the temporary directory will be inside vendor directory and will have correct permissions from
+By default, the temporary directory will be inside vendor directory and will have write permissions from
 `post_install` composer script.
 
 For more information about custom temporary directory see the note on
@@ -103,12 +103,17 @@ Online manual
 
 Online manual is available at https://mpdf.github.io/.
 
-For general questions or troubleshooting please use the [mpdf tag](https://stackoverflow.com/questions/tagged/mpdf) at Stack Overflow (and not the project's issue tracker).
+General troubleshooting
+=============
+
+For general questions or troubleshooting please use [Discussions](https://github.com/mpdf/mpdf/discussions).
+
+You can also use the [mpdf tag](https://stackoverflow.com/questions/tagged/mpdf) at Stack Overflow as the StackOverflow user base is more likely to answer you in a timely manner.
 
 Contributing
 ============
 
-Please read before submitting issues and pull requests the [CONTRIBUTING.md](https://github.com/mpdf/mpdf/blob/development/.github/CONTRIBUTING.md) file.
+Before submitting issues and pull requests please read the [CONTRIBUTING.md](https://github.com/mpdf/mpdf/blob/development/.github/CONTRIBUTING.md) file.
 
 Unit Testing
 ============
@@ -118,7 +123,7 @@ Unit testing for mPDF is done using [PHPUnit](https://phpunit.de/).
 To get started, run `composer install` from the command line while in the mPDF root directory
 (you'll need [composer installed first](https://getcomposer.org/download/)).
 
-To execute tests, run `vendor/bin/phpunit` from the command line while in the mPDF root directory.
+To execute tests, run `composer test` from the command line while in the mPDF root directory.
 
 Any assistance writing unit tests for mPDF is greatly appreciated. If you'd like to help, please
 note that any PHP file located in the `/tests/` directory will be autoloaded when unit testing.
