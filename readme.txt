@@ -121,6 +121,8 @@ There are 2 ways you can add the Read Offline links:
 
 
 == Changelog ==
+= 0.9.14 =
+* Housekeeping
 = 0.9.13 =
 * Update mPDF to version 8.0.12
 = 0.9.12 =
