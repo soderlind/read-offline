@@ -482,6 +482,20 @@ class Read_Offline_Admin {
 					cursor: pointer
 				}
 
+								/* EPUB CSS profile preview */
+								.read-offline-epub-css-preview-wrapper { margin-top: 6px; }
+								.read-offline-epub-css-preview { border:1px solid #ccd0d4; padding:8px 10px; font-size:12px; line-height:1.4; border-radius:4px; display:flex; gap:12px; align-items:flex-start; }
+								.read-offline-epub-css-preview samp { display:block; font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif; }
+								.read-offline-epub-css-preview small { display:block; opacity:.75; margin-top:4px; }
+								.read-offline-epub-css-preview code { background:rgba(0,0,0,.07); padding:1px 4px; border-radius:3px; }
+								.read-offline-epub-css-preview[data-profile="light"] { background:#ffffff; color:#1d2327; }
+								.read-offline-epub-css-preview[data-profile="dark"] { background:#1d2327; color:#f5f5f5; }
+								.read-offline-epub-css-preview[data-profile="none"] { background:linear-gradient(45deg,#fafafa 25%,#f0f0f0 25%,#f0f0f0 50%,#fafafa 50%,#fafafa 75%,#f0f0f0 75%,#f0f0f0); background-size:18px 18px; color:#1d2327; }
+								.read-offline-epub-css-preview-badge { font-size:10px; letter-spacing:.5px; text-transform:uppercase; font-weight:600; padding:2px 6px; border:1px solid currentColor; border-radius:10px; align-self:flex-start; }
+								.read-offline-epub-css-preview[data-profile="dark"] .read-offline-epub-css-preview-badge { color:#f5f5f5; }
+								.read-offline-epub-css-preview[data-profile="light"] .read-offline-epub-css-preview-badge { color:#1d2327; }
+								.read-offline-epub-css-preview[data-profile="none"] .read-offline-epub-css-preview-badge { color:#444; }
+
 				.read-offline-actions {
 					display: flex;
 					gap: 8px;
@@ -807,6 +821,16 @@ class Read_Offline_Admin {
 												</option>
 												<option value="custom" <?php selected( $options[ 'css_profile' ] ?? '', 'custom' ); ?>><?php _e( 'Custom', 'read-offline' ); ?></option>
 											</select>
+													<div class="read-offline-epub-css-preview-wrapper">
+														<div id="read-offline-epub-css-preview" class="read-offline-epub-css-preview" data-profile="<?php echo esc_attr( $options['css_profile'] ?? 'light' ); ?>">
+															<span class="read-offline-epub-css-preview-badge" id="read-offline-epub-css-preview-badge"></span>
+															<div>
+																<samp><strong><?php esc_html_e( 'Heading Example', 'read-offline' ); ?></strong></samp>
+																<samp style="font-size:11px;">Lorem ipsum dolor sit amet, <code>&lt;strong&gt;</code> elit.</samp>
+																<small id="read-offline-epub-css-preview-desc"></small>
+															</div>
+														</div>
+													</div>
 										</div>
 
 										<label><?php _e( 'Custom CSS', 'read-offline' ); ?>
@@ -881,6 +905,26 @@ class Read_Offline_Admin {
 												try { wp.media.attachment(existingId).fetch().then(function (att) { renderPreview(att.toJSON()); }); } catch (err) { }
 											}
 										});
+									})(jQuery);
+								</script>
+								<script>
+									(function($){
+										function updateEpubCssPreview(){
+											var profile = $('[name="read_offline_settings_epub[css_profile]"]').val() || 'light';
+											var $box = $('#read-offline-epub-css-preview');
+											if(!$box.length) return;
+											$box.attr('data-profile', profile);
+											var badge = profile.charAt(0).toUpperCase()+profile.slice(1);
+											$('#read-offline-epub-css-preview-badge').text(badge);
+											var desc='';
+											if(profile==='light') desc='<?php echo esc_js( __( 'Clean white background with dark text.', 'read-offline' ) ); ?>';
+											else if(profile==='dark') desc='<?php echo esc_js( __( 'Dark background with light text for low-light reading.', 'read-offline' ) ); ?>';
+											else if(profile==='none') desc='<?php echo esc_js( __( 'No base styling; inherits minimal reader defaults.', 'read-offline' ) ); ?>';
+											else if(profile==='custom') desc='<?php echo esc_js( __( 'Will use only your Custom CSS below.', 'read-offline' ) ); ?>';
+											$('#read-offline-epub-css-preview-desc').text(desc);
+										}
+										$(document).on('change','[name="read_offline_settings_epub[css_profile]"]',updateEpubCssPreview);
+										$(updateEpubCssPreview);
 									})(jQuery);
 								</script>
 								<?php
