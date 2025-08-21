@@ -165,7 +165,9 @@ class Read_Offline_Admin {
 					font-size: 12px;
 					margin-top: 4px;
 				}
-				.read-offline-help-tip{display:inline-block;margin-left:6px;color:#646970;cursor:help;border:1px solid #ccd0d4;border-radius:50%;width:16px;height:16px;line-height:14px;text-align:center;font-size:11px;background:#f6f7f7}
+				.read-offline-help-tip{display:inline-block;margin-left:6px;color:#646970;cursor:pointer;border:1px solid #ccd0d4;border-radius:50%;width:16px;height:16px;line-height:14px;text-align:center;font-size:11px;background:#f6f7f7}
+				.read-offline-help-tip:hover{background:#eef0f1}
+				.read-offline-help-popup{position:absolute;z-index:100000;background:#fff;border:1px solid #ccd0d4;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:10px;max-width:320px;font-size:12px;color:#1d2327}
 
 				.read-offline-cover-preview img {
 					max-width: 160px;
@@ -567,6 +569,53 @@ class Read_Offline_Admin {
 				</div><!-- /.read-offline-aside -->
 			</div><!-- /.read-offline-layout -->
 		</div>
+		<script>
+		(function(){
+			var popup = null, owner = null;
+			function ensurePopup(){
+				if(!popup){
+					popup = document.createElement('div');
+					popup.className = 'read-offline-help-popup';
+					popup.style.display = 'none';
+					document.body.appendChild(popup);
+				}
+				return popup;
+			}
+			function hide(){ if(popup){ popup.style.display='none'; popup.setAttribute('aria-hidden','true'); owner=null; } }
+			function show(tip, text){
+				var p = ensurePopup();
+				p.textContent = text || '';
+				var r = tip.getBoundingClientRect();
+				var top = r.bottom + window.scrollY + 8;
+				var left = r.left + window.scrollX;
+				p.style.top = top + 'px';
+				p.style.left = left + 'px';
+				p.style.display = 'block';
+				p.setAttribute('aria-hidden','false');
+				owner = tip;
+				// Prevent overflow off the right edge
+				var rect = p.getBoundingClientRect();
+				var overflowX = rect.right - window.innerWidth + 8;
+				if (overflowX > 0) {
+					p.style.left = (left - overflowX) + 'px';
+				}
+			}
+			document.addEventListener('click', function(e){
+				var tip = e.target.closest ? e.target.closest('.read-offline-help-tip') : null;
+				if(tip){
+					e.preventDefault(); e.stopPropagation();
+					var text = tip.getAttribute('data-help') || tip.getAttribute('title') || '';
+					if(popup && popup.style.display==='block' && owner === tip){ hide(); return; }
+					show(tip, text);
+				} else {
+					hide();
+				}
+			});
+			window.addEventListener('scroll', hide, { passive: true });
+			window.addEventListener('resize', hide);
+			document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ hide(); } });
+		})();
+		</script>
 		<?php
 	}
 
