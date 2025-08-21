@@ -6,6 +6,8 @@ class Read_Offline_Admin {
 	public static function init() {
 		add_action( 'admin_menu', [ __CLASS__, 'add_settings_page' ] );
 		add_action( 'admin_init', [ __CLASS__, 'register_settings' ] );
+		// Reset settings handler
+		add_action( 'admin_post_read_offline_reset_settings', [ __CLASS__, 'reset_settings_action' ] );
 
 		// Bulk actions for Posts and Pages
 		add_filter( 'bulk_actions-edit-post', [ __CLASS__, 'register_bulk_actions_posts' ] );
@@ -102,6 +104,11 @@ class Read_Offline_Admin {
 					border-radius: 4px;
 					margin-top: 12px;
 				}
+				.read-offline-layout{display:flex;gap:16px;align-items:flex-start}
+				.read-offline-main{flex:2;min-width:0}
+				.read-offline-aside{flex:1;min-width:260px}
+				.read-offline-grid{display:grid;grid-template-columns:220px 1fr;gap:12px;align-items:center}
+				.read-offline-grid .full{grid-column:1/-1}
 
 				.read-offline-field-desc {
 					color: #555;
@@ -124,9 +131,15 @@ class Read_Offline_Admin {
 				}
 				.read-offline-ok { color: #1a7f37; }
 				.read-offline-warn { color: #9a6700; }
+				.read-offline-chips{margin-top:6px}
+				.read-offline-chip{display:inline-block;border:1px solid #ccd0d4;border-radius:12px;padding:2px 8px;margin:2px;font-size:11px;background:#f6f7f7;cursor:pointer}
+				.read-offline-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+				.read-offline-kbd{background:#f6f7f7;border:1px solid #ccd0d4;border-radius:3px;padding:2px 4px}
 			</style>
 
-			<div class="read-offline-card">
+			<div class="read-offline-layout">
+				<div class="read-offline-main">
+					<div class="read-offline-card">
 				<h2><?php esc_html_e( 'Environment health', 'read-offline' ); ?></h2>
 				<p class="description"><?php esc_html_e( 'Checks for required PHP extensions and vendor libraries.', 'read-offline' ); ?></p>
 				<ul class="read-offline-health">
@@ -143,7 +156,7 @@ class Read_Offline_Admin {
 						<?php if ( ! $health['epub'] ) : ?> — <?php esc_html_e( 'Install Composer deps to enable EPUB export.', 'read-offline' ); ?><?php endif; ?>
 					</li>
 				</ul>
-			</div>
+					</div>
 			<form method="post" action="options.php">
 				<?php
 				if ( $current_tab === 'general' ) {
@@ -151,49 +164,36 @@ class Read_Offline_Admin {
 					$options = get_option( 'read_offline_settings_general' );
 					?>
 					<div class="read-offline-card">
-						<table class="form-table" role="presentation">
-							<tr>
-								<th scope="row"><?php _e( 'Auto-insert Save As button', 'read-offline' ); ?></th>
-								<td>
-									<input type="checkbox" name="read_offline_settings_general[auto_insert]" value="1" <?php checked( ! empty( $options[ 'auto_insert' ] ) ); ?> />
-									<p class="read-offline-field-desc">
-										<?php esc_html_e( 'Append the Save As control after post content automatically.', 'read-offline' ); ?>
-									</p>
-								</td>
-							</tr>
-							<tr>
-								<th scope="row"><?php _e( 'Default formats', 'read-offline' ); ?></th>
-								<td>
-									<label><input type="checkbox" name="read_offline_settings_general[formats][]" value="pdf" <?php checked( in_array( 'pdf', (array) ( $options[ 'formats' ] ?? [] ), true ) ); ?> />
-										PDF</label>
-									<label style="margin-left:12px;"><input type="checkbox"
-											name="read_offline_settings_general[formats][]" value="epub" <?php checked( in_array( 'epub', (array) ( $options[ 'formats' ] ?? [] ), true ) ); ?> /> EPUB</label>
-								</td>
-							</tr>
-							<tr>
-								<th scope="row"><?php _e( 'Filename template', 'read-offline' ); ?></th>
-								<td>
-									<input type="text" name="read_offline_settings_general[filename]"
-										value="<?php echo esc_attr( $options[ 'filename' ] ?? '' ); ?>" class="regular-text" />
-									<p class="read-offline-field-desc">
-										<?php esc_html_e( 'Placeholders: {site}, {post_slug}, {post_id}, {title}, {format}, {date}, {lang}', 'read-offline' ); ?>
-									</p>
-								</td>
-							</tr>
-							<tr>
-								<th scope="row"><?php _e( 'Include featured image as cover', 'read-offline' ); ?></th>
-								<td><input type="checkbox" name="read_offline_settings_general[include_featured]" value="1" <?php checked( ! empty( $options[ 'include_featured' ] ) ); ?> /></td>
-							</tr>
-							<tr>
-								<th scope="row"><?php _e( 'Include author/date', 'read-offline' ); ?></th>
-								<td><input type="checkbox" name="read_offline_settings_general[include_author]" value="1" <?php checked( ! empty( $options[ 'include_author' ] ) ); ?> /></td>
-							</tr>
-							<tr>
-								<th scope="row"><?php _e( 'Custom CSS for PDF', 'read-offline' ); ?></th>
-								<td><textarea name="read_offline_settings_general[css]" class="large-text"
-										rows="4"><?php echo esc_textarea( $options[ 'css' ] ?? '' ); ?></textarea></td>
-							</tr>
-						</table>
+						<div class="read-offline-grid">
+							<label><?php _e( 'Auto-insert Save As button', 'read-offline' ); ?></label>
+							<div>
+								<input type="checkbox" name="read_offline_settings_general[auto_insert]" value="1" <?php checked( ! empty( $options['auto_insert'] ) ); ?> />
+								<p class="read-offline-field-desc"><?php esc_html_e( 'Append the Save As control after post content automatically.', 'read-offline' ); ?></p>
+							</div>
+
+							<label><?php _e( 'Default formats', 'read-offline' ); ?></label>
+							<div>
+								<label><input type="checkbox" name="read_offline_settings_general[formats][]" value="pdf" <?php checked( in_array( 'pdf', (array) ( $options['formats'] ?? [] ), true ) ); ?> /> PDF</label>
+								<label style="margin-left:12px;"><input type="checkbox" name="read_offline_settings_general[formats][]" value="epub" <?php checked( in_array( 'epub', (array) ( $options['formats'] ?? [] ), true ) ); ?> /> EPUB</label>
+							</div>
+
+							<label><?php _e( 'Filename template', 'read-offline' ); ?></label>
+							<div>
+								<input id="ro-filename" type="text" name="read_offline_settings_general[filename]" value="<?php echo esc_attr( $options['filename'] ?? '' ); ?>" class="regular-text" />
+								<div class="read-offline-chips" id="ro-chips"></div>
+								<p class="read-offline-field-desc"><?php esc_html_e( 'Click to insert placeholders. Preview updates live.', 'read-offline' ); ?></p>
+								<p class="read-offline-field-desc"><strong><?php esc_html_e( 'Preview:', 'read-offline' ); ?></strong> <span id="ro-filename-preview"></span></p>
+							</div>
+
+							<label><?php _e( 'Include featured image as cover', 'read-offline' ); ?></label>
+							<div><input type="checkbox" name="read_offline_settings_general[include_featured]" value="1" <?php checked( ! empty( $options['include_featured'] ) ); ?> /></div>
+
+							<label><?php _e( 'Include author/date', 'read-offline' ); ?></label>
+							<div><input type="checkbox" name="read_offline_settings_general[include_author]" value="1" <?php checked( ! empty( $options['include_author'] ) ); ?> /></div>
+
+							<label><?php _e( 'Custom CSS for PDF', 'read-offline' ); ?></label>
+							<div class="full"><textarea name="read_offline_settings_general[css]" class="large-text" rows="4"><?php echo esc_textarea( $options['css'] ?? '' ); ?></textarea></div>
+						</div>
 					</div>
 					<?php
 				} elseif ( $current_tab === 'pdf' ) {
@@ -339,6 +339,26 @@ class Read_Offline_Admin {
 					</div>
 					<script>
 						(function ($) {
+							// Chips for filename template
+							var chips = ['{site}','{post_slug}','{post_id}','{title}','{format}','{date}','{lang}'];
+							var $chips = $('#ro-chips');
+							chips.forEach(function(c){ $chips.append('<span class="read-offline-chip" data-chip="'+c+'">'+c+'</span>'); });
+							function updatePreview(){
+								var t = $('#ro-filename').val()||'';
+								var sample = { '{site}':'mysite','{post_slug}':'example-post','{post_id}':'123','{title}':'example-post','{format}':'pdf','{date}':'20250821','{lang}':'en_US' };
+								Object.keys(sample).forEach(function(k){ t = t.split(k).join(sample[k]); });
+								$('#ro-filename-preview').text(t);
+							}
+							$(document).on('click','.read-offline-chip',function(){
+								var chip = $(this).data('chip');
+								var $inp = $('#ro-filename')[0];
+								if(!$inp) return; var start = $inp.selectionStart||0; var end = $inp.selectionEnd||0; var v = $inp.value;
+								$inp.value = v.substring(0,start)+chip+v.substring(end);
+								$('#ro-filename').trigger('input').focus();
+								$inp.selectionStart=$inp.selectionEnd=start+chip.length;
+							});
+							$(document).on('input','#ro-filename',updatePreview);
+							$(function(){ updatePreview(); });
 							function toggleCustomCover() {
 								var v = $('#read-offline-epub-cover-source').val();
 								var $wrap = $('#read-offline-custom-cover');
@@ -383,7 +403,7 @@ class Read_Offline_Admin {
 					</script>
 					<?php
 				}
-				submit_button();
+					submit_button();
 				?>
 			</form>
 			<?php if ( $current_tab === 'general' ) : ?>
@@ -411,6 +431,25 @@ class Read_Offline_Admin {
 					</form>
 				</div>
 			<?php endif; ?>
+				</div><!-- /.read-offline-main -->
+				<div class="read-offline-aside">
+					<div class="read-offline-card">
+						<h2><?php esc_html_e( 'Shortcode & REST', 'read-offline' ); ?></h2>
+						<p>[read_offline]</p>
+						<p class="read-offline-field-desc"><?php echo esc_html( rest_url( 'read-offline/v1/export?postId={id}&format=pdf|epub' ) ); ?></p>
+					</div>
+					<div class="read-offline-card">
+						<h2><?php esc_html_e( 'Placeholders', 'read-offline' ); ?></h2>
+						<p class="read-offline-field-desc">{site}, {post_slug}, {post_id}, {title}, {format}, {date}, {lang}</p>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+							<?php wp_nonce_field( 'read_offline_reset_settings', '_ror_nonce' ); ?>
+							<input type="hidden" name="action" value="read_offline_reset_settings" />
+							<input type="hidden" name="tab" value="<?php echo esc_attr( $current_tab ); ?>" />
+							<?php submit_button( __( 'Reset this tab to defaults', 'read-offline' ), 'small', 'submit', false ); ?>
+						</form>
+					</div>
+				</div><!-- /.read-offline-aside -->
+			</div><!-- /.read-offline-layout -->
 		</div>
 		<?php
 	}
@@ -572,6 +611,13 @@ class Read_Offline_Admin {
 			</div>
 			<?php
 		}
+		if ( isset( $_GET['read_offline_reset'] ) && $_GET['read_offline_reset'] ) {
+			?>
+			<div class="notice notice-success is-dismissible">
+				<p><?php esc_html_e( 'Settings were reset to defaults for this tab.', 'read-offline' ); ?></p>
+			</div>
+			<?php
+		}
 		if ( isset( $_GET['read_offline_test_done'] ) && $_GET['read_offline_test_done'] ) {
 			$token = isset( $_GET['token'] ) ? sanitize_text_field( $_GET['token'] ) : '';
 			$data  = $token ? get_transient( 'read_offline_test_' . $token ) : false;
@@ -642,6 +688,29 @@ class Read_Offline_Admin {
 		update_option( 'read_offline_settings_general', $opts );
 		set_transient( 'read_offline_test_' . $token, [ 'url' => $url, 'format' => $format, 'post_id' => $post_id ], 5 * MINUTE_IN_SECONDS );
 		wp_safe_redirect( add_query_arg( [ 'read_offline_test_done' => 1, 'token' => $token ], $redirect ) );
+		exit;
+	}
+
+	public static function reset_settings_action() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'read-offline' ) );
+		}
+		$nonce = isset( $_POST['_ror_nonce'] ) ? sanitize_text_field( $_POST['_ror_nonce'] ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'read_offline_reset_settings' ) ) {
+			wp_die( esc_html__( 'Nonce verification failed.', 'read-offline' ) );
+		}
+		$tab = isset( $_POST['tab'] ) ? sanitize_key( $_POST['tab'] ) : 'general';
+		switch ( $tab ) {
+			case 'pdf': delete_option( 'read_offline_settings_pdf' ); break;
+			case 'epub': delete_option( 'read_offline_settings_epub' ); break;
+			case 'general': default: delete_option( 'read_offline_settings_general' ); break;
+		}
+		$redirect = wp_get_referer();
+		if ( ! $redirect ) {
+			$redirect = admin_url( 'options-general.php?page=read-offline-settings&tab=' . $tab );
+		}
+		$redirect = add_query_arg( 'read_offline_reset', 1, $redirect );
+		wp_safe_redirect( $redirect );
 		exit;
 	}
 }
