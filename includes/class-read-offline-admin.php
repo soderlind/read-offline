@@ -167,9 +167,11 @@ class Read_Offline_Admin {
 				}
 				.read-offline-help-tip{display:inline-block;margin-left:6px;color:#646970;cursor:pointer;border:1px solid #ccd0d4;border-radius:50%;width:16px;height:16px;line-height:14px;text-align:center;font-size:11px;background:#f6f7f7}
 				.read-offline-help-tip:hover{background:#eef0f1}
-				.read-offline-help-popup{position:absolute;z-index:100000;background:#fff;border:1px solid #ccd0d4;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:10px;max-width:320px;max-height:260px;overflow:auto;font-size:12px;color:#1d2327}
+				.read-offline-help-popup{position:absolute;z-index:100000;background:#fff;border:1px solid #ccd0d4;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:10px 28px 10px 10px;max-width:320px;max-height:260px;overflow:auto;font-size:12px;color:#1d2327}
 				.read-offline-help-popup::after{content:"";position:absolute;top:-6px;left:12px;border-width:6px;border-style:solid;border-color:transparent transparent #ccd0d4 transparent}
 				.read-offline-help-popup::before{content:"";position:absolute;top:-5px;left:12px;border-width:6px;border-style:solid;border-color:transparent transparent #fff transparent}
+				.read-offline-help-close{position:absolute;top:6px;right:6px;border:1px solid #ccd0d4;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;background:#f6f7f7;color:#1d2327;cursor:pointer;line-height:1;font-size:12px}
+				.read-offline-help-close:hover{background:#eef0f1}
 
 				.read-offline-cover-preview img {
 					max-width: 160px;
@@ -588,8 +590,10 @@ class Read_Offline_Admin {
 					content.className = 'read-offline-help-content';
 					closeBtn = document.createElement('button');
 					closeBtn.type = 'button';
-					closeBtn.className = 'button button-small';
-					closeBtn.textContent = 'Close';
+					closeBtn.className = 'read-offline-help-close';
+					closeBtn.setAttribute('aria-label','Close help');
+					closeBtn.setAttribute('title','');
+					closeBtn.innerHTML = '\u00D7';
 					closeBtn.addEventListener('click', hide);
 					popup.appendChild(content);
 					popup.appendChild(closeBtn);
