@@ -73,9 +73,9 @@ class Read_Offline_Admin {
 			array(
 				'id'      => 'read_offline_help_overview',
 				'title'   => __( 'Overview', 'read-offline' ),
-				'content' => '<p>' . esc_html__( 'Export posts and pages to PDF or EPUB. Use auto-insert to show a Save As button after content, the shortcode to place it manually, or the REST API for programmatic exports.', 'read-offline' ) . '</p>'
-					. '<p><strong>' . esc_html__( 'Shortcode', 'read-offline' ) . ':</strong> <code>[read_offline]</code></p>'
-					. '<p><strong>' . esc_html__( 'REST API', 'read-offline' ) . ':</strong> <code>' . esc_html( rest_url( 'read-offline/v1/export?postId={id}&format=pdf|epub' ) ) . '</code></p>',
+					'content' => '<p>' . esc_html__( 'Export posts and pages to PDF, EPUB, or Markdown. Use auto-insert to show a Save As button after content, the shortcode to place it manually, or the REST API for programmatic exports.', 'read-offline' ) . '</p>'
+						. '<p><strong>' . esc_html__( 'Shortcode', 'read-offline' ) . ':</strong> <code>[read_offline]</code></p>'
+						. '<p><strong>' . esc_html__( 'REST API', 'read-offline' ) . ':</strong> <code>' . esc_html( rest_url( 'read-offline/v1/export?postId={id}&format=pdf|epub|md' ) ) . '</code></p>',
 			)
 		);
 		// PDF
@@ -199,7 +199,7 @@ class Read_Offline_Admin {
 	public static function sanitize_general_settings( $input ) {
 		$clean                       = array();
 		$clean[ 'auto_insert' ]      = ! empty( $input[ 'auto_insert' ] ) ? 1 : 0;
-		$allowed_formats             = array( 'pdf', 'epub' );
+		$allowed_formats             = array( 'pdf', 'epub', 'md' );
 		$in_formats                  = isset( $input[ 'formats' ] ) ? (array) $input[ 'formats' ] : array();
 		$clean[ 'formats' ]          = array_values( array_intersect( $allowed_formats, array_map( 'sanitize_key', $in_formats ) ) );
 		$clean[ 'filename' ]         = isset( $input[ 'filename' ] ) ? sanitize_text_field( wp_unslash( $input[ 'filename' ] ) ) : '{site}-{post_slug}-{format}';
@@ -660,12 +660,12 @@ class Read_Offline_Admin {
 							<?php
 						} elseif ( 'pdf' === $current_tab ) {
 							settings_fields( 'read_offline_settings_pdf' );
-							$options       = get_option( 'read_offline_settings_pdf' );
+							$options        = get_option( 'read_offline_settings_pdf' );
 							$general_legacy = get_option( 'read_offline_settings_general', array() );
 							// One-time migration of legacy general css -> pdf custom_css.
-							if ( ! empty( $general_legacy['css'] ) && empty( $options['custom_css'] ) ) {
-								$options['custom_css'] = $general_legacy['css'];
-								unset( $general_legacy['css'] );
+							if ( ! empty( $general_legacy[ 'css' ] ) && empty( $options[ 'custom_css' ] ) ) {
+								$options[ 'custom_css' ] = $general_legacy[ 'css' ];
+								unset( $general_legacy[ 'css' ] );
 								update_option( 'read_offline_settings_pdf', $options );
 								update_option( 'read_offline_settings_general', $general_legacy );
 							}
@@ -774,7 +774,8 @@ class Read_Offline_Admin {
 											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
 											data-help="<?php echo esc_attr__( 'Additional CSS appended to the PDF output. Useful for minor layout tweaks.', 'read-offline' ); ?>">?</span>
 									</label>
-									<div class="full"><textarea name="read_offline_settings_pdf[custom_css]" class="large-text" rows="4"><?php echo esc_textarea( $options['custom_css'] ?? '' ); ?></textarea></div>
+									<div class="full"><textarea name="read_offline_settings_pdf[custom_css]" class="large-text"
+											rows="4"><?php echo esc_textarea( $options[ 'custom_css' ] ?? '' ); ?></textarea></div>
 								</div>
 							</div>
 							<?php
@@ -1015,6 +1016,7 @@ class Read_Offline_Admin {
 								<select name="format">
 									<option value="pdf">PDF</option>
 									<option value="epub">EPUB</option>
+									<option value="md">Markdown</option>
 								</select>
 								&nbsp;
 								<?php submit_button( __( 'Test export', 'read-offline' ), 'secondary', 'submit', false ); ?>
@@ -1027,7 +1029,7 @@ class Read_Offline_Admin {
 						<h2><?php esc_html_e( 'Shortcode & REST', 'read-offline' ); ?></h2>
 						<p>[read_offline]</p>
 						<p class="read-offline-field-desc">
-							<?php echo esc_html( rest_url( 'read-offline/v1/export?postId={id}&format=pdf|epub' ) ); ?>
+							<?php echo esc_html( rest_url( 'read-offline/v1/export?postId={id}&format=pdf|epub|md' ) ); ?>
 						</p>
 					</div>
 					<div class="read-offline-card">
@@ -1496,7 +1498,7 @@ class Read_Offline_Admin {
 		if ( ! $redirect ) {
 			$redirect = admin_url( 'options-general.php?page=read-offline-settings' );
 		}
-		if ( 0 >= $post_id || ! in_array( $format, array( 'pdf', 'epub' ), true ) ) {
+		if ( 0 >= $post_id || ! in_array( $format, array( 'pdf', 'epub', 'md' ), true ) ) {
 			wp_safe_redirect( add_query_arg( 'read_offline_test_error', 'invalid_params', $redirect ) );
 			exit;
 		}
