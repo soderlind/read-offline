@@ -131,6 +131,232 @@ class Read_Offline_Export {
 	}
 
 	/**
+	 * Generate a single combined document from multiple posts.
+	 * No long-term caching (content & settings hashed implicitly by timestamp in filename).
+	 *
+	 * @param array  $post_ids Array of post IDs.
+	 * @param string $format   pdf|epub.
+	 * @return string|WP_Error Absolute path or error.
+	 */
+	public static function generate_combined( $post_ids, $format ) {
+		$post_ids = array_values( array_unique( array_map( 'intval', (array) $post_ids ) ) );
+		$post_ids = array_filter( $post_ids, function ($pid) {
+			return get_post( $pid );
+		} );
+		if ( empty( $post_ids ) ) {
+			return new WP_Error( 'not_found', 'No valid posts provided' );
+		}
+		$uploads = wp_upload_dir();
+		$dir     = trailingslashit( $uploads[ 'basedir' ] ) . 'read-offline/';
+		wp_mkdir_p( $dir );
+		$site     = sanitize_title( get_bloginfo( 'name' ) );
+		$ts       = current_time( 'Ymd_His' );
+		$filename = sprintf( '%s_%s_%dposts.%s', $site, $ts, count( $post_ids ), $format );
+		$path     = $dir . sanitize_file_name( $filename );
+		if ( 'pdf' === $format ) {
+			return self::generate_combined_pdf( $post_ids, $path );
+		}
+		if ( 'epub' === $format ) {
+			return self::generate_combined_epub( $post_ids, $path );
+		}
+		return new WP_Error( 'invalid_format', 'Invalid format' );
+	}
+
+	/**
+	 * Internal: build combined PDF.
+	 *
+	 * @param array  $post_ids IDs.
+	 * @param string $path     Destination path.
+	 * @return string|WP_Error
+	 */
+	protected static function generate_combined_pdf( $post_ids, $path ) {
+		if ( ! class_exists( '\\Mpdf\\Mpdf' ) ) {
+			return new WP_Error( 'mpdf_missing', 'mPDF not available. Install dependencies.' );
+		}
+		$pdf_opts  = get_option( 'read_offline_settings_pdf', array() );
+		$gen_opts  = get_option( 'read_offline_settings_general', array() );
+		$m         = $pdf_opts[ 'margins' ] ?? array( 't' => 15, 'r' => 15, 'b' => 15, 'l' => 15 );
+		$size      = $pdf_opts[ 'size' ] ?? 'A4';
+		$formatArg = $size;
+		if ( is_string( $size ) && 'custom' === strtolower( $size ) ) {
+			$custom = isset( $pdf_opts[ 'custom_size' ] ) ? trim( (string) $pdf_opts[ 'custom_size' ] ) : '';
+			if ( $custom && preg_match( '/^(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)$/i', $custom, $mm ) ) {
+				$w = (float) $mm[ 1 ];
+				$h = (float) $mm[ 2 ];
+				if ( $w > 0 && $h > 0 ) {
+					$formatArg = array( $w, $h );
+				}
+			}
+			if ( 'custom' === $formatArg ) {
+				$formatArg = 'A4';
+			}
+		}
+		try {
+			$mpdf = new \Mpdf\Mpdf(
+				array(
+					'format'        => $formatArg,
+					'margin_left'   => (int) ( $m[ 'l' ] ?? 15 ),
+					'margin_right'  => (int) ( $m[ 'r' ] ?? 15 ),
+					'margin_top'    => (int) ( $m[ 't' ] ?? 15 ),
+					'margin_bottom' => (int) ( $m[ 'b' ] ?? 15 ),
+				)
+			);
+			$mpdf->SetTitle( get_bloginfo( 'name' ) . ' – Combined Export' );
+			$mpdf->SetAuthor( get_bloginfo( 'name' ) );
+			if ( ! empty( $pdf_opts[ 'header' ] ) ) {
+				$mpdf->SetHTMLHeader( $pdf_opts[ 'header' ] );
+			}
+			if ( ! empty( $pdf_opts[ 'footer' ] ) ) {
+				$mpdf->SetHTMLFooter( $pdf_opts[ 'footer' ] );
+			} elseif ( ! empty( $pdf_opts[ 'page_numbers' ] ) ) {
+				$mpdf->SetFooter( '{PAGENO}/{nbpg}' );
+			}
+			if ( ! empty( $pdf_opts[ 'printable' ] ) ) {
+				$mpdf->SetProtection( array( 'print' ) );
+			} else {
+				$mpdf->SetProtection( array( 'copy' ) );
+			}
+			if ( ! empty( $pdf_opts[ 'watermark' ] ) ) {
+				$mpdf->SetWatermarkText( $pdf_opts[ 'watermark' ] );
+				$mpdf->showWatermarkText = true;
+			}
+			// TOC
+			if ( ! empty( $pdf_opts[ 'toc' ] ) ) {
+				$depth = max( 1, min( 6, (int) ( $pdf_opts[ 'toc_depth' ] ?? 3 ) ) );
+				$h2toc = array();
+				for ( $i = 1; $i <= $depth; $i++ ) {
+					$h2toc[ 'H' . $i ] = $i - 1;
+				}
+				$mpdf->h2toc = $h2toc;
+				$mpdf->TOCpagebreakByArray( array( 'toc-preHTML' => '<h1>' . esc_html( __( 'Contents', 'read-offline' ) ) . '</h1>', 'links' => 1 ) );
+			}
+			$base_css         = 'img{max-width:100%;height:auto;} figure{margin:0;}';
+			$base_css .= $gen_opts[ 'css' ] ?? '';
+			$base_css .= apply_filters( 'read_offline_pdf_css', '', null );
+			$include_author   = ! empty( $gen_opts[ 'include_author' ] );
+			$include_featured = ! empty( $gen_opts[ 'include_featured' ] );
+			$first            = true;
+			foreach ( $post_ids as $pid ) {
+				$post = get_post( $pid );
+				if ( ! $post ) {
+					continue;
+				}
+				if ( ! $first ) {
+					$mpdf->AddPage();
+				}
+				$first      = false;
+				$title      = get_the_title( $post );
+				$content    = apply_filters( 'the_content', $post->post_content );
+				$content    = apply_filters( 'read_offline_content_html', $content, $post, 'pdf' );
+				$headerBits = '<h1>' . esc_html( $title ) . '</h1>';
+				$metaBits   = '';
+				if ( $include_author ) {
+					$metaBits .= '<p style="font-size:12px;color:#555;">' . esc_html( get_the_author_meta( 'display_name', $post->post_author ) ) . ' – ' . esc_html( get_the_date( '', $post ) ) . '</p>';
+				}
+				if ( $include_featured && has_post_thumbnail( $post ) ) {
+					$img        = get_the_post_thumbnail( $post, 'large', array( 'style' => 'max-width:100%;height:auto;margin:0 0 16px;' ) );
+					$headerBits .= $img ? $img : '';
+				}
+				$mpdf->WriteHTML( '<style>' . $base_css . '</style>' . $headerBits . $metaBits . $content );
+			}
+			$mpdf->Output( $path, \Mpdf\Output\Destination::FILE );
+			return $path;
+		} catch (\Throwable $e) {
+			return new WP_Error( 'pdf_failed', $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Internal: build combined EPUB.
+	 *
+	 * @param array  $post_ids IDs.
+	 * @param string $path     Destination path.
+	 * @return string|WP_Error
+	 */
+	protected static function generate_combined_epub( $post_ids, $path ) {
+		if ( ! class_exists( '\\PHPePub\\Core\\EPub' ) ) {
+			return new WP_Error( 'phpepub_missing', 'PHPePub not available. Install dependencies.' );
+		}
+		$epub_opts        = get_option( 'read_offline_settings_epub', array() );
+		$gen_opts         = get_option( 'read_offline_settings_general', array() );
+		$meta             = $epub_opts[ 'meta' ] ?? array();
+		$author           = $meta[ 'author' ] ?? get_bloginfo( 'name' );
+		$publisher        = $meta[ 'publisher' ] ?? get_bloginfo( 'name' );
+		$lang             = $meta[ 'lang' ] ?? get_locale();
+		$profile          = $epub_opts[ 'css_profile' ] ?? 'light';
+		$custom_css       = $epub_opts[ 'custom_css' ] ?? '';
+		$include_author   = ! empty( $gen_opts[ 'include_author' ] );
+		$include_featured = ! empty( $gen_opts[ 'include_featured' ] );
+		$css              = '';
+		switch ( $profile ) {
+			case 'light':
+				$css = 'body{font-family: serif;line-height:1.6;color:#222;background:#fff;padding:1em;} img{max-width:100%;height:auto;} h1,h2,h3{margin-top:1.2em;}';
+				break;
+			case 'dark':
+				$css = 'body{font-family: serif;line-height:1.6;color:#f5f5f5;background:#111;padding:1em;} a{color:#9cf;} img{max-width:100%;height:auto;} h1,h2,h3{margin-top:1.2em;}';
+				break;
+			case 'custom':
+				$css = (string) $custom_css;
+				break;
+			case 'none':
+			default:
+				$css = '';
+		}
+		$css = apply_filters( 'read_offline_epub_css', $css, null, $epub_opts );
+		try {
+			$book = new \PHPePub\Core\EPub();
+			$book->setTitle( get_bloginfo( 'name' ) . ' – Combined Export' );
+			$book->setIdentifier( home_url(), \PHPePub\Core\EPub::IDENTIFIER_URI );
+			$book->setLanguage( $lang );
+			$book->setAuthor( $author, $author );
+			$book->setPublisher( $publisher, get_site_url() );
+			$book->setSourceURL( home_url() );
+			$cover = apply_filters( 'read_offline_epub_cover', null, null, $epub_opts );
+			if ( ! $cover ) {
+				// Attempt to derive from first post's featured image.
+				$first = get_post( $post_ids[ 0 ] );
+				if ( $first ) {
+					$cover = self::resolve_cover_image( $first, $epub_opts[ 'cover' ] ?? 'featured', $epub_opts );
+				}
+			}
+			if ( $cover && method_exists( $book, 'setCoverImage' ) ) {
+				list( $fn, $bytes, $mime ) = $cover;
+				$book->setCoverImage( $fn, $bytes, $mime );
+			}
+			$index = 1;
+			foreach ( $post_ids as $pid ) {
+				$post = get_post( $pid );
+				if ( ! $post ) {
+					continue;
+				}
+				$title   = get_the_title( $post );
+				$content = apply_filters( 'the_content', $post->post_content );
+				$content = apply_filters( 'read_offline_content_html', $content, $post, 'epub' );
+				$header  = '<h1>' . esc_html( $title ) . '</h1>';
+				if ( $include_featured && has_post_thumbnail( $post ) ) {
+					$img    = get_the_post_thumbnail( $post, 'large', array( 'style' => 'max-width:100%;height:auto;margin:0 0 1em;' ) );
+					$header .= $img ? $img : '';
+				}
+				if ( $include_author ) {
+					$header .= '<p style="font-size:0.8em;color:#555;">' . esc_html( get_the_author_meta( 'display_name', $post->post_author ) ) . ' – ' . esc_html( get_the_date( '', $post ) ) . '</p>';
+				}
+				$body      = $header . $content;
+				$xhtml     = self::wrap_epub_xhtml_document( $title, $lang, $body, $css );
+				$chapterFN = 'chapter' . $index . '.xhtml';
+				$book->addChapter( sanitize_title( $title ), $chapterFN, $xhtml );
+				$index++;
+			}
+			$book->finalize();
+			$dir      = dirname( $path );
+			$basename = preg_replace( '/\.epub$/', '', basename( $path ) );
+			$book->saveBook( $basename, $dir );
+			return $path;
+		} catch (\Throwable $e) {
+			return new WP_Error( 'epub_failed', $e->getMessage() );
+		}
+	}
+
+	/**
 	 * Generate PDF using mPDF.
 	 *
 	 * @param WP_Post $post  Post object.

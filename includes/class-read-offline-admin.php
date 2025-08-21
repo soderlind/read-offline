@@ -31,6 +31,8 @@ class Read_Offline_Admin {
 
 		// Download endpoint for generated ZIPs
 		add_action( 'admin_post_read_offline_download_zip', array( __CLASS__, 'download_zip' ) );
+		// Download endpoint for combined single file
+		add_action( 'admin_post_read_offline_download_file', array( __CLASS__, 'download_combined_file' ) );
 		// Admin notices for results
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 		add_action( 'admin_post_read_offline_clear_cache', array( __CLASS__, 'clear_cache_action' ) );
@@ -132,6 +134,7 @@ class Read_Offline_Admin {
 					'filename'         => '{site}-{post_slug}-{format}',
 					'include_featured' => true,
 					'include_author'   => true,
+					'combine_bulk'     => true,
 					'css'              => '',
 				),
 				'sanitize_callback' => array( __CLASS__, 'sanitize_general_settings' ),
@@ -194,14 +197,15 @@ class Read_Offline_Admin {
 	 * @return array
 	 */
 	public static function sanitize_general_settings( $input ) {
-		$clean                     = array();
+		$clean                       = array();
 		$clean[ 'auto_insert' ]      = ! empty( $input[ 'auto_insert' ] ) ? 1 : 0;
-		$allowed_formats           = array( 'pdf', 'epub' );
-		$in_formats                = isset( $input[ 'formats' ] ) ? (array) $input[ 'formats' ] : array();
+		$allowed_formats             = array( 'pdf', 'epub' );
+		$in_formats                  = isset( $input[ 'formats' ] ) ? (array) $input[ 'formats' ] : array();
 		$clean[ 'formats' ]          = array_values( array_intersect( $allowed_formats, array_map( 'sanitize_key', $in_formats ) ) );
 		$clean[ 'filename' ]         = isset( $input[ 'filename' ] ) ? sanitize_text_field( wp_unslash( $input[ 'filename' ] ) ) : '{site}-{post_slug}-{format}';
 		$clean[ 'include_featured' ] = ! empty( $input[ 'include_featured' ] ) ? 1 : 0;
 		$clean[ 'include_author' ]   = ! empty( $input[ 'include_author' ] ) ? 1 : 0;
+		$clean[ 'combine_bulk' ]     = ! empty( $input[ 'combine_bulk' ] ) ? 1 : 0;
 		$clean[ 'css' ]              = isset( $input[ 'css' ] ) ? sanitize_textarea_field( wp_unslash( $input[ 'css' ] ) ) : '';
 		return $clean;
 	}
@@ -215,31 +219,31 @@ class Read_Offline_Admin {
 	 * @return array
 	 */
 	public static function sanitize_pdf_settings( $input ) {
-		$clean         = array();
-		$allowed_sizes = array( 'A4', 'Letter', 'Legal', 'A5', 'A6', 'B5', 'Tabloid', 'Executive', 'Custom' );
-		$size          = isset( $input[ 'size' ] ) ? (string) $input[ 'size' ] : 'A4';
-		$size_upper    = strtoupper( $size );
+		$clean           = array();
+		$allowed_sizes   = array( 'A4', 'Letter', 'Legal', 'A5', 'A6', 'B5', 'Tabloid', 'Executive', 'Custom' );
+		$size            = isset( $input[ 'size' ] ) ? (string) $input[ 'size' ] : 'A4';
+		$size_upper      = strtoupper( $size );
 		$clean[ 'size' ] = in_array( $size_upper, $allowed_sizes, true ) ? $size_upper : 'A4';
-		$custom_size   = isset( $input[ 'custom_size' ] ) ? trim( (string) $input[ 'custom_size' ] ) : '';
+		$custom_size     = isset( $input[ 'custom_size' ] ) ? trim( (string) $input[ 'custom_size' ] ) : '';
 		if ( preg_match( '/^\s*(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)\s*$/i', $custom_size, $m ) ) {
-			$w                    = (float) $m[ 1 ];
-			$h                    = (float) $m[ 2 ];
+			$w                      = (float) $m[ 1 ];
+			$h                      = (float) $m[ 2 ];
 			$clean[ 'custom_size' ] = ( $w > 0 && $h > 0 ) ? ( $w . 'x' . $h ) : '';
 		} else {
 			$clean[ 'custom_size' ] = '';
 		}
 		$clean[ 'margins' ] = array();
-		$defaults_m       = array( 't' => 15, 'r' => 15, 'b' => 15, 'l' => 15 );
+		$defaults_m         = array( 't' => 15, 'r' => 15, 'b' => 15, 'l' => 15 );
 		foreach ( $defaults_m as $k => $def ) {
-			$val                    = isset( $input[ 'margins' ][ $k ] ) ? (int) $input[ 'margins' ][ $k ] : $def;
-			$val                    = max( 0, min( 200, $val ) );
+			$val                      = isset( $input[ 'margins' ][ $k ] ) ? (int) $input[ 'margins' ][ $k ] : $def;
+			$val                      = max( 0, min( 200, $val ) );
 			$clean[ 'margins' ][ $k ] = $val;
 		}
 		$clean[ 'header' ]       = isset( $input[ 'header' ] ) ? wp_kses_post( wp_unslash( $input[ 'header' ] ) ) : '';
 		$clean[ 'footer' ]       = isset( $input[ 'footer' ] ) ? wp_kses_post( wp_unslash( $input[ 'footer' ] ) ) : '';
 		$clean[ 'page_numbers' ] = ! empty( $input[ 'page_numbers' ] ) ? 1 : 0;
 		$clean[ 'toc' ]          = ! empty( $input[ 'toc' ] ) ? 1 : 0;
-		$depth                 = isset( $input[ 'toc_depth' ] ) ? (int) $input[ 'toc_depth' ] : 3;
+		$depth                   = isset( $input[ 'toc_depth' ] ) ? (int) $input[ 'toc_depth' ] : 3;
 		$clean[ 'toc_depth' ]    = max( 1, min( 6, $depth ) );
 		$clean[ 'watermark' ]    = isset( $input[ 'watermark' ] ) ? sanitize_text_field( wp_unslash( $input[ 'watermark' ] ) ) : '';
 		$clean[ 'printable' ]    = ! empty( $input[ 'printable' ] ) ? 1 : 0;
@@ -259,21 +263,21 @@ class Read_Offline_Admin {
 	 * @return array
 	 */
 	public static function sanitize_epub_settings( $input ) {
-		$clean                               = array();
+		$clean                                 = array();
 		$clean[ 'meta' ]                       = array();
-		$clean[ 'meta' ][ 'author' ]             = isset( $input[ 'meta' ][ 'author' ] ) ? sanitize_text_field( wp_unslash( $input[ 'meta' ][ 'author' ] ) ) : '';
-		$clean[ 'meta' ][ 'publisher' ]          = isset( $input[ 'meta' ][ 'publisher' ] ) ? sanitize_text_field( wp_unslash( $input[ 'meta' ][ 'publisher' ] ) ) : '';
-		$clean[ 'meta' ][ 'lang' ]               = isset( $input[ 'meta' ][ 'lang' ] ) ? sanitize_text_field( wp_unslash( $input[ 'meta' ][ 'lang' ] ) ) : '';
+		$clean[ 'meta' ][ 'author' ]           = isset( $input[ 'meta' ][ 'author' ] ) ? sanitize_text_field( wp_unslash( $input[ 'meta' ][ 'author' ] ) ) : '';
+		$clean[ 'meta' ][ 'publisher' ]        = isset( $input[ 'meta' ][ 'publisher' ] ) ? sanitize_text_field( wp_unslash( $input[ 'meta' ][ 'publisher' ] ) ) : '';
+		$clean[ 'meta' ][ 'lang' ]             = isset( $input[ 'meta' ][ 'lang' ] ) ? sanitize_text_field( wp_unslash( $input[ 'meta' ][ 'lang' ] ) ) : '';
 		$clean[ 'toc' ]                        = ! empty( $input[ 'toc' ] ) ? 1 : 0;
-		$depth                               = isset( $input[ 'toc_depth' ] ) ? (int) $input[ 'toc_depth' ] : 3;
+		$depth                                 = isset( $input[ 'toc_depth' ] ) ? (int) $input[ 'toc_depth' ] : 3;
 		$clean[ 'toc_depth' ]                  = max( 1, min( 6, $depth ) );
-		$allowed_covers                      = array( 'featured', 'logo', 'custom' );
-		$cover                               = isset( $input[ 'cover' ] ) ? sanitize_key( $input[ 'cover' ] ) : 'featured';
+		$allowed_covers                        = array( 'featured', 'logo', 'custom' );
+		$cover                                 = isset( $input[ 'cover' ] ) ? sanitize_key( $input[ 'cover' ] ) : 'featured';
 		$clean[ 'cover' ]                      = in_array( $cover, $allowed_covers, true ) ? $cover : 'featured';
 		$clean[ 'custom_cover_attachment_id' ] = isset( $input[ 'custom_cover_attachment_id' ] ) ? max( 0, (int) $input[ 'custom_cover_attachment_id' ] ) : 0;
 		$clean[ 'custom_cover_url' ]           = isset( $input[ 'custom_cover_url' ] ) ? esc_url_raw( $input[ 'custom_cover_url' ] ) : '';
-		$allowed_profiles                    = array( 'light', 'dark', 'none', 'custom' );
-		$profile                             = isset( $input[ 'css_profile' ] ) ? sanitize_key( $input[ 'css_profile' ] ) : 'light';
+		$allowed_profiles                      = array( 'light', 'dark', 'none', 'custom' );
+		$profile                               = isset( $input[ 'css_profile' ] ) ? sanitize_key( $input[ 'css_profile' ] ) : 'light';
 		$clean[ 'css_profile' ]                = in_array( $profile, $allowed_profiles, true ) ? $profile : 'light';
 		$clean[ 'custom_css' ]                 = isset( $input[ 'custom_css' ] ) ? sanitize_textarea_field( wp_unslash( $input[ 'custom_css' ] ) ) : '';
 		return $clean;
@@ -589,6 +593,17 @@ class Read_Offline_Admin {
 											data-help="<?php echo esc_attr__( 'Adds basic metadata (author and publish date) near the top of the exported document.', 'read-offline' ); ?>">?</span>
 									</label>
 									<div><input type="checkbox" name="read_offline_settings_general[include_author]" value="1" <?php checked( ! empty( $options[ 'include_author' ] ) ); ?> /></div>
+
+									<label><?php _e( 'Combine bulk exports', 'read-offline' ); ?>
+										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
+											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
+											data-help="<?php echo esc_attr__( 'When enabled, selecting multiple posts/pages in bulk export produces one combined PDF/EPUB instead of a ZIP of separate files.', 'read-offline' ); ?>">?</span>
+									</label>
+									<div><input type="checkbox" name="read_offline_settings_general[combine_bulk]" value="1" <?php checked( ! empty( $options[ 'combine_bulk' ] ) ); ?> />
+										<p class="read-offline-field-desc">
+											<?php esc_html_e( 'Uncheck to revert to per-post files zipped together.', 'read-offline' ); ?>
+										</p>
+									</div>
 
 									<label><?php _e( 'Custom CSS for PDF', 'read-offline' ); ?>
 										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
@@ -1139,18 +1154,54 @@ class Read_Offline_Admin {
 			return add_query_arg( array( 'read_offline_error' => 'forbidden' ), $redirect_to );
 		}
 
-		$format    = $doaction === 'read_offline_export_pdf' ? 'pdf' : 'epub';
-		$generated = array();
-		$errors    = array();
+		$format = $doaction === 'read_offline_export_pdf' ? 'pdf' : 'epub';
 
-		// Generate files
+		$general_opts    = get_option( 'read_offline_settings_general', array() );
+		$combine_setting = ! empty( $general_opts[ 'combine_bulk' ] );
+		$combine         = apply_filters( 'read_offline_bulk_combine', $combine_setting, $post_ids, $format, $post_type );
+		$errors          = array();
+
+		if ( $combine && count( $post_ids ) > 1 ) {
+			$valid_ids = array();
+			foreach ( (array) $post_ids as $pid ) {
+				$post = get_post( $pid );
+				if ( ! $post || $post->post_type !== $post_type || ! current_user_can( 'read_post', $pid ) ) {
+					$errors[] = $pid;
+					continue;
+				}
+				$valid_ids[] = $pid;
+			}
+			if ( empty( $valid_ids ) ) {
+				return add_query_arg( array( 'read_offline_error' => 'no_files' ), $redirect_to );
+			}
+			$path = Read_Offline_Export::generate_combined( $valid_ids, $format );
+			if ( is_wp_error( $path ) || ! $path ) {
+				$code = is_wp_error( $path ) ? $path->get_error_code() : 'generation_failed';
+				return add_query_arg( array( 'read_offline_error' => $code ), $redirect_to );
+			}
+			$token = wp_generate_password( 20, false, false );
+			set_transient( 'read_offline_file_' . $token, $path, HOUR_IN_SECONDS );
+			return add_query_arg(
+				array(
+					'read_offline_done' => 1,
+					'combined'          => 1,
+					'count'             => count( $valid_ids ),
+					'errors'            => count( $errors ),
+					'token'             => $token,
+					'format'            => $format,
+				),
+				$redirect_to
+			);
+		}
+
+		// Fallback: original per-post generation into ZIP
+		$generated = array();
 		foreach ( (array) $post_ids as $post_id ) {
 			$post = get_post( $post_id );
 			if ( ! $post || $post->post_type !== $post_type ) {
 				$errors[] = $post_id;
 				continue;
 			}
-			// Capability per post
 			if ( ! current_user_can( 'read_post', $post_id ) ) {
 				$errors[] = $post_id;
 				continue;
@@ -1160,17 +1211,11 @@ class Read_Offline_Admin {
 				$errors[] = $post_id;
 				continue;
 			}
-			$generated[] = array(
-				'post_id' => $post_id,
-				'path'    => $path,
-			);
+			$generated[] = array( 'post_id' => $post_id, 'path' => $path );
 		}
-
 		if ( empty( $generated ) ) {
 			return add_query_arg( array( 'read_offline_error' => 'no_files' ), $redirect_to );
 		}
-
-		// Create ZIP package
 		$site     = sanitize_title( get_bloginfo( 'name' ) );
 		$ts       = current_time( 'Ymd_His' );
 		$zip_name = sprintf( '%s_%s_%s.zip', $site, $ts, $format );
@@ -1178,12 +1223,9 @@ class Read_Offline_Admin {
 		if ( is_wp_error( $zip_path ) || ! $zip_path ) {
 			return add_query_arg( array( 'read_offline_error' => 'zip_failed' ), $redirect_to );
 		}
-
-		// Store token to download
 		$token = wp_generate_password( 20, false, false );
 		set_transient( 'read_offline_zip_' . $token, $zip_path, HOUR_IN_SECONDS );
-
-		$redirect_to = add_query_arg(
+		return add_query_arg(
 			array(
 				'read_offline_done' => 1,
 				'count'             => count( $generated ),
@@ -1193,7 +1235,6 @@ class Read_Offline_Admin {
 			),
 			$redirect_to
 		);
-		return $redirect_to;
 	}
 
 	/**
@@ -1219,6 +1260,32 @@ class Read_Offline_Admin {
 		// Optionally delete after download
 		@unlink( $path );
 		delete_transient( 'read_offline_zip_' . $token );
+		exit;
+	}
+
+	/**
+	 * Admin endpoint to download a combined single file (PDF/EPUB).
+	 *
+	 * @return void
+	 */
+	public static function download_combined_file() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_die( esc_html__( 'You do not have permission to download this file.', 'read-offline' ) );
+		}
+		$token = isset( $_GET[ 'token' ] ) ? sanitize_text_field( wp_unslash( $_GET[ 'token' ] ) ) : '';
+		$path  = $token ? get_transient( 'read_offline_file_' . $token ) : '';
+		if ( ! $path || ! file_exists( $path ) ) {
+			wp_die( esc_html__( 'The requested file is no longer available.', 'read-offline' ) );
+		}
+		$ext           = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
+		$ct            = ( 'pdf' === $ext ) ? 'application/pdf' : ( 'epub' === $ext ? 'application/epub+zip' : 'application/octet-stream' );
+		$download_name = sanitize_file_name( basename( $path ) );
+		header( 'Content-Type: ' . $ct );
+		header( 'Content-Disposition: attachment; filename="' . $download_name . '"' );
+		header( 'Content-Length: ' . filesize( $path ) );
+		readfile( $path );
+		@unlink( $path );
+		delete_transient( 'read_offline_file_' . $token );
 		exit;
 	}
 
@@ -1254,20 +1321,24 @@ class Read_Offline_Admin {
 	 */
 	public static function admin_notices() {
 		if ( isset( $_GET[ 'read_offline_done' ] ) && $_GET[ 'read_offline_done' ] ) {
-			$count  = isset( $_GET[ 'count' ] ) ? intval( wp_unslash( $_GET[ 'count' ] ) ) : 0;
-			$errors = isset( $_GET[ 'errors' ] ) ? intval( wp_unslash( $_GET[ 'errors' ] ) ) : 0;
-			$token  = isset( $_GET[ 'token' ] ) ? sanitize_text_field( wp_unslash( $_GET[ 'token' ] ) ) : '';
-			$link   = $token ? esc_url( admin_url( 'admin-post.php?action=read_offline_download_zip&token=' . $token ) ) : '';
+			$count    = isset( $_GET[ 'count' ] ) ? intval( wp_unslash( $_GET[ 'count' ] ) ) : 0;
+			$errors   = isset( $_GET[ 'errors' ] ) ? intval( wp_unslash( $_GET[ 'errors' ] ) ) : 0;
+			$token    = isset( $_GET[ 'token' ] ) ? sanitize_text_field( wp_unslash( $_GET[ 'token' ] ) ) : '';
+			$combined = ! empty( $_GET[ 'combined' ] );
+			$action   = $combined ? 'read_offline_download_file' : 'read_offline_download_zip';
+			$link     = $token ? esc_url( admin_url( 'admin-post.php?action=' . $action . '&token=' . $token ) ) : '';
 			?>
 			<div class="notice notice-success is-dismissible">
-				<p><?php
-				/* translators: 1: number of files exported, 2: number of errors */
-				echo esc_html( sprintf( __( 'Read Offline: %1$d file(s) exported. %2$d error(s).', 'read-offline' ), $count, $errors ) );
-				?>
+				<p><?php if ( $combined ) {
+					echo esc_html( sprintf( __( 'Read Offline: Combined document created from %1$d post(s). %2$d error(s).', 'read-offline' ), $count, $errors ) );
+				} else { /* translators: 1: number of files exported, 2: number of errors */
+					echo esc_html( sprintf( __( 'Read Offline: %1$d file(s) exported. %2$d error(s).', 'read-offline' ), $count, $errors ) );
+				} ?>
 				</p>
 				<?php if ( $link ) : ?>
 					<p><a class="button button-primary"
-							href="<?php echo $link; ?>"><?php esc_html_e( 'Download ZIP', 'read-offline' ); ?></a></p>
+							href="<?php echo $link; ?>"><?php echo esc_html( $combined ? __( 'Download file', 'read-offline' ) : __( 'Download ZIP', 'read-offline' ) ); ?></a>
+					</p>
 				<?php endif; ?>
 			</div>
 			<?php
