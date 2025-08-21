@@ -167,7 +167,9 @@ class Read_Offline_Admin {
 				}
 				.read-offline-help-tip{display:inline-block;margin-left:6px;color:#646970;cursor:pointer;border:1px solid #ccd0d4;border-radius:50%;width:16px;height:16px;line-height:14px;text-align:center;font-size:11px;background:#f6f7f7}
 				.read-offline-help-tip:hover{background:#eef0f1}
-				.read-offline-help-popup{position:absolute;z-index:100000;background:#fff;border:1px solid #ccd0d4;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:10px;max-width:320px;font-size:12px;color:#1d2327}
+				.read-offline-help-popup{position:absolute;z-index:100000;background:#fff;border:1px solid #ccd0d4;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:10px;max-width:320px;max-height:260px;overflow:auto;font-size:12px;color:#1d2327}
+				.read-offline-help-popup::after{content:"";position:absolute;top:-6px;left:12px;border-width:6px;border-style:solid;border-color:transparent transparent #ccd0d4 transparent}
+				.read-offline-help-popup::before{content:"";position:absolute;top:-5px;left:12px;border-width:6px;border-style:solid;border-color:transparent transparent #fff transparent}
 
 				.read-offline-cover-preview img {
 					max-width: 160px;
@@ -219,7 +221,7 @@ class Read_Offline_Admin {
 					<div class="read-offline-card">
 						<div class="read-offline-grid">
 							<label><?php _e( 'Auto-insert Save As button', 'read-offline' ); ?>
-								<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Automatically appends the Save As controls after single post content. Disable if you prefer placing the shortcode manually.', 'read-offline' ); ?>">?</span>
+								<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Automatically appends the Save As controls after single post content. Disable if you prefer placing the shortcode manually.', 'read-offline' ); ?>">?</span>
 							</label>
 							<div>
 								<input type="checkbox" name="read_offline_settings_general[auto_insert]" value="1" <?php checked( ! empty( $options['auto_insert'] ) ); ?> />
@@ -227,7 +229,7 @@ class Read_Offline_Admin {
 							</div>
 
 							<label><?php _e( 'Default formats', 'read-offline' ); ?>
-								<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Choose which formats show up by default in the Save As UI. You can still filter these via hooks.', 'read-offline' ); ?>">?</span>
+								<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Choose which formats show up by default in the Save As UI. You can still filter these via hooks.', 'read-offline' ); ?>">?</span>
 							</label>
 							<div>
 								<label><input type="checkbox" name="read_offline_settings_general[formats][]" value="pdf" <?php checked( in_array( 'pdf', (array) ( $options['formats'] ?? [] ), true ) ); ?> /> PDF</label>
@@ -235,7 +237,7 @@ class Read_Offline_Admin {
 							</div>
 
 							<label><?php _e( 'Filename template', 'read-offline' ); ?>
-								<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Use placeholders like {site}, {post_slug}, {title}, {format}, {date}, {lang}. The preview below shows an example.', 'read-offline' ); ?>">?</span>
+								<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Use placeholders like {site}, {post_slug}, {title}, {format}, {date}, {lang}. The preview below shows an example.', 'read-offline' ); ?>">?</span>
 							</label>
 							<div>
 								<input id="ro-filename" type="text" name="read_offline_settings_general[filename]" value="<?php echo esc_attr( $options['filename'] ?? '' ); ?>" class="regular-text" />
@@ -245,17 +247,17 @@ class Read_Offline_Admin {
 							</div>
 
 							<label><?php _e( 'Include featured image as cover', 'read-offline' ); ?>
-								<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'If enabled, the post’s featured image will be used as a cover in both PDF and EPUB when appropriate.', 'read-offline' ); ?>">?</span>
+								<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'If enabled, the post’s featured image will be used as a cover in both PDF and EPUB when appropriate.', 'read-offline' ); ?>">?</span>
 							</label>
 							<div><input type="checkbox" name="read_offline_settings_general[include_featured]" value="1" <?php checked( ! empty( $options['include_featured'] ) ); ?> /></div>
 
 							<label><?php _e( 'Include author/date', 'read-offline' ); ?>
-								<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Adds basic metadata (author and publish date) near the top of the exported document.', 'read-offline' ); ?>">?</span>
+								<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Adds basic metadata (author and publish date) near the top of the exported document.', 'read-offline' ); ?>">?</span>
 							</label>
 							<div><input type="checkbox" name="read_offline_settings_general[include_author]" value="1" <?php checked( ! empty( $options['include_author'] ) ); ?> /></div>
 
 							<label><?php _e( 'Custom CSS for PDF', 'read-offline' ); ?>
-								<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Additional CSS appended to the PDF output. Useful for minor layout tweaks.', 'read-offline' ); ?>">?</span>
+								<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Additional CSS appended to the PDF output. Useful for minor layout tweaks.', 'read-offline' ); ?>">?</span>
 							</label>
 							<div class="full"><textarea name="read_offline_settings_general[css]" class="large-text" rows="4"><?php echo esc_textarea( $options['css'] ?? '' ); ?></textarea></div>
 						</div>
@@ -269,7 +271,7 @@ class Read_Offline_Admin {
 						<table class="form-table" role="presentation">
 							<tr>
 								<th scope="row"><?php _e( 'Page size', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Select a standard size or choose Custom to enter width x height in millimeters (e.g., 210x297).', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Select a standard size or choose Custom to enter width x height in millimeters (e.g., 210x297).', 'read-offline' ); ?>">?</span>
 								</th>
 								<td>
 									<select id="ro-pdf-size" name="read_offline_settings_pdf[size]">
@@ -299,7 +301,7 @@ class Read_Offline_Admin {
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Margins (t,r,b,l)', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Enter top, right, bottom, left margins in millimeters.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Enter top, right, bottom, left margins in millimeters.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td>
 									<input type="text" name="read_offline_settings_pdf[margins][t]"
@@ -314,27 +316,27 @@ class Read_Offline_Admin {
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Header', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Optional HTML header shown on each page. Keep it simple for best results.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Optional HTML header shown on each page. Keep it simple for best results.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td><input type="text" name="read_offline_settings_pdf[header]"
 										value="<?php echo esc_attr( $options[ 'header' ] ?? '' ); ?>" class="regular-text" /></td>
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Footer', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Optional HTML footer. Use {PAGENO}/{nbpg} via Page numbers setting for pagination.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Optional HTML footer. Use {PAGENO}/{nbpg} via Page numbers setting for pagination.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td><input type="text" name="read_offline_settings_pdf[footer]"
 										value="<?php echo esc_attr( $options[ 'footer' ] ?? '' ); ?>" class="regular-text" /></td>
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Page numbers', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Adds a simple {PAGENO}/{nbpg} footer when no custom footer is set.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Adds a simple {PAGENO}/{nbpg} footer when no custom footer is set.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td><input type="checkbox" name="read_offline_settings_pdf[page_numbers]" value="1" <?php checked( ! empty( $options[ 'page_numbers' ] ) ); ?> /></td>
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Table of Contents', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Generates a TOC before the content. Depth controls which heading levels are included.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Generates a TOC before the content. Depth controls which heading levels are included.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td>
 									<input type="checkbox" name="read_offline_settings_pdf[toc]" value="1" <?php checked( ! empty( $options[ 'toc' ] ) ); ?> />
@@ -345,14 +347,14 @@ class Read_Offline_Admin {
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Watermark text', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Optional translucent text placed behind content on each page.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Optional translucent text placed behind content on each page.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td><input type="text" name="read_offline_settings_pdf[watermark]"
 										value="<?php echo esc_attr( $options[ 'watermark' ] ?? '' ); ?>" class="regular-text" /></td>
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Printable', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'When unchecked, restricts printing via PDF permissions (not bulletproof).', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'When unchecked, restricts printing via PDF permissions (not bulletproof).', 'read-offline' ); ?>">?</span>
 								</th>
 								<td><input type="checkbox" name="read_offline_settings_pdf[printable]" value="1" <?php checked( ! empty( $options[ 'printable' ] ) ); ?> /></td>
 							</tr>
@@ -367,7 +369,7 @@ class Read_Offline_Admin {
 						<table class="form-table" role="presentation">
 							<tr>
 								<th scope="row"><?php _e( 'Author', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Overrides the EPUB author metadata. Leave blank to default to site name.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Overrides the EPUB author metadata. Leave blank to default to site name.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td><input type="text" name="read_offline_settings_epub[meta][author]"
 										value="<?php echo esc_attr( $options[ 'meta' ][ 'author' ] ?? '' ); ?>" class="regular-text" />
@@ -375,7 +377,7 @@ class Read_Offline_Admin {
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Publisher', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'EPUB publisher metadata. Leave blank to default to site name.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'EPUB publisher metadata. Leave blank to default to site name.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td><input type="text" name="read_offline_settings_epub[meta][publisher]"
 										value="<?php echo esc_attr( $options[ 'meta' ][ 'publisher' ] ?? '' ); ?>"
@@ -383,7 +385,7 @@ class Read_Offline_Admin {
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Language', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'BCP 47 language tag (e.g., en-US). Leave blank to auto-detect from site locale.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'BCP 47 language tag (e.g., en-US). Leave blank to auto-detect from site locale.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td><input type="text" name="read_offline_settings_epub[meta][lang]"
 										value="<?php echo esc_attr( $options[ 'meta' ][ 'lang' ] ?? '' ); ?>" class="regular-text" />
@@ -391,7 +393,7 @@ class Read_Offline_Admin {
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Table of Contents', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Adds an inline TOC at the top of the EPUB. Depth controls which heading levels are included.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Adds an inline TOC at the top of the EPUB. Depth controls which heading levels are included.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td>
 									<input type="checkbox" name="read_offline_settings_epub[toc]" value="1" <?php checked( ! empty( $options[ 'toc' ] ) ); ?> />
@@ -402,7 +404,7 @@ class Read_Offline_Admin {
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Cover source', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Pick the image used as the EPUB cover. Custom lets you choose from the media library.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Pick the image used as the EPUB cover. Custom lets you choose from the media library.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td>
 									<select name="read_offline_settings_epub[cover]" id="read-offline-epub-cover-source">
@@ -431,7 +433,7 @@ class Read_Offline_Admin {
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'CSS Profile', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Choose a base stylesheet for EPUB. Custom allows full control via the field below.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Choose a base stylesheet for EPUB. Custom allows full control via the field below.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td>
 									<select name="read_offline_settings_epub[css_profile]">
@@ -448,7 +450,7 @@ class Read_Offline_Admin {
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Custom CSS', 'read-offline' ); ?>
-									<span class="read-offline-help-tip" title="<?php echo esc_attr__( 'Additional CSS injected into the EPUB chapter. Keep it simple; avoid external URLs.', 'read-offline' ); ?>">?</span>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Additional CSS injected into the EPUB chapter. Keep it simple; avoid external URLs.', 'read-offline' ); ?>">?</span>
 								</th>
 								<td><textarea name="read_offline_settings_epub[custom_css]" class="large-text"
 										rows="4"><?php echo esc_textarea( $options[ 'custom_css' ] ?? '' ); ?></textarea></td>
@@ -571,20 +573,42 @@ class Read_Offline_Admin {
 		</div>
 		<script>
 		(function(){
-			var popup = null, owner = null;
+			var popup = null, owner = null, content = null, closeBtn = null;
 			function ensurePopup(){
 				if(!popup){
 					popup = document.createElement('div');
 					popup.className = 'read-offline-help-popup';
+					popup.id = 'read-offline-help-popup';
+					popup.setAttribute('role','dialog');
+					popup.setAttribute('aria-modal','false');
+					popup.setAttribute('aria-hidden','true');
 					popup.style.display = 'none';
+					popup.tabIndex = -1;
+					content = document.createElement('div');
+					content.className = 'read-offline-help-content';
+					closeBtn = document.createElement('button');
+					closeBtn.type = 'button';
+					closeBtn.className = 'button button-small';
+					closeBtn.textContent = 'Close';
+					closeBtn.addEventListener('click', hide);
+					popup.appendChild(content);
+					popup.appendChild(closeBtn);
 					document.body.appendChild(popup);
 				}
 				return popup;
 			}
-			function hide(){ if(popup){ popup.style.display='none'; popup.setAttribute('aria-hidden','true'); owner=null; } }
+			function hide(){
+				if(popup){
+					popup.style.display='none';
+					popup.setAttribute('aria-hidden','true');
+					popup.removeAttribute('aria-labelledby');
+				}
+				if(owner){ owner.setAttribute('aria-expanded','false'); owner.removeAttribute('aria-describedby'); owner.focus(); }
+				owner=null;
+			}
 			function show(tip, text){
 				var p = ensurePopup();
-				p.textContent = text || '';
+				content.textContent = text || '';
 				var r = tip.getBoundingClientRect();
 				var top = r.bottom + window.scrollY + 8;
 				var left = r.left + window.scrollX;
@@ -593,27 +617,60 @@ class Read_Offline_Admin {
 				p.style.display = 'block';
 				p.setAttribute('aria-hidden','false');
 				owner = tip;
+				tip.setAttribute('aria-expanded','true');
+				tip.setAttribute('aria-describedby','read-offline-help-popup');
 				// Prevent overflow off the right edge
 				var rect = p.getBoundingClientRect();
 				var overflowX = rect.right - window.innerWidth + 8;
 				if (overflowX > 0) {
 					p.style.left = (left - overflowX) + 'px';
 				}
+				// Focus management
+				p.focus();
 			}
 			document.addEventListener('click', function(e){
 				var tip = e.target.closest ? e.target.closest('.read-offline-help-tip') : null;
 				if(tip){
 					e.preventDefault(); e.stopPropagation();
-					var text = tip.getAttribute('data-help') || tip.getAttribute('title') || '';
+					var text = tip.getAttribute('data-help') || '';
 					if(popup && popup.style.display==='block' && owner === tip){ hide(); return; }
 					show(tip, text);
+				} else if (popup && popup.contains(e.target)) {
+					// clicks inside popup shouldn't close it
+					return;
 				} else {
 					hide();
 				}
 			});
+			// Keyboard activation on tip (Enter/Space)
+			document.addEventListener('keydown', function(e){
+				var tip = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('read-offline-help-tip') ? document.activeElement : null;
+				if(!tip) return;
+				if(e.key === 'Enter' || e.key === ' '){
+					e.preventDefault();
+					var text = tip.getAttribute('data-help') || '';
+					if(popup && popup.style.display==='block' && owner === tip){ hide(); return; }
+					show(tip, text);
+				}
+			});
+			// Focus trap (basic): keep Tab cycling between popup and its close button
+			document.addEventListener('keydown', function(e){
+				if(!popup || popup.style.display !== 'block') return;
+				if(e.key === 'Escape'){ hide(); return; }
+				if(e.key === 'Tab'){
+					var focusables = [popup, closeBtn];
+					var idx = focusables.indexOf(document.activeElement);
+					if(e.shiftKey){
+						idx = idx <= 0 ? focusables.length - 1 : idx - 1;
+					} else {
+						idx = idx >= focusables.length - 1 ? 0 : idx + 1;
+					}
+					e.preventDefault();
+					focusables[idx].focus();
+				}
+			});
 			window.addEventListener('scroll', hide, { passive: true });
 			window.addEventListener('resize', hide);
-			document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ hide(); } });
 		})();
 		</script>
 		<?php
