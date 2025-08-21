@@ -599,7 +599,11 @@ class Read_Offline_Admin {
 											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
 											data-help="<?php echo esc_attr__( 'When enabled, selecting multiple posts/pages in bulk export produces one combined PDF/EPUB instead of a ZIP of separate files.', 'read-offline' ); ?>">?</span>
 									</label>
-									<div><input type="checkbox" name="read_offline_settings_general[combine_bulk]" value="1" <?php checked( ! empty( $options[ 'combine_bulk' ] ) ); ?> />
+									<div><?php
+									// Show as checked if key absent (legacy installs) or explicitly truthy.
+									$combine_default_checked = ! array_key_exists( 'combine_bulk', (array) $options ) || ! empty( $options['combine_bulk'] );
+									?>
+									<input type="checkbox" name="read_offline_settings_general[combine_bulk]" value="1" <?php checked( $combine_default_checked ); ?> />
 										<p class="read-offline-field-desc">
 											<?php esc_html_e( 'Uncheck to revert to per-post files zipped together.', 'read-offline' ); ?>
 										</p>
@@ -1157,7 +1161,8 @@ class Read_Offline_Admin {
 		$format = $doaction === 'read_offline_export_pdf' ? 'pdf' : 'epub';
 
 		$general_opts    = get_option( 'read_offline_settings_general', array() );
-		$combine_setting = ! empty( $general_opts[ 'combine_bulk' ] );
+		// If the setting key is absent (pre-feature installs), treat it as enabled by default.
+		$combine_setting = array_key_exists( 'combine_bulk', (array) $general_opts ) ? ! empty( $general_opts[ 'combine_bulk' ] ) : true;
 		$combine         = apply_filters( 'read_offline_bulk_combine', $combine_setting, $post_ids, $format, $post_type );
 		$errors          = array();
 
