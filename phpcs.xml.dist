@@ -24,6 +24,5 @@
     <!-- Optional: reduce noise for nonce verification on admin views (we validate actions elsewhere). Comment out to re-enable. -->
     <!-- <exclude name="WordPress.Security.NonceVerification.Recommended"/> -->
 
-    <!-- Show sniff codes in reports for clarity -->
-    <arg value="-s"/>
+    <!-- Show sniff codes in reports for clarity (omitted due to local flag parsing). -->
 </ruleset>
