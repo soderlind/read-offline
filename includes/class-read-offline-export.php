@@ -42,7 +42,7 @@ class Read_Offline_Export {
 					'format' => array(
 						'required' => true,
 						'type'     => 'string',
-						'enum'     => array( 'pdf', 'epub' ),
+						'enum'     => array( 'pdf', 'epub', 'md' ),
 					),
 					'nonce'  => array(
 						'required' => false,
@@ -127,6 +127,9 @@ class Read_Offline_Export {
 		if ( 'epub' === $format ) {
 			return self::generate_epub( $post, $title, $content, $path );
 		}
+		if ( 'md' === $format ) {
+			return self::generate_markdown( $post, $title, $content, $path );
+		}
 		return new WP_Error( 'invalid_format', 'Invalid format' );
 	}
 
@@ -159,7 +162,109 @@ class Read_Offline_Export {
 		if ( 'epub' === $format ) {
 			return self::generate_combined_epub( $post_ids, $path );
 		}
+		if ( 'md' === $format ) {
+			return self::generate_combined_markdown( $post_ids, $path );
+		}
 		return new WP_Error( 'invalid_format', 'Invalid format' );
+	}
+/**
+	 * Generate Markdown file for a single post.
+	 * Basic conversion: strip HTML tags after applying filters, keep headings, links, images.
+	 * @param WP_Post $post Post.
+	 * @param string $title Title.
+	 * @param string $html HTML content.
+	 * @param string $path Destination path (.md).
+	 * @return string|WP_Error
+	 */
+	protected static function generate_markdown( WP_Post $post, $title, $html, $path ) {
+		$md = self::html_to_markdown( $title, $html, array( 'include_author' => ! empty( get_option( 'read_offline_settings_general', array() )[ 'include_author' ] ) ? $post->post_author : 0, 'date' => get_the_date( '', $post ) ) );
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		global $wp_filesystem; WP_Filesystem();
+		$ok = false;
+		if ( $wp_filesystem && method_exists( $wp_filesystem, 'put_contents' ) ) {
+			$ok = $wp_filesystem->put_contents( $path, $md, FS_CHMOD_FILE );
+		}
+		if ( ! $ok ) {
+			$ok = false !== @file_put_contents( $path, $md );
+		}
+		return $ok ? $path : new WP_Error( 'md_write_failed', 'Could not write markdown file' );
+	}
+/**
+	 * Generate combined Markdown file from multiple posts.
+	 * @param array $post_ids IDs.
+	 * @param string $path Path.
+	 * @return string|WP_Error
+	 */
+	protected static function generate_combined_markdown( $post_ids, $path ) {
+		$parts = array();
+		foreach ( $post_ids as $pid ) {
+			$post = get_post( $pid ); if ( ! $post ) { continue; }
+			$title = get_the_title( $post );
+			$html  = apply_filters( 'the_content', $post->post_content );
+			$html  = apply_filters( 'read_offline_content_html', $html, $post, 'md' );
+			$parts[] = self::html_to_markdown( $title, $html, array( 'include_author' => ! empty( get_option( 'read_offline_settings_general', array() )[ 'include_author' ] ) ? $post->post_author : 0, 'date' => get_the_date( '', $post ) ) );
+		}
+		$md = implode( "\n\n---\n\n", $parts );
+		if ( ! function_exists( 'WP_Filesystem' ) ) { require_once ABSPATH . 'wp-admin/includes/file.php'; }
+		global $wp_filesystem; WP_Filesystem();
+		$ok = false;
+		if ( $wp_filesystem && method_exists( $wp_filesystem, 'put_contents' ) ) { $ok = $wp_filesystem->put_contents( $path, $md, FS_CHMOD_FILE ); }
+		if ( ! $ok ) { $ok = false !== @file_put_contents( $path, $md ); }
+		return $ok ? $path : new WP_Error( 'md_write_failed', 'Could not write markdown file' );
+	}
+/**
+	 * Convert HTML fragment into a rough Markdown representation.
+	 * This is intentionally lightweight to avoid adding large libraries.
+	 * @param string $title Title.
+	 * @param string $html HTML content.
+	 * @param array $meta Meta (include_author => author_id|0, date => string).
+	 * @return string Markdown.
+	 */
+	protected static function html_to_markdown( $title, $html, $meta = array() ) {
+		$author_line = '';
+		if ( ! empty( $meta['include_author'] ) ) {
+			$author_line = '\n' . esc_html( get_the_author_meta( 'display_name', $meta['include_author'] ) );
+			if ( ! empty( $meta['date'] ) ) { $author_line .= ' — ' . esc_html( $meta['date'] ); }
+		}
+		// Basic replacements
+		$md = $html;
+		// Remove scripts/styles
+		$md = preg_replace( '#<(script|style)[^>]*>.*?</\1>#is', '', $md );
+		// Headings
+		for ( $i = 6; $i >= 1; $i-- ) {
+			$md = preg_replace( '#<h' . $i . '[^>]*>(.*?)</h' . $i . '>#is', str_repeat( '#', $i ) . ' $1\n\n', $md );
+		}
+		// Bold/italic
+		$md = preg_replace( '#<(strong|b)>(.*?)</\1>#is', '**$2**', $md );
+		$md = preg_replace( '#<(em|i)>(.*?)</\1>#is', '*$2*', $md );
+		// Images ![alt](src)
+		$md = preg_replace_callback( '#<img[^>]*>#i', function( $m ) {
+			if ( preg_match( '#alt="([^"]*)"#i', $m[0], $alt ) ) { $a = $alt[1]; } else { $a = ''; }
+			if ( preg_match( '#src="([^"]*)"#i', $m[0], $src ) ) { $s = $src[1]; } else { $s = ''; }
+			return $s ? '![' . $a . '](' . $s . ')' : '';
+		}, $md );
+		// Links [text](url)
+		$md = preg_replace( '#<a\s+[^>]*href="([^"]*)"[^>]*>(.*?)</a>#is', '[$2]($1)', $md );
+		// Lists
+		$md = preg_replace( '#<li[^>]*>(.*?)</li>#is', '- $1\n', $md );
+		$md = preg_replace( '#</?(ul|ol)[^>]*>#i', "\n", $md );
+		// Code blocks
+		$md = preg_replace( '#<pre[^>]*><code[^>]*>(.*?)</code></pre>#is', "``````\n$1\n``````\n", $md );
+		$md = preg_replace( '#<code>(.*?)</code>#is', '`$1`', $md );
+		// Paragraphs / line breaks
+		$md = preg_replace( '#<br\s*/?>#i', "\n", $md );
+		$md = preg_replace( '#</p>#i', "\n\n", $md );
+		$md = preg_replace( '#<p[^>]*>#i', '', $md );
+		// Strip remaining tags
+		$md = wp_strip_all_tags( $md );
+		// Decode entities
+		$md = html_entity_decode( $md, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		// Collapse excessive blank lines
+		$md = preg_replace( "/\n{3,}/", "\n\n", $md );
+		$front = '# ' . $title . $author_line . "\n\n";
+		return $front . trim( $md ) . "\n";
 	}
 
 	/**
@@ -963,7 +1068,7 @@ class Read_Offline_Export {
 		);
 		$name     = strtr( $template, $repl );
 		$name     = sanitize_file_name( $name );
-		$ext      = ( 'pdf' === $format ) ? '.pdf' : '.epub';
+		if ( 'pdf' === $format ) { $ext = '.pdf'; } elseif ( 'epub' === $format ) { $ext = '.epub'; } elseif ( 'md' === $format ) { $ext = '.md'; } else { $ext = '.' . preg_replace( '/[^a-z0-9]/', '', $format ); }
 		$ver      = substr( $hash, 0, 8 );
 		return $name . '-v' . $ver . $ext;
 	}

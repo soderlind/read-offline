@@ -31,9 +31,9 @@ class Read_Offline_Frontend {
 	 */
 	protected static function enabled_formats() {
 		$settings = get_option( 'read_offline_settings_general', array() );
-		$formats  = isset( $settings[ 'formats' ] ) ? (array) $settings[ 'formats' ] : array( 'pdf', 'epub' );
+		$formats  = isset( $settings[ 'formats' ] ) ? (array) $settings[ 'formats' ] : array( 'pdf', 'epub', 'md' );
 		$formats  = apply_filters( 'read_offline_enabled_formats', $formats );
-		return array_values( array_intersect( array( 'pdf', 'epub' ), $formats ) );
+		return array_values( array_intersect( array( 'pdf', 'epub', 'md' ), $formats ) );
 	}
 
 	/**
@@ -132,7 +132,7 @@ class Read_Offline_Frontend {
 	 */
 	protected static function render_ui( $post_id, $atts = array() ) {
 		$formats = isset( $atts[ 'formats' ] ) ? array_map( 'trim', explode( ',', strtolower( $atts[ 'formats' ] ) ) ) : self::enabled_formats();
-		$formats = array_values( array_intersect( array( 'pdf', 'epub' ), $formats ) );
+		$formats = array_values( array_intersect( array( 'pdf', 'epub', 'md' ), $formats ) );
 		if ( empty( $formats ) ) {
 			return '';
 		}
@@ -141,7 +141,7 @@ class Read_Offline_Frontend {
 
 		$opts = '';
 		foreach ( $formats as $fmt ) {
-			$label = strtoupper( $fmt );
+			$label = ( 'md' === $fmt ) ? 'Markdown' : strtoupper( $fmt );
 			$opts .= '<option value="' . esc_attr( $fmt ) . '">' . esc_html( $label ) . '</option>';
 		}
 		$html = '<div class="read-offline ' . esc_attr( $class ) . '">';
