@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 - 2025-08-21
+- Feature: Markdown (MD) export (single post + REST + front-end UI). Includes lightweight HTML→Markdown converter with headings, lists, links, images, emphasis, and fenced code blocks.
+- Admin: Added MD to selectable default formats and REST format documentation.
+- Admin: Moved Custom PDF CSS from General tab to PDF tab with automatic one-time migration/fallback.
+- Markdown: Improved formatting (proper newlines, standard triple backtick fences, spacing cleanup, no literal \n output).
+- Internal: Refactored export routing to include md in filename building and caching hash.
+- Docs: Updated README to reflect Markdown support and CSS relocation.
+- Prep: Bulk action + combined Markdown export planned for a later release.
+
 ## 0.1.1 - 2025-08-21
 - Add settings sanitization/validation for General, PDF (custom size, margins, TOC depth), and EPUB (meta, cover, CSS profile).
 - Tighten escaping in admin UI (CSS classes, health icons, download filename) and add translators’ comments for dynamic strings.
