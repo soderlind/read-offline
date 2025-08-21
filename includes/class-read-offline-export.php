@@ -90,10 +90,10 @@ class Read_Offline_Export {
 				// Support custom size like "210x297" (mm) when size is set to Custom
 				$formatArg = $size;
 				if ( is_string( $size ) && strtolower( $size ) === 'custom' ) {
-					$custom = isset( $pdf_opts['custom_size'] ) ? trim( (string) $pdf_opts['custom_size'] ) : '';
+					$custom = isset( $pdf_opts[ 'custom_size' ] ) ? trim( (string) $pdf_opts[ 'custom_size' ] ) : '';
 					if ( $custom && preg_match( '/^\s*(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)\s*$/i', $custom, $mm ) ) {
-						$w = (float) $mm[1];
-						$h = (float) $mm[2];
+						$w = (float) $mm[ 1 ];
+						$h = (float) $mm[ 2 ];
 						if ( $w > 0 && $h > 0 ) {
 							$formatArg = [ $w, $h ];
 						}

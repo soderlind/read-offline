@@ -25,12 +25,61 @@ class Read_Offline_Admin {
 	}
 
 	public static function add_settings_page() {
-		add_options_page(
+		$hook = add_options_page(
 			__( 'Read Offline Settings', 'read-offline' ),
 			__( 'Read Offline', 'read-offline' ),
 			'manage_options',
 			'read-offline-settings',
 			[ __CLASS__, 'render_settings_page' ]
+		);
+		if ( $hook ) {
+			add_action( 'load-' . $hook, [ __CLASS__, 'add_help_tabs' ] );
+		}
+	}
+
+	public static function add_help_tabs() {
+		$screen = get_current_screen();
+		if ( ! $screen || empty( $screen->id ) ) {
+			return;
+		}
+		// Overview
+		$screen->add_help_tab( [
+			'id'      => 'read_offline_help_overview',
+			'title'   => __( 'Overview', 'read-offline' ),
+			'content' => '<p>' . esc_html__( 'Export posts and pages to PDF or EPUB. Use auto-insert to show a Save As button after content, the shortcode to place it manually, or the REST API for programmatic exports.', 'read-offline' ) . '</p>'
+				. '<p><strong>' . esc_html__( 'Shortcode', 'read-offline' ) . ':</strong> <code>[read_offline]</code></p>'
+				. '<p><strong>' . esc_html__( 'REST API', 'read-offline' ) . ':</strong> <code>' . esc_html( rest_url( 'read-offline/v1/export?postId={id}&format=pdf|epub' ) ) . '</code></p>'
+		] );
+		// PDF
+		$screen->add_help_tab( [
+			'id'    => 'read_offline_help_pdf',
+			'title' => __( 'PDF settings', 'read-offline' ),
+			'content' =>
+				'<p>' . esc_html__( 'Choose a page size or pick Custom and provide dimensions in millimeters (e.g., 210x297). Configure margins, optional header/footer, page numbers, table of contents depth, watermark, and print protection.', 'read-offline' ) . '</p>'
+		] );
+		// EPUB
+		$screen->add_help_tab( [
+			'id'    => 'read_offline_help_epub',
+			'title' => __( 'EPUB settings', 'read-offline' ),
+			'content' =>
+				'<p>' . esc_html__( 'Set metadata (author, publisher, language), include a table of contents, and pick a cover source (featured image, site logo, or custom upload via the media library). Select a CSS profile or supply custom CSS.', 'read-offline' ) . '</p>'
+		] );
+		// Troubleshooting
+		$screen->add_help_tab( [
+			'id'    => 'read_offline_help_troubleshooting',
+			'title' => __( 'Troubleshooting', 'read-offline' ),
+			'content' =>
+				'<ul>'
+				. '<li>' . esc_html__( 'If PDF/EPUB buttons are missing, ensure the auto-insert option is enabled or use the shortcode.', 'read-offline' ) . '</li>'
+				. '<li>' . esc_html__( 'If generation fails, check the Environment health card below for missing PHP extensions or Composer libraries (mPDF for PDF, PHPePub for EPUB).', 'read-offline' ) . '</li>'
+				. '<li>' . esc_html__( 'Use the Test export tool on this page to quickly verify your setup for a specific post ID.', 'read-offline' ) . '</li>'
+				. '<li>' . esc_html__( 'If old files are served, clear the plugin cache using the Clear cache button.', 'read-offline' ) . '</li>'
+				. '</ul>'
+		] );
+
+		$screen->set_help_sidebar(
+			'<p><strong>' . esc_html__( 'Need help?', 'read-offline' ) . '</strong></p>' .
+			'<p>' . esc_html__( 'Use the tabs here for quick guidance. Hover field labels for additional context where available.', 'read-offline' ) . '</p>'
 		);
 	}
 
