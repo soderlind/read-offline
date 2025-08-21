@@ -612,7 +612,7 @@ class Read_Offline_Admin {
 
 			<div class="read-offline-layout">
 				<div class="read-offline-main">
-					<form method="post" action="options.php">
+						<form method="post" action="options.php">
 						<?php
 						if ( 'general' === $current_tab ) {
 							settings_fields( 'read_offline_settings_general' );
@@ -697,6 +697,24 @@ class Read_Offline_Admin {
 
 									<!-- Removed: PDF Custom CSS moved to PDF tab -->
 								</div>
+							</div>
+							<?php
+							// Inline actions row for Save / Clear cache only on General tab.
+							$clear_nonce      = wp_create_nonce( 'read_offline_clear_cache' );
+							$clear_cache_url  = add_query_arg(
+								array(
+									'action'     => 'read_offline_clear_cache',
+									'_roc_nonce' => $clear_nonce,
+								),
+								admin_url( 'admin-post.php' )
+							);
+							?>
+							<div class="read-offline-actions" style="margin-top:16px;">
+								<button type="submit" class="button button-primary"><?php esc_html_e( 'Save Changes', 'read-offline' ); ?></button>
+								<a href="<?php echo esc_url( $clear_cache_url ); ?>" class="button" id="read-offline-clear-cache-btn">
+									<?php esc_html_e( 'Clear cache', 'read-offline' ); ?>
+									<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog" aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>" data-help="<?php echo esc_attr__( 'Deletes all previously generated export files (PDF/EPUB/MD) from uploads/read-offline so they regenerate on next download.', 'read-offline' ); ?>">?</span>
+								</a>
 							</div>
 							<?php
 						} elseif ( 'pdf' === $current_tab ) {
@@ -819,6 +837,10 @@ class Read_Offline_Admin {
 											rows="4"><?php echo esc_textarea( $options[ 'custom_css' ] ?? '' ); ?></textarea></div>
 								</div>
 							</div>
+							<?php
+							// PDF tab actions
+							?>
+							<p class="submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Save Changes', 'read-offline' ); ?></button></p>
 							<?php
 						} else { // epub
 							settings_fields( 'read_offline_settings_epub' );
@@ -1029,19 +1051,15 @@ class Read_Offline_Admin {
 								})(jQuery);
 							</script>
 							<?php
+							// EPUB tab actions
+							?>
+							<p class="submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Save Changes', 'read-offline' ); ?></button></p>
+							<?php
 						}
-						submit_button();
 						?>
 					</form>
 					<?php if ( 'general' === $current_tab ) : ?>
-						<hr />
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
-							style="margin-top:12px;">
-							<?php wp_nonce_field( 'read_offline_clear_cache', '_roc_nonce' ); ?>
-							<input type="hidden" name="action" value="read_offline_clear_cache" />
-							<?php submit_button( __( 'Clear cache', 'read-offline' ), 'secondary', 'submit', false ); ?>
-						</form>
-						<div class="read-offline-card" style="margin-top:12px;">
+						<div class="read-offline-card" style="margin-top:24px;">
 							<?php $general_opts = get_option( 'read_offline_settings_general', array() ); ?>
 							<h2><?php esc_html_e( 'Test export', 'read-offline' ); ?></h2>
 							<p class="read-offline-field-desc">
