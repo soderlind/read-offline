@@ -104,7 +104,7 @@ class Read_Offline_Admin {
 				'content' =>
 					'<ul>'
 					. '<li>' . esc_html__( 'If PDF/EPUB buttons are missing, ensure the auto-insert option is enabled or use the shortcode.', 'read-offline' ) . '</li>'
-					. '<li>' . esc_html__( 'If generation fails, check the Environment health card below for missing PHP extensions or Composer libraries (mPDF for PDF, PHPePub for EPUB).', 'read-offline' ) . '</li>'
+										. '<li>' . esc_html__( 'If generation fails, verify required PHP extensions (ZipArchive) and that Composer libraries (mPDF for PDF, PHPePub for EPUB) are installed.', 'read-offline' ) . '</li>'
 					. '<li>' . esc_html__( 'Use the Test export tool on this page to quickly verify your setup for a specific post ID.', 'read-offline' ) . '</li>'
 					. '<li>' . esc_html__( 'If old files are served, clear the plugin cache using the Clear cache button.', 'read-offline' ) . '</li>'
 					. '</ul>',
@@ -512,36 +512,7 @@ class Read_Offline_Admin {
 			</style>
 
 			<div class="read-offline-layout">
-				<div class="read-offline-main">
-					<div class="read-offline-card">
-						<h2><?php esc_html_e( 'Environment health', 'read-offline' ); ?></h2>
-						<p class="description">
-							<?php esc_html_e( 'Checks for required PHP extensions and vendor libraries.', 'read-offline' ); ?>
-						</p>
-						<ul class="read-offline-health">
-							<li class="<?php echo esc_attr( $health[ 'zip' ] ? 'read-offline-ok' : 'read-offline-warn' ); ?>">
-								<?php echo esc_html( $health[ 'zip' ] ? '✔' : '⚠' ); ?>
-								<?php esc_html_e( 'ZipArchive extension', 'read-offline' ); ?>
-								<?php if ( ! $health[ 'zip' ] ) : ?> —
-									<?php esc_html_e( 'Required for packaging bulk downloads (ZIP).', 'read-offline' ); ?>
-								<?php endif; ?>
-							</li>
-							<li class="<?php echo esc_attr( $health[ 'pdf' ] ? 'read-offline-ok' : 'read-offline-warn' ); ?>">
-								<?php echo esc_html( $health[ 'pdf' ] ? '✔' : '⚠' ); ?>
-								<?php esc_html_e( 'mPDF library', 'read-offline' ); ?>
-								<?php if ( ! $health[ 'pdf' ] ) : ?> —
-									<?php esc_html_e( 'Install Composer deps to enable PDF export.', 'read-offline' ); ?>
-								<?php endif; ?>
-							</li>
-							<li class="<?php echo esc_attr( $health[ 'epub' ] ? 'read-offline-ok' : 'read-offline-warn' ); ?>">
-								<?php echo esc_html( $health[ 'epub' ] ? '✔' : '⚠' ); ?>
-								<?php esc_html_e( 'PHPePub library', 'read-offline' ); ?>
-								<?php if ( ! $health[ 'epub' ] ) : ?> —
-									<?php esc_html_e( 'Install Composer deps to enable EPUB export.', 'read-offline' ); ?>
-								<?php endif; ?>
-							</li>
-						</ul>
-					</div>
+								<div class="read-offline-main">
 					<form method="post" action="options.php">
 						<?php
 						if ( 'general' === $current_tab ) {
