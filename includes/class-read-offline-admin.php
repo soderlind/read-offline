@@ -73,9 +73,29 @@ class Read_Offline_Admin {
 			array(
 				'id'      => 'read_offline_help_overview',
 				'title'   => __( 'Overview', 'read-offline' ),
-					'content' => '<p>' . esc_html__( 'Export posts and pages to PDF, EPUB, or Markdown. Use auto-insert to show a Save As button after content, the shortcode to place it manually, or the REST API for programmatic exports.', 'read-offline' ) . '</p>'
-						. '<p><strong>' . esc_html__( 'Shortcode', 'read-offline' ) . ':</strong> <code>[read_offline]</code></p>'
-						. '<p><strong>' . esc_html__( 'REST API', 'read-offline' ) . ':</strong> <code>' . esc_html( rest_url( 'read-offline/v1/export?postId={id}&format=pdf|epub|md' ) ) . '</code></p>',
+				'content' => '<p>' . esc_html__( 'Export posts and pages to PDF, EPUB, or Markdown. Use auto-insert to show a Save As button after content, the shortcode to place it manually, or the REST API for programmatic exports.', 'read-offline' ) . '</p>'
+					. '<p><strong>' . esc_html__( 'Shortcode', 'read-offline' ) . ':</strong> <code>[read_offline]</code></p>'
+					. '<p><strong>' . esc_html__( 'REST API', 'read-offline' ) . ':</strong> <code>' . esc_html( rest_url( 'read-offline/v1/export?postId={id}&format=pdf|epub|md' ) ) . '</code></p>'
+					. '<p>' . esc_html__( 'Markdown currently has no separate settings tab; it uses the filtered post content with a lightweight HTML→Markdown conversion.', 'read-offline' ) . '</p>',
+			)
+		);
+		// General settings
+		$screen->add_help_tab(
+			array(
+				'id'      => 'read_offline_help_general',
+				'title'   => __( 'General settings', 'read-offline' ),
+				'content' => '<p>' . esc_html__( 'Control global behaviour and which export formats are exposed to users.', 'read-offline' ) . '</p>'
+					. '<ul>'
+					. '<li><strong>' . esc_html__( 'Auto-insert Save As button', 'read-offline' ) . '</strong> – ' . esc_html__( 'Automatically append the download controls after single post/page content.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Default formats', 'read-offline' ) . '</strong> – ' . esc_html__( 'Select which of PDF / EPUB / MD appear. You can filter these programmatically.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Filename template', 'read-offline' ) . '</strong> – ' . esc_html__( 'Placeholders: {site}, {post_slug}, {post_id}, {title}, {format}, {date}, {lang}.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Include featured image as cover', 'read-offline' ) . '</strong> – ' . esc_html__( 'Uses the featured image as a cover (PDF/EPUB only).', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Include author/date', 'read-offline' ) . '</strong> – ' . esc_html__( 'Adds a small metadata line near the top of each export.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Combine bulk exports', 'read-offline' ) . '</strong> – ' . esc_html__( 'If enabled, multiple selected posts/pages become one combined PDF/EPUB. If disabled, a ZIP of individual files is generated.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Clear cache', 'read-offline' ) . '</strong> – ' . esc_html__( 'Removes previously generated files so they can regenerate with updated settings/content.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Test export', 'read-offline' ) . '</strong> – ' . esc_html__( 'Quickly verify that generation works for a specific post ID and format.', 'read-offline' ) . '</li>'
+					. '</ul>'
+					. '<p>' . esc_html__( 'Custom PDF CSS moved to the PDF tab in version 0.2.0.', 'read-offline' ) . '</p>',
 			)
 		);
 		// PDF
@@ -84,7 +104,7 @@ class Read_Offline_Admin {
 				'id'      => 'read_offline_help_pdf',
 				'title'   => __( 'PDF settings', 'read-offline' ),
 				'content' =>
-					'<p>' . esc_html__( 'Choose a page size or pick Custom and provide dimensions in millimeters (e.g., 210x297). Configure margins, optional header/footer, page numbers, table of contents depth, watermark, and print protection.', 'read-offline' ) . '</p>',
+					'<p>' . esc_html__( 'Choose a page size or pick Custom and provide dimensions in millimeters (e.g., 210x297). Configure margins, optional header/footer, page numbers, table of contents depth, watermark, and print protection. Add extra styling in Custom CSS (moved here in 0.2.0).', 'read-offline' ) . '</p>',
 			)
 		);
 		// EPUB
