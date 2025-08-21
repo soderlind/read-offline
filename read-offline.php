@@ -1,14 +1,20 @@
 <?php
-/*
-Plugin Name: Read Offline
-Description: Export posts and pages to PDF and EPUB for offline reading.
-Version: 0.1.0
-Author: Your Name
-Text Domain: read-offline
-*/
+/**
+ * Plugin bootstrap for Read Offline.
+ *
+ * @wordpress-plugin
+ * Plugin Name:       Read Offline
+ * Description:       Export posts and pages to PDF and EPUB for offline reading.
+ * Version:           0.1.1
+ * Author:            Your Name
+ * Text Domain:       read-offline
+ * Requires at least: 6.0
+ * Requires PHP:      7.4
+ */
 
-if ( ! defined( 'ABSPATH' ) )
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
 
 // Load Composer autoload if available
 $autoload = __DIR__ . '/vendor/autoload.php';

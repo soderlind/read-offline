@@ -1,50 +1,103 @@
 <?php
-if ( ! defined( 'ABSPATH' ) )
+/**
+ * Export engine for Read Offline.
+ *
+ * Provides REST endpoint and generation of PDF (mPDF) and EPUB (PHPePub),
+ * with caching and helper utilities.
+ *
+ * @package Read_Offline
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
 
 class Read_Offline_Export {
+	/**
+	 * Register hooks.
+	 *
+	 * @return void
+	 */
 	public static function init() {
-		add_action( 'rest_api_init', [ __CLASS__, 'register_rest' ] );
+		add_action( 'rest_api_init', array( __CLASS__, 'register_rest' ) );
 	}
 
+	/**
+	 * Register the REST route.
+	 *
+	 * @return void
+	 */
 	public static function register_rest() {
-		register_rest_route( 'read-offline/v1', '/export', [ 
-			'methods'             => 'GET',
-			'callback'            => [ __CLASS__, 'rest_export' ],
-			'args'                => [ 
-				'postId' => [ 'required' => true, 'type' => 'integer' ],
-				'format' => [ 'required' => true, 'type' => 'string', 'enum' => [ 'pdf', 'epub' ] ],
-				'nonce'  => [ 'required' => false, 'type' => 'string' ],
-			],
-			'permission_callback' => '__return_true',
-		] );
+		register_rest_route(
+			'read-offline/v1',
+			'/export',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'rest_export' ),
+				'args'                => array(
+					'postId' => array(
+						'required' => true,
+						'type'     => 'integer',
+					),
+					'format' => array(
+						'required' => true,
+						'type'     => 'string',
+						'enum'     => array( 'pdf', 'epub' ),
+					),
+					'nonce'  => array(
+						'required' => false,
+						'type'     => 'string',
+					),
+				),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
+	/**
+	 * REST callback to export a post.
+	 *
+	 * @param WP_REST_Request $req Request object.
+	 * @return WP_REST_Response
+	 */
 	public static function rest_export( WP_REST_Request $req ) {
 		$post_id = (int) $req->get_param( 'postId' );
-		$format  = $req->get_param( 'format' );
-		$nonce   = $req->get_param( 'nonce' );
+		$format  = sanitize_key( (string) $req->get_param( 'format' ) );
+		$nonce   = sanitize_text_field( wp_unslash( (string) $req->get_param( 'nonce' ) ) );
 
 		$post = get_post( $post_id );
 		if ( ! $post || ( 'publish' !== $post->post_status && ! current_user_can( 'read_post', $post_id ) ) ) {
-			return new WP_REST_Response( [ 'error' => 'not_found' ], 404 );
+			return new WP_REST_Response( array( 'error' => 'not_found' ), 404 );
 		}
 		// Require nonce only for non-public content; allow published content without nonce
 		if ( 'publish' !== $post->post_status ) {
 			if ( ! current_user_can( 'read_post', $post_id ) && ! wp_verify_nonce( $nonce, 'read_offline_export_' . $post_id ) ) {
-				return new WP_REST_Response( [ 'error' => 'forbidden' ], 403 );
+				return new WP_REST_Response( array( 'error' => 'forbidden' ), 403 );
 			}
 		}
 
 		$path = self::generate( $post_id, $format );
 		if ( is_wp_error( $path ) || ! $path ) {
 			$code = is_wp_error( $path ) ? $path->get_error_code() : 'generation_failed';
-			return new WP_REST_Response( [ 'error' => $code ], 500 );
+			return new WP_REST_Response( array( 'error' => $code ), 500 );
 		}
 		$url = self::path_to_url( $path );
-		return new WP_REST_Response( [ 'status' => 'ok', 'url' => $url ], 200 );
+		return new WP_REST_Response(
+			array(
+				'status' => 'ok',
+				'url'    => $url,
+			),
+			200
+		);
 	}
 
+	/**
+	 * Generate an export file for a post.
+	 *
+	 * @param int    $post_id Post ID.
+	 * @param string $format  pdf|epub.
+	 * @return string|WP_Error Absolute file path or error.
+	 */
 	public static function generate( $post_id, $format ) {
 		$post = get_post( $post_id );
 		if ( ! $post ) {
@@ -68,50 +121,71 @@ class Read_Offline_Export {
 		$content = apply_filters( 'the_content', $post->post_content );
 		$content = apply_filters( 'read_offline_content_html', $content, $post, $format );
 
-		if ( $format === 'pdf' ) {
+		if ( 'pdf' === $format ) {
 			return self::generate_pdf( $post, $title, $content, $path );
 		}
-		if ( $format === 'epub' ) {
+		if ( 'epub' === $format ) {
 			return self::generate_epub( $post, $title, $content, $path );
 		}
 		return new WP_Error( 'invalid_format', 'Invalid format' );
 	}
 
+	/**
+	 * Generate PDF using mPDF.
+	 *
+	 * @param WP_Post $post  Post object.
+	 * @param string  $title Title.
+	 * @param string  $html  HTML content.
+	 * @param string  $path  Destination path.
+	 * @return string|WP_Error
+	 */
 	protected static function generate_pdf( WP_Post $post, $title, $html, $path ) {
-		$pdf_opts = get_option( 'read_offline_settings_pdf', [] );
-		$gen_opts = get_option( 'read_offline_settings_general', [] );
+		$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
+		$gen_opts = get_option( 'read_offline_settings_general', array() );
 		$size     = $pdf_opts[ 'size' ] ?? 'A4';
-		$m        = $pdf_opts[ 'margins' ] ?? [ 't' => 15, 'r' => 15, 'b' => 15, 'l' => 15 ];
-		$css      = "img{max-width:100%;height:auto;} figure{margin:0;}" . ( $gen_opts[ 'css' ] ?? '' );
+		$m        = $pdf_opts[ 'margins' ] ?? array(
+			't' => 15,
+			'r' => 15,
+			'b' => 15,
+			'l' => 15,
+		);
+		$css      = 'img{max-width:100%;height:auto;} figure{margin:0;}' . ( $gen_opts[ 'css' ] ?? '' );
 		$css .= apply_filters( 'read_offline_pdf_css', '', $post );
 
 		if ( class_exists( '\\Mpdf\\Mpdf' ) ) {
 			try {
 				// Support custom size like "210x297" (mm) when size is set to Custom
 				$formatArg = $size;
-				if ( is_string( $size ) && strtolower( $size ) === 'custom' ) {
+				if ( is_string( $size ) && 'custom' === strtolower( $size ) ) {
 					$custom = isset( $pdf_opts[ 'custom_size' ] ) ? trim( (string) $pdf_opts[ 'custom_size' ] ) : '';
 					if ( $custom && preg_match( '/^\s*(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)\s*$/i', $custom, $mm ) ) {
 						$w = (float) $mm[ 1 ];
 						$h = (float) $mm[ 2 ];
-						if ( $w > 0 && $h > 0 ) {
-							$formatArg = [ $w, $h ];
+						if ( 0 < $w && 0 < $h ) {
+							$formatArg = array( $w, $h );
 						}
 					}
+					// If custom was selected but not valid, fall back to A4 to avoid mPDF errors.
+					if ( 'custom' === $formatArg ) {
+						$formatArg = 'A4';
+					}
 				}
-				$mpdf = new \Mpdf\Mpdf( [ 
-					'format'        => $formatArg,
-					'margin_left'   => (int) ( $m[ 'l' ] ?? 15 ),
-					'margin_right'  => (int) ( $m[ 'r' ] ?? 15 ),
-					'margin_top'    => (int) ( $m[ 't' ] ?? 15 ),
-					'margin_bottom' => (int) ( $m[ 'b' ] ?? 15 ),
-				] );
+				$mpdf = new \Mpdf\Mpdf(
+					array(
+						'format'        => $formatArg,
+						'margin_left'   => (int) ( $m[ 'l' ] ?? 15 ),
+						'margin_right'  => (int) ( $m[ 'r' ] ?? 15 ),
+						'margin_top'    => (int) ( $m[ 't' ] ?? 15 ),
+						'margin_bottom' => (int) ( $m[ 'b' ] ?? 15 ),
+					)
+				);
 				$mpdf->SetTitle( $title );
 				$mpdf->SetAuthor( get_bloginfo( 'name' ) );
 
 				// Header/footer
-				if ( ! empty( $pdf_opts[ 'header' ] ) )
+				if ( ! empty( $pdf_opts[ 'header' ] ) ) {
 					$mpdf->SetHTMLHeader( $pdf_opts[ 'header' ] );
+				}
 				if ( ! empty( $pdf_opts[ 'footer' ] ) ) {
 					$mpdf->SetHTMLFooter( $pdf_opts[ 'footer' ] );
 				} elseif ( ! empty( $pdf_opts[ 'page_numbers' ] ) ) {
@@ -120,9 +194,9 @@ class Read_Offline_Export {
 
 				// Printable toggle
 				if ( isset( $pdf_opts[ 'printable' ] ) && ! $pdf_opts[ 'printable' ] ) {
-					$mpdf->SetProtection( [ 'copy' ] );
+					$mpdf->SetProtection( array( 'copy' ) );
 				} else {
-					$mpdf->SetProtection( [ 'print' ] );
+					$mpdf->SetProtection( array( 'print' ) );
 				}
 				// Watermark
 				if ( ! empty( $pdf_opts[ 'watermark' ] ) ) {
@@ -133,15 +207,17 @@ class Read_Offline_Export {
 				// TOC before content
 				if ( ! empty( $pdf_opts[ 'toc' ] ) ) {
 					$depth = max( 1, min( 6, (int) ( $pdf_opts[ 'toc_depth' ] ?? 3 ) ) );
-					$h2toc = [];
+					$h2toc = array();
 					for ( $i = 1; $i <= $depth; $i++ ) {
 						$h2toc[ 'H' . $i ] = $i - 1;
 					}
 					$mpdf->h2toc = $h2toc;
-					$mpdf->TOCpagebreakByArray( [ 
-						'toc-preHTML' => '<h1>' . esc_html( __( 'Contents', 'read-offline' ) ) . '</h1>',
-						'links'       => 1,
-					] );
+					$mpdf->TOCpagebreakByArray(
+						array(
+							'toc-preHTML' => '<h1>' . esc_html( __( 'Contents', 'read-offline' ) ) . '</h1>',
+							'links'       => 1,
+						)
+					);
 				}
 
 				// Write CSS + HTML
@@ -153,13 +229,31 @@ class Read_Offline_Export {
 			}
 		}
 		// Fallback: save HTML with .pdf name to signal missing dependency
-		file_put_contents( $path, $html );
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		global $wp_filesystem;
+		WP_Filesystem();
+		if ( $wp_filesystem && $wp_filesystem->put_contents( $path, $html, FS_CHMOD_FILE ) ) {
+			// Saved via WP_Filesystem
+		} else {
+			@file_put_contents( $path, $html );
+		}
 		return new WP_Error( 'mpdf_missing', 'mPDF not available. Install dependencies.' );
 	}
 
+	/**
+	 * Generate EPUB using PHPePub.
+	 *
+	 * @param WP_Post $post  Post object.
+	 * @param string  $title Title.
+	 * @param string  $html  HTML content.
+	 * @param string  $path  Destination path.
+	 * @return string|WP_Error
+	 */
 	protected static function generate_epub( WP_Post $post, $title, $html, $path ) {
-		$epub_opts  = get_option( 'read_offline_settings_epub', [] );
-		$meta       = $epub_opts[ 'meta' ] ?? [];
+		$epub_opts  = get_option( 'read_offline_settings_epub', array() );
+		$meta       = $epub_opts[ 'meta' ] ?? array();
 		$author     = $meta[ 'author' ] ?? get_bloginfo( 'name' );
 		$publisher  = $meta[ 'publisher' ] ?? get_bloginfo( 'name' );
 		$lang       = $meta[ 'lang' ] ?? get_locale();
@@ -230,11 +324,29 @@ class Read_Offline_Export {
 				return new WP_Error( 'epub_failed', $e->getMessage() );
 			}
 		}
-		file_put_contents( $path, $html );
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		global $wp_filesystem;
+		WP_Filesystem();
+		if ( $wp_filesystem && $wp_filesystem->put_contents( $path, $html, FS_CHMOD_FILE ) ) {
+			// Saved via WP_Filesystem
+		} else {
+			@file_put_contents( $path, $html );
+		}
 		return new WP_Error( 'phpepub_missing', 'PHPePub not available. Install dependencies.' );
 	}
 
 	// Build a well-formed XHTML document for EPUB content
+	/**
+	 * Wrap an XHTML 1.1 document around body content suitable for EPUB.
+	 *
+	 * @param string $title    Title.
+	 * @param string $lang     Language tag.
+	 * @param string $bodyHtml Body inner HTML.
+	 * @param string $css      Optional CSS.
+	 * @return string Well-formed XHTML string.
+	 */
 	protected static function wrap_epub_xhtml_document( $title, $lang, $bodyHtml, $css = '' ) {
 		// Normalize entities, unescaped ampersands in attributes, and self-close void elements for XHTML parsers
 		$bodyHtml = self::normalize_xml_entities_for_epub( $bodyHtml );
@@ -263,39 +375,57 @@ class Read_Offline_Export {
 	}
 
 	// Ensure attributes on void elements are quoted per XHTML rules
+	/**
+	 * Ensure attributes on void elements are quoted per XHTML rules.
+	 *
+	 * @param string $html HTML fragment.
+	 * @return string
+	 */
 	protected static function normalize_xhtml_attributes_quoted( $html ) {
-		$tags    = [ 'img', 'source', 'track', 'input', 'meta', 'link', 'area', 'base', 'col', 'embed', 'param', 'br', 'hr', 'wbr' ];
+		$tags    = array( 'img', 'source', 'track', 'input', 'meta', 'link', 'area', 'base', 'col', 'embed', 'param', 'br', 'hr', 'wbr' );
 		$pattern = '/<(' . implode( '|', $tags ) . ')\b([^>]*?)\/?>(?!\s*<\/\1>)/i';
-		return preg_replace_callback( $pattern, function ($m) {
-			$tag   = strtolower( $m[ 1 ] );
-			$attrs = trim( $m[ 2 ] );
-			if ( $attrs === '' ) {
-				return '<' . $tag . ' />';
-			}
-			$rebuilt   = [];
-			$regexAttr = '/([:\w-]+)(?:\s*=\\s*(?:"([^"]*)"|\'([^\']*)\'|([^\\s"\'<>/]+)))?/';
-			if ( preg_match_all( $regexAttr, $attrs, $am, PREG_SET_ORDER ) ) {
-				foreach ( $am as $a ) {
-					$name  = strtolower( $a[ 1 ] );
-					$value = '';
-					if ( isset( $a[ 3 ] ) && $a[ 3 ] !== '' )
-						$value = $a[ 3 ];
-					elseif ( isset( $a[ 4 ] ) && $a[ 4 ] !== '' )
-						$value = $a[ 4 ];
-					elseif ( isset( $a[ 5 ] ) && $a[ 5 ] !== '' )
-						$value = $a[ 5 ];
-					// XHTML boolean attributes must be name="name"
-					if ( $value === '' )
-						$value = $name;
-					$value     = str_replace( '"', '&quot;', $value );
-					$rebuilt[] = $name . '="' . $value . '"';
+		return preg_replace_callback(
+			$pattern,
+			function ($m) {
+				$tag   = strtolower( $m[ 1 ] );
+				$attrs = trim( $m[ 2 ] );
+				if ( '' === $attrs ) {
+					return '<' . $tag . ' />';
 				}
-			}
-			return '<' . $tag . ' ' . implode( ' ', $rebuilt ) . ' />';
-		}, $html );
+				$rebuilt   = array();
+				$regexAttr = '/([:\w-]+)(?:\s*=\\s*(?:"([^"]*)"|\'([^\']*)\'|([^\\s"\'<>/]+)))?/';
+				if ( preg_match_all( $regexAttr, $attrs, $am, PREG_SET_ORDER ) ) {
+					foreach ( $am as $a ) {
+						$name  = strtolower( $a[ 1 ] );
+						$value = '';
+						if ( isset( $a[ 3 ] ) && '' !== $a[ 3 ] ) {
+							$value = $a[ 3 ];
+						} elseif ( isset( $a[ 4 ] ) && '' !== $a[ 4 ] ) {
+							$value = $a[ 4 ];
+						} elseif ( isset( $a[ 5 ] ) && '' !== $a[ 5 ] ) {
+							$value = $a[ 5 ];
+						}
+						// XHTML boolean attributes must be name="name"
+						if ( '' === $value ) {
+							$value = $name;
+						}
+						$value     = str_replace( '"', '&quot;', $value );
+						$rebuilt[] = $name . '="' . $value . '"';
+					}
+				}
+				return '<' . $tag . ' ' . implode( ' ', $rebuilt ) . ' />';
+			},
+			$html
+		);
 	}
 
 	// Try to repair malformed HTML fragments using DOMDocument, returning a cleaner HTML string
+	/**
+	 * Attempt to repair a malformed HTML fragment using DOMDocument.
+	 *
+	 * @param string $html HTML fragment.
+	 * @return string
+	 */
 	protected static function repair_html_fragment_with_dom( $html ) {
 		if ( ! class_exists( '\\DOMDocument' ) ) {
 			return $html;
@@ -318,44 +448,70 @@ class Read_Offline_Export {
 		foreach ( $body->childNodes as $child ) {
 			$out .= $dom->saveHTML( $child );
 		}
-		return $out !== '' ? $out : $html;
+		return '' !== $out ? $out : $html;
 	}
 
+	/**
+	 * Normalize XHTML void elements to self-closing.
+	 *
+	 * @param string $html HTML fragment.
+	 * @return string
+	 */
 	protected static function normalize_xhtml_void_elements( $html ) {
-		$tags = [ 'img', 'br', 'hr', 'input', 'meta', 'link', 'source', 'track', 'wbr', 'area', 'base', 'col', 'embed', 'param' ];
+		$tags = array( 'img', 'br', 'hr', 'input', 'meta', 'link', 'source', 'track', 'wbr', 'area', 'base', 'col', 'embed', 'param' );
 		foreach ( $tags as $t ) {
 			$pattern = '/<' . $t . '\b((?>[^"\'<>]|"[^"]*"|\'[^\']*\')*)>/i';
-			$html    = preg_replace_callback( $pattern, function ($m) use ($t) {
-				$attrs = rtrim( $m[ 1 ] );
-				// Already self-closed? (<tag .../>)
-				if ( preg_match( '/\/$/', $attrs ) ) {
-					$attrs = rtrim( substr( $attrs, 0, -1 ) );
-					$space = $attrs !== '' ? ' ' : '';
+			$html    = preg_replace_callback(
+				$pattern,
+				function ($m) use ($t) {
+					$attrs = rtrim( $m[ 1 ] );
+					// Already self-closed? (<tag .../>)
+					if ( preg_match( '/\/$/', $attrs ) ) {
+						$attrs = rtrim( substr( $attrs, 0, -1 ) );
+						$space = $attrs !== '' ? ' ' : '';
+						return '<' . strtolower( $t ) . $space . $attrs . ' />';
+					}
+					$space = '' !== $attrs ? ' ' : '';
 					return '<' . strtolower( $t ) . $space . $attrs . ' />';
-				}
-				$space = $attrs !== '' ? ' ' : '';
-				return '<' . strtolower( $t ) . $space . $attrs . ' />';
-			}, $html );
+				},
+				$html
+			);
 			// Remove any erroneous closing tags for void elements: </tag>
 			$html = preg_replace( '/<\/' . $t . '\s*>/i', '', $html );
 		}
 		return $html;
 	}
 
+	/**
+	 * Replace raw ampersands in attribute values with &amp; unless they are valid entities.
+	 *
+	 * @param string $html HTML fragment.
+	 * @return string
+	 */
 	protected static function normalize_xml_ampersands_in_attributes( $html ) {
 		// Replace raw & in attribute values with &amp; unless already an entity
-		return preg_replace_callback( '/(\w+)=("|")(.*?)(\2)/s', function ($m) {
-			$before = $m[ 1 ] . '=' . $m[ 2 ];
-			$val    = $m[ 3 ];
-			$after  = $m[ 4 ];
-			$val    = preg_replace( '/&(?!amp;|lt;|gt;|quot;|apos;|#[0-9]+;|#x[0-9A-Fa-f]+;)/', '&amp;', $val );
-			return $before . $val . $after;
-		}, $html );
+		return preg_replace_callback(
+			'/(\w+)=("|")(.*?)(\2)/s',
+			function ($m) {
+				$before = $m[ 1 ] . '=' . $m[ 2 ];
+				$val    = $m[ 3 ];
+				$after  = $m[ 4 ];
+				$val    = preg_replace( '/&(?!amp;|lt;|gt;|quot;|apos;|#[0-9]+;|#x[0-9A-Fa-f]+;)/', '&amp;', $val );
+				return $before . $val . $after;
+			},
+			$html
+		);
 	}
 
+	/**
+	 * Run Tidy if available to normalize XHTML.
+	 *
+	 * @param string $xhtml XHTML content.
+	 * @return string Empty string if Tidy unavailable or failed, otherwise fixed content.
+	 */
 	protected static function maybe_tidy_xhtml( $xhtml ) {
 		if ( function_exists( 'tidy_repair_string' ) ) {
-			$cfg   = [ 
+			$cfg   = array(
 				'indent'              => false,
 				'wrap'                => 0,
 				'output-xhtml'        => true,
@@ -364,46 +520,65 @@ class Read_Offline_Export {
 				'numeric-entities'    => true,
 				'char-encoding'       => 'utf8',
 				'new-blocklevel-tags' => 'nav,section,article,header,footer,figure,figcaption',
-			];
+			);
 			$fixed = tidy_repair_string( $xhtml, $cfg, 'utf8' );
-			if ( is_string( $fixed ) && trim( $fixed ) !== '' )
+			if ( is_string( $fixed ) && '' !== trim( $fixed ) ) {
 				return $fixed;
+			}
 		}
 		return '';
 	}
 
+	/**
+	 * Convert named HTML entities to numeric references for EPUB safety.
+	 *
+	 * @param string $html HTML fragment.
+	 * @return string
+	 */
 	protected static function normalize_xml_entities_for_epub( $html ) {
 		// Convert &nbsp; and most named HTML entities to numeric references, keep the XML 1.0 five
-		$keep = [ 'lt', 'gt', 'amp', 'apos', 'quot' ];
-		$html = preg_replace_callback( '/&([a-zA-Z][a-zA-Z0-9]+);/', function ($m) use ($keep) {
-			$name = $m[ 1 ];
-			if ( in_array( $name, $keep, true ) ) {
-				return $m[ 0 ];
-			}
-			$decoded = html_entity_decode( '&' . $name . ';', ENT_HTML5, 'UTF-8' );
-			if ( $decoded === '&' . $name . ';' ) {
-				// Unknown entity, leave as-is
-				return $m[ 0 ];
-			}
-			if ( function_exists( 'mb_ord' ) ) {
-				$code = mb_ord( $decoded, 'UTF-8' );
-			} else {
-				$u    = unpack( 'N', mb_convert_encoding( $decoded, 'UCS-4BE', 'UTF-8' ) );
-				$code = $u ? $u[ 1 ] : ord( $decoded );
-			}
-			return '&#' . $code . ';';
-		}, $html );
+		$keep = array( 'lt', 'gt', 'amp', 'apos', 'quot' );
+		$html = preg_replace_callback(
+			'/&([a-zA-Z][a-zA-Z0-9]+);/',
+			function ($m) use ($keep) {
+				$name = $m[ 1 ];
+				if ( in_array( $name, $keep, true ) ) {
+					return $m[ 0 ];
+				}
+				$decoded = html_entity_decode( '&' . $name . ';', ENT_HTML5, 'UTF-8' );
+				if ( '&' . $name . ';' === $decoded ) {
+					// Unknown entity, leave as-is
+					return $m[ 0 ];
+				}
+				if ( function_exists( 'mb_ord' ) ) {
+					$code = mb_ord( $decoded, 'UTF-8' );
+				} else {
+					$u    = unpack( 'N', mb_convert_encoding( $decoded, 'UCS-4BE', 'UTF-8' ) );
+					$code = $u ? $u[ 1 ] : ord( $decoded );
+				}
+				return '&#' . $code . ';';
+			},
+			$html
+		);
 		return $html;
 	}
 
-	protected static function resolve_cover_image( WP_Post $post, $source, $opts = [] ) {
+	/**
+	 * Resolve cover image bytes from featured image, site logo, or custom.
+	 *
+	 * @param WP_Post $post   Post.
+	 * @param string  $source featured|logo|custom.
+	 * @param array   $opts   EPUB options.
+	 * @return array|null [filename, bytes, mime] or null
+	 */
+	protected static function resolve_cover_image( WP_Post $post, $source, $opts = array() ) {
 		$attachment_id = 0;
-		if ( $source === 'featured' ) {
+		if ( 'featured' === $source ) {
 			$attachment_id = get_post_thumbnail_id( $post );
-		} elseif ( $source === 'logo' ) {
+		} elseif ( 'logo' === $source ) {
 			$logo_id       = get_theme_mod( 'custom_logo' );
 			$attachment_id = $logo_id ? (int) $logo_id : 0;
-		} elseif ( $source === 'custom' ) {
+		} elseif ( 'custom' === $source ) {
 			if ( ! empty( $opts[ 'custom_cover_attachment_id' ] ) ) {
 				$attachment_id = (int) $opts[ 'custom_cover_attachment_id' ];
 			} elseif ( ! empty( $opts[ 'custom_cover_url' ] ) ) {
@@ -415,36 +590,58 @@ class Read_Offline_Export {
 						$data     = wp_remote_retrieve_body( $bits );
 						$mime     = wp_remote_retrieve_header( $bits, 'content-type' ) ?: 'image/jpeg';
 						$filename = basename( parse_url( $url, PHP_URL_PATH ) );
-						return [ $filename ?: 'cover.jpg', $data, $mime ];
+						return array( $filename ?: 'cover.jpg', $data, $mime );
 					}
 				}
 			}
 		}
-		if ( ! $attachment_id )
+		if ( ! $attachment_id ) {
 			return null;
+		}
 		$file = get_attached_file( $attachment_id );
-		if ( ! $file || ! file_exists( $file ) )
+		if ( ! $file || ! file_exists( $file ) ) {
 			return null;
-		$data = @file_get_contents( $file );
-		if ( false === $data )
+		}
+		// Prefer WP_Filesystem if available
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		global $wp_filesystem;
+		WP_Filesystem();
+		$data = null;
+		if ( $wp_filesystem && method_exists( $wp_filesystem, 'get_contents' ) ) {
+			$data = $wp_filesystem->get_contents( $file );
+		} else {
+			$data = @file_get_contents( $file );
+		}
+		if ( false === $data || null === $data ) {
 			return null;
+		}
 		$mime     = function_exists( 'mime_content_type' ) ? mime_content_type( $file ) : 'image/jpeg';
 		$filename = basename( $file );
-		return [ $filename, $data, $mime ];
+		return array( $filename, $data, $mime );
 	}
 
 	// Build a simple inline HTML TOC from headings up to the given depth. Returns [newHtml, tocHtml]
+	/**
+	 * Build a simple inline HTML TOC from headings up to the given depth.
+	 *
+	 * @param string $html  HTML.
+	 * @param int    $depth Depth 1-6.
+	 * @return array{0:string,1:string}
+	 */
 	protected static function build_epub_toc_html( $html, $depth ) {
 		$pattern = '#<h([1-6])(\s+[^>]*)?>(.*?)</h\1>#is';
-		$matches = [];
-		$toc     = [];
-		$usedIds = [];
+		$matches = array();
+		$toc     = array();
+		$usedIds = array();
 		$newHtml = $html;
 		if ( preg_match_all( $pattern, $html, $matches, PREG_SET_ORDER ) ) {
 			foreach ( $matches as $m ) {
 				$level = (int) $m[ 1 ];
-				if ( $level > $depth )
+				if ( $level > $depth ) {
 					continue;
+				}
 				$attrs = isset( $m[ 2 ] ) ? $m[ 2 ] : '';
 				$text  = wp_strip_all_tags( $m[ 3 ] );
 				$id    = self::slugify( $text );
@@ -457,20 +654,31 @@ class Read_Offline_Export {
 				// Insert id attribute
 				$withId  = sprintf( '<h%d id="%s"%s>%s</h%d>', $level, esc_attr( $id ), $attrs, $m[ 3 ], $level );
 				$newHtml = str_replace( $m[ 0 ], $withId, $newHtml );
-				$toc[]   = [ 'level' => $level, 'text' => $text, 'id' => $id ];
+				$toc[]   = array(
+					'level' => $level,
+					'text'  => $text,
+					'id'    => $id,
+				);
 			}
 		}
-		if ( empty( $toc ) )
-			return [ $newHtml, '' ];
+		if ( empty( $toc ) ) {
+			return array( $newHtml, '' );
+		}
 		// Flat list with level classes
 		$out = '<ul class="read-offline-epub-toc">';
 		foreach ( $toc as $item ) {
 			$out .= sprintf( '<li class="lvl-%d"><a href="#%s">%s</a></li>', $item[ 'level' ], esc_attr( $item[ 'id' ] ), esc_html( $item[ 'text' ] ) );
 		}
 		$out .= '</ul>';
-		return [ $newHtml, $out ];
+		return array( $newHtml, $out );
 	}
 
+	/**
+	 * Make a simple slug from text.
+	 *
+	 * @param string $text Text.
+	 * @return string
+	 */
 	protected static function slugify( $text ) {
 		$text = strtolower( trim( $text ) );
 		$text = preg_replace( '/[^a-z0-9\s-]/', '', $text );
@@ -478,6 +686,13 @@ class Read_Offline_Export {
 		return trim( $text, '-' );
 	}
 
+	/**
+	 * Create a ZIP from file paths.
+	 *
+	 * @param array  $paths    List of absolute file paths.
+	 * @param string $zip_name Desired ZIP filename.
+	 * @return string|WP_Error Absolute path or error.
+	 */
 	public static function zip_files( $paths, $zip_name ) {
 		$uploads = wp_upload_dir();
 		$dir     = trailingslashit( $uploads[ 'basedir' ] ) . 'read-offline/';
@@ -500,10 +715,18 @@ class Read_Offline_Export {
 		return new WP_Error( 'zip_missing', 'Zip extension not available' );
 	}
 
+	/**
+	 * Build a cache filename based on template and short hash.
+	 *
+	 * @param WP_Post $post   Post.
+	 * @param string  $format Format.
+	 * @param string  $hash   Hash.
+	 * @return string
+	 */
 	protected static function build_filename( WP_Post $post, $format, $hash ) {
-		$settings = get_option( 'read_offline_settings_general', [] );
+		$settings = get_option( 'read_offline_settings_general', array() );
 		$template = $settings[ 'filename' ] ?? '{site}-{post_slug}-{format}';
-		$repl     = [ 
+		$repl     = array(
 			'{site}'      => sanitize_title( get_bloginfo( 'name' ) ),
 			'{post_slug}' => $post->post_name,
 			'{post_id}'   => $post->ID,
@@ -511,48 +734,85 @@ class Read_Offline_Export {
 			'{format}'    => $format,
 			'{date}'      => date( 'Ymd' ),
 			'{lang}'      => get_locale(),
-		];
+		);
 		$name     = strtr( $template, $repl );
 		$name     = sanitize_file_name( $name );
-		$ext      = $format === 'pdf' ? '.pdf' : '.epub';
+		$ext      = ( 'pdf' === $format ) ? '.pdf' : '.epub';
 		$ver      = substr( $hash, 0, 8 );
 		return $name . '-v' . $ver . $ext;
 	}
 
+	/**
+	 * Convert cache path to URL in uploads.
+	 *
+	 * @param string $path Absolute path.
+	 * @return string URL.
+	 */
 	protected static function path_to_url( $path ) {
 		$uploads = wp_upload_dir();
 		return str_replace( $uploads[ 'basedir' ], $uploads[ 'baseurl' ], $path );
 	}
 
+	/**
+	 * Compute a content/settings hash for cache versioning.
+	 *
+	 * @param WP_Post $post   Post.
+	 * @param string  $format Format.
+	 * @return string SHA1 hash.
+	 */
 	protected static function compute_hash( WP_Post $post, $format ) {
-		$general   = get_option( 'read_offline_settings_general', [] );
-		$pdf       = get_option( 'read_offline_settings_pdf', [] );
-		$epub      = get_option( 'read_offline_settings_epub', [] );
+		$general   = get_option( 'read_offline_settings_general', array() );
+		$pdf       = get_option( 'read_offline_settings_pdf', array() );
+		$epub      = get_option( 'read_offline_settings_epub', array() );
 		$content   = apply_filters( 'the_content', $post->post_content );
-		$signature = wp_json_encode( [ $post->post_modified_gmt, $format, $general, $pdf, $epub, md5( $content ) ] );
+		$signature = wp_json_encode( array( $post->post_modified_gmt, $format, $general, $pdf, $epub, md5( $content ) ) );
 		return sha1( $signature );
 	}
 
+	/**
+	 * Clear the plugin's uploads cache directory.
+	 *
+	 * @return bool
+	 */
 	public static function clear_cache() {
 		$uploads = wp_upload_dir();
 		$dir     = trailingslashit( $uploads[ 'basedir' ] ) . 'read-offline/';
-		if ( ! file_exists( $dir ) )
+		if ( ! file_exists( $dir ) ) {
 			return true;
+		}
 		self::rrmdir( $dir );
 		return true;
 	}
+	/**
+	 * Recursively delete a directory, preferring WP_Filesystem if available.
+	 *
+	 * @param string $dir Directory absolute path.
+	 * @return void
+	 */
 	protected static function rrmdir( $dir ) {
-		$items = @scandir( $dir );
-		if ( ! $items )
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		global $wp_filesystem;
+		WP_Filesystem();
+		if ( $wp_filesystem && method_exists( $wp_filesystem, 'rmdir' ) ) {
+			$wp_filesystem->rmdir( $dir, true );
 			return;
+		}
+		$items = @scandir( $dir );
+		if ( ! $items ) {
+			return;
+		}
 		foreach ( $items as $item ) {
-			if ( $item === '.' || $item === '..' )
+			if ( '.' === $item || '..' === $item ) {
 				continue;
+			}
 			$path = $dir . DIRECTORY_SEPARATOR . $item;
-			if ( is_dir( $path ) )
+			if ( is_dir( $path ) ) {
 				self::rrmdir( $path );
-			else
+			} else {
 				@unlink( $path );
+			}
 		}
 		@rmdir( $dir );
 	}
