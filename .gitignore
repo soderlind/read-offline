@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Editors/IDEs
+.vscode/
+.idea/
+*.iml
+
+# Node (not used here, but safe)
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Composer
+composer.phar
+
+# Env files
+.env
+.env.*
+
+# Caches/Artifacts
+.cache/
+dist/
+.phpunit.result.cache
+.phpcs-cache
