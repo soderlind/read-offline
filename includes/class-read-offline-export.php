@@ -201,7 +201,7 @@ class Read_Offline_Export {
 	protected static function generate_combined_markdown( $post_ids, $path ) {
 		$parts = array();
 		foreach ( $post_ids as $pid ) {
-			$post    = get_post( $pid );
+			$post = get_post( $pid );
 			if ( ! $post ) {
 				continue;
 			}
@@ -236,7 +236,7 @@ class Read_Offline_Export {
 	protected static function html_to_markdown( $title, $html, $meta = array() ) {
 		$author_line = '';
 		if ( ! empty( $meta[ 'include_author' ] ) ) {
-			$author_line = '\n' . esc_html( get_the_author_meta( 'display_name', $meta[ 'include_author' ] ) );
+			$author_line = esc_html( get_the_author_meta( 'display_name', $meta[ 'include_author' ] ) );
 			if ( ! empty( $meta[ 'date' ] ) ) {
 				$author_line .= ' — ' . esc_html( $meta[ 'date' ] );
 			}
@@ -245,9 +245,9 @@ class Read_Offline_Export {
 		$md = $html;
 		// Remove scripts/styles
 		$md = preg_replace( '#<(script|style)[^>]*>.*?</\1>#is', '', $md );
-		// Headings
+		// Headings (ensure real newlines, not literal \n)
 		for ( $i = 6; $i >= 1; $i-- ) {
-			$md = preg_replace( '#<h' . $i . '[^>]*>(.*?)</h' . $i . '>#is', str_repeat( '#', $i ) . ' $1\n\n', $md );
+			$md = preg_replace( '#<h' . $i . '[^>]*>(.*?)</h' . $i . '>#is', str_repeat( '#', $i ) . " $1\n\n", $md );
 		}
 		// Bold/italic
 		$md = preg_replace( '#<(strong|b)>(.*?)</\1>#is', '**$2**', $md );
@@ -268,11 +268,11 @@ class Read_Offline_Export {
 		}, $md );
 		// Links [text](url)
 		$md = preg_replace( '#<a\s+[^>]*href="([^"]*)"[^>]*>(.*?)</a>#is', '[$2]($1)', $md );
-		// Lists
-		$md = preg_replace( '#<li[^>]*>(.*?)</li>#is', '- $1\n', $md );
+		// Lists (real newline after each item)
+		$md = preg_replace( '#<li[^>]*>(.*?)</li>#is', "- $1\n", $md );
 		$md = preg_replace( '#</?(ul|ol)[^>]*>#i', "\n", $md );
-		// Code blocks
-		$md = preg_replace( '#<pre[^>]*><code[^>]*>(.*?)</code></pre>#is', "``````\n$1\n``````\n", $md );
+		// Code blocks (convert to fenced code blocks with triple backticks)
+		$md = preg_replace( '#<pre[^>]*><code[^>]*>(.*?)</code></pre>#is', "```\n$1\n```\n", $md );
 		$md = preg_replace( '#<code>(.*?)</code>#is', '`$1`', $md );
 		// Paragraphs / line breaks
 		$md = preg_replace( '#<br\s*/?>#i', "\n", $md );
@@ -282,9 +282,19 @@ class Read_Offline_Export {
 		$md = wp_strip_all_tags( $md );
 		// Decode entities
 		$md = html_entity_decode( $md, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-		// Collapse excessive blank lines
-		$md    = preg_replace( "/\n{3,}/", "\n\n", $md );
-		$front = '# ' . $title . $author_line . "\n\n";
+		// Basic list spacing & trailing space cleanup
+		$md = preg_replace( "/[ \t]+\n/", "\n", $md ); // strip trailing spaces at line end
+		// Ensure blank line before list blocks
+		$md = preg_replace( '/(^|\n)(-\s)/', "\n$1$2", $md );
+		// Collapse excessive blank lines (3+ -> 2)
+		$md = preg_replace( "/\n{3,}/", "\n\n", $md );
+		// Ensure a blank line after list blocks not followed by another list or blank line
+		$md    = preg_replace( '/((?:^- .+\n)+)(?!- |\n)/m', "$1\n", $md );
+		$front = '# ' . $title;
+		if ( $author_line ) {
+			$front .= "\n" . $author_line;
+		}
+		$front .= "\n\n";
 		return $front . trim( $md ) . "\n";
 	}
 
@@ -356,15 +366,15 @@ class Read_Offline_Export {
 				$mpdf->h2toc = $h2toc;
 				$mpdf->TOCpagebreakByArray( array( 'toc-preHTML' => '<h1>' . esc_html( __( 'Contents', 'read-offline' ) ) . '</h1>', 'links' => 1 ) );
 			}
-			$base_css         = 'img{max-width:100%;height:auto;} figure{margin:0;}';
-			$pdf_custom_css   = '';
+			$base_css       = 'img{max-width:100%;height:auto;} figure{margin:0;}';
+			$pdf_custom_css = '';
 			if ( empty( $pdf_opts ) ) {
 				$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
 			}
-			if ( ! empty( $pdf_opts['custom_css'] ) ) {
-				$pdf_custom_css = $pdf_opts['custom_css'];
-			} elseif ( isset( $gen_opts['css'] ) ) { // legacy fallback.
-				$pdf_custom_css = $gen_opts['css'];
+			if ( ! empty( $pdf_opts[ 'custom_css' ] ) ) {
+				$pdf_custom_css = $pdf_opts[ 'custom_css' ];
+			} elseif ( isset( $gen_opts[ 'css' ] ) ) { // legacy fallback.
+				$pdf_custom_css = $gen_opts[ 'css' ];
 			}
 			$base_css .= $pdf_custom_css;
 			$base_css .= apply_filters( 'read_offline_pdf_css', '', null );
@@ -511,8 +521,8 @@ class Read_Offline_Export {
 			'l' => 15,
 		);
 		$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
-		$legacy   = $gen_opts['css'] ?? '';
-		$css      = 'img{max-width:100%;height:auto;} figure{margin:0;}' . ( $pdf_opts['custom_css'] ?? $legacy );
+		$legacy   = $gen_opts[ 'css' ] ?? '';
+		$css      = 'img{max-width:100%;height:auto;} figure{margin:0;}' . ( $pdf_opts[ 'custom_css' ] ?? $legacy );
 		$css .= apply_filters( 'read_offline_pdf_css', '', $post );
 
 		if ( class_exists( '\\Mpdf\\Mpdf' ) ) {
