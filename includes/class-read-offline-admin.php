@@ -104,7 +104,19 @@ class Read_Offline_Admin {
 				'id'      => 'read_offline_help_pdf',
 				'title'   => __( 'PDF settings', 'read-offline' ),
 				'content' =>
-					'<p>' . esc_html__( 'Choose a page size or pick Custom and provide dimensions in millimeters (e.g., 210x297). Configure margins, optional header/footer, page numbers, table of contents depth, watermark, and print protection. Add extra styling in Custom CSS (moved here in 0.2.0).', 'read-offline' ) . '</p>',
+					'<p>' . esc_html__( 'Configure layout and structural options for generated PDFs.', 'read-offline' ) . '</p>'
+					. '<ul>'
+					. '<li><strong>' . esc_html__( 'Page size', 'read-offline' ) . '</strong> – ' . esc_html__( 'Pick a standard size (A4, Letter, etc.) or choose Custom and supply width x height in millimeters (e.g., 210x297).', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Margins', 'read-offline' ) . '</strong> – ' . esc_html__( 'Top, Right, Bottom, Left in millimeters; values are clamped to a reasonable range.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Header / Footer', 'read-offline' ) . '</strong> – ' . esc_html__( 'Optional minimal HTML. Keep markup simple; complex layouts may not render as expected.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Page numbers', 'read-offline' ) . '</strong> – ' . esc_html__( 'Adds {PAGENO}/{nbpg} if no custom footer is set.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Table of Contents', 'read-offline' ) . '</strong> – ' . esc_html__( 'Insert a TOC before content. Depth controls which heading levels (H1–H6) are included.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Watermark', 'read-offline' ) . '</strong> – ' . esc_html__( 'Optional translucent text behind each page.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Printable', 'read-offline' ) . '</strong> – ' . esc_html__( 'When disabled, sets PDF permissions to discourage printing (not a guarantee).', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Fonts', 'read-offline' ) . '</strong> – ' . esc_html__( '(Optional) List additional font family names installed for mPDF to attempt embedding.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Custom CSS', 'read-offline' ) . '</strong> – ' . esc_html__( 'Extra CSS appended at the end of the PDF stylesheet (moved here from General in 0.2.0).', 'read-offline' ) . '</li>'
+					. '</ul>'
+					. '<p>' . esc_html__( 'Tip: If PDF generation fails, inspect the content for very large images or unclosed HTML tags, and review PHP memory limits.', 'read-offline' ) . '</p>',
 			)
 		);
 		// EPUB
@@ -113,7 +125,16 @@ class Read_Offline_Admin {
 				'id'      => 'read_offline_help_epub',
 				'title'   => __( 'EPUB settings', 'read-offline' ),
 				'content' =>
-					'<p>' . esc_html__( 'Set metadata (author, publisher, language), include a table of contents, and pick a cover source (featured image, site logo, or custom upload via the media library). Select a CSS profile or supply custom CSS.', 'read-offline' ) . '</p>',
+					'<p>' . esc_html__( 'Adjust EPUB metadata, structure, and styling.', 'read-offline' ) . '</p>'
+					. '<ul>'
+					. '<li><strong>' . esc_html__( 'Author / Publisher', 'read-offline' ) . '</strong> – ' . esc_html__( 'Override site defaults for EPUB metadata fields.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Language', 'read-offline' ) . '</strong> – ' . esc_html__( 'BCP 47 tag (e.g., en-US). Falls back to site locale if blank.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Table of Contents', 'read-offline' ) . '</strong> – ' . esc_html__( 'Adds inline navigation at the top; depth limits heading levels included.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Cover source', 'read-offline' ) . '</strong> – ' . esc_html__( 'Featured image, Site Logo, or select a Custom image from the media library.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'CSS Profile', 'read-offline' ) . '</strong> – ' . esc_html__( 'Light, Dark, None, or Custom (only your custom CSS).', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Custom CSS', 'read-offline' ) . '</strong> – ' . esc_html__( 'Scoped to the EPUB content; avoid external @import or remote font URLs for portability.', 'read-offline' ) . '</li>'
+					. '</ul>'
+					. '<p>' . esc_html__( 'Tip: Validation warnings often stem from malformed HTML in the source post. Clean up embeds or stray tags if readers complain.', 'read-offline' ) . '</p>',
 			)
 		);
 		// Troubleshooting
