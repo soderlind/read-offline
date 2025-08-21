@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<ruleset name="Read Offline Plugin">
+    <description>Project coding standards for the Read Offline plugin.</description>
+
+    <!-- Scan these paths -->
+    <file>read-offline.php</file>
+    <file>includes</file>
+
+    <!-- Ignore third-party code -->
+    <exclude-pattern>vendor/*</exclude-pattern>
+
+    <!-- Limit to PHP files -->
+    <arg name="extensions" value="php"/>
+
+    <!-- Use WordPress Coding Standards -->
+    <rule ref="WordPress-Core"/>
+    <rule ref="WordPress-Docs"/>
+    <rule ref="WordPress-Extra"/>
+
+    <!-- Tuning: allow short array syntax; keep arrays flexible on trailing comma. -->
+    <exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+    <exclude name="NormalizedArrays.Arrays.CommaAfterLast.MissingMultiLine"/>
+
+    <!-- Optional: reduce noise for nonce verification on admin views (we validate actions elsewhere). Comment out to re-enable. -->
+    <!-- <exclude name="WordPress.Security.NonceVerification.Recommended"/> -->
+
+    <!-- Show sniff codes in reports for clarity -->
+    <arg value="-s"/>
+</ruleset>
