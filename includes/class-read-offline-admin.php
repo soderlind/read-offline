@@ -135,7 +135,6 @@ class Read_Offline_Admin {
 					'include_featured' => true,
 					'include_author'   => true,
 					'combine_bulk'     => true,
-					'css'              => '',
 				),
 				'sanitize_callback' => array( __CLASS__, 'sanitize_general_settings' ),
 			)
@@ -162,6 +161,7 @@ class Read_Offline_Admin {
 					'watermark'    => '',
 					'printable'    => true,
 					'fonts'        => array(),
+					'custom_css'   => '',
 				),
 				'sanitize_callback' => array( __CLASS__, 'sanitize_pdf_settings' ),
 			)
@@ -206,7 +206,6 @@ class Read_Offline_Admin {
 		$clean[ 'include_featured' ] = ! empty( $input[ 'include_featured' ] ) ? 1 : 0;
 		$clean[ 'include_author' ]   = ! empty( $input[ 'include_author' ] ) ? 1 : 0;
 		$clean[ 'combine_bulk' ]     = ! empty( $input[ 'combine_bulk' ] ) ? 1 : 0;
-		$clean[ 'css' ]              = isset( $input[ 'css' ] ) ? sanitize_textarea_field( wp_unslash( $input[ 'css' ] ) ) : '';
 		return $clean;
 	}
 
@@ -253,6 +252,7 @@ class Read_Offline_Admin {
 				$clean[ 'fonts' ][] = sanitize_text_field( $font );
 			}
 		}
+		$clean[ 'custom_css' ] = isset( $input[ 'custom_css' ] ) ? sanitize_textarea_field( wp_unslash( $input[ 'custom_css' ] ) ) : '';
 		return $clean;
 	}
 
@@ -597,9 +597,13 @@ class Read_Offline_Admin {
 											data-help="<?php echo esc_attr__( 'Choose which formats show up by default in the Save As UI. You can still filter these via hooks.', 'read-offline' ); ?>">?</span>
 									</label>
 									<div>
-																				<label><input type="checkbox" name="read_offline_settings_general[formats][]" value="pdf" <?php checked( in_array( 'pdf', (array) ( $options[ 'formats' ] ?? array() ), true ) ); ?> /> PDF</label>
-																				<label style="margin-left:12px;"><input type="checkbox" name="read_offline_settings_general[formats][]" value="epub" <?php checked( in_array( 'epub', (array) ( $options[ 'formats' ] ?? array() ), true ) ); ?> /> EPUB</label>
-																				<label style="margin-left:12px;"><input type="checkbox" name="read_offline_settings_general[formats][]" value="md" <?php checked( in_array( 'md', (array) ( $options[ 'formats' ] ?? array() ), true ) ); ?> /> MD</label>
+										<label><input type="checkbox" name="read_offline_settings_general[formats][]" value="pdf"
+												<?php checked( in_array( 'pdf', (array) ( $options[ 'formats' ] ?? array() ), true ) ); ?> /> PDF</label>
+										<label style="margin-left:12px;"><input type="checkbox"
+												name="read_offline_settings_general[formats][]" value="epub" <?php checked( in_array( 'epub', (array) ( $options[ 'formats' ] ?? array() ), true ) ); ?> />
+											EPUB</label>
+										<label style="margin-left:12px;"><input type="checkbox"
+												name="read_offline_settings_general[formats][]" value="md" <?php checked( in_array( 'md', (array) ( $options[ 'formats' ] ?? array() ), true ) ); ?> /> MD</label>
 									</div>
 
 									<label><?php _e( 'Filename template', 'read-offline' ); ?>
@@ -616,7 +620,8 @@ class Read_Offline_Admin {
 										</p>
 										<p class="read-offline-field-desc">
 											<strong><?php esc_html_e( 'Preview:', 'read-offline' ); ?></strong> <span
-												id="ro-filename-preview"></span></p>
+												id="ro-filename-preview"></span>
+										</p>
 									</div>
 
 									<label><?php _e( 'Include featured image as cover', 'read-offline' ); ?>
@@ -649,19 +654,21 @@ class Read_Offline_Admin {
 										</p>
 									</div>
 
-									<label><?php _e( 'Custom CSS for PDF', 'read-offline' ); ?>
-										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
-											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
-											data-help="<?php echo esc_attr__( 'Additional CSS appended to the PDF output. Useful for minor layout tweaks.', 'read-offline' ); ?>">?</span>
-									</label>
-									<div class="full"><textarea name="read_offline_settings_general[css]" class="large-text"
-											rows="4"><?php echo esc_textarea( $options[ 'css' ] ?? '' ); ?></textarea></div>
+									<!-- Removed: PDF Custom CSS moved to PDF tab -->
 								</div>
 							</div>
 							<?php
 						} elseif ( 'pdf' === $current_tab ) {
 							settings_fields( 'read_offline_settings_pdf' );
-							$options = get_option( 'read_offline_settings_pdf' );
+							$options       = get_option( 'read_offline_settings_pdf' );
+							$general_legacy = get_option( 'read_offline_settings_general', array() );
+							// One-time migration of legacy general css -> pdf custom_css.
+							if ( ! empty( $general_legacy['css'] ) && empty( $options['custom_css'] ) ) {
+								$options['custom_css'] = $general_legacy['css'];
+								unset( $general_legacy['css'] );
+								update_option( 'read_offline_settings_pdf', $options );
+								update_option( 'read_offline_settings_general', $general_legacy );
+							}
 							?>
 							<div class="read-offline-card">
 								<div class="read-offline-grid">
@@ -761,6 +768,13 @@ class Read_Offline_Admin {
 											data-help="<?php echo esc_attr__( 'When unchecked, restricts printing via PDF permissions (not bulletproof).', 'read-offline' ); ?>">?</span>
 									</label>
 									<div><input type="checkbox" name="read_offline_settings_pdf[printable]" value="1" <?php checked( ! empty( $options[ 'printable' ] ) ); ?> /></div>
+
+									<label><?php _e( 'Custom CSS', 'read-offline' ); ?>
+										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
+											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
+											data-help="<?php echo esc_attr__( 'Additional CSS appended to the PDF output. Useful for minor layout tweaks.', 'read-offline' ); ?>">?</span>
+									</label>
+									<div class="full"><textarea name="read_offline_settings_pdf[custom_css]" class="large-text" rows="4"><?php echo esc_textarea( $options['custom_css'] ?? '' ); ?></textarea></div>
 								</div>
 							</div>
 							<?php
@@ -818,7 +832,8 @@ class Read_Offline_Admin {
 									<div>
 										<select name="read_offline_settings_epub[cover]" id="read-offline-epub-cover-source">
 											<option value="featured" <?php selected( $options[ 'cover' ] ?? '', 'featured' ); ?>>
-												<?php _e( 'Featured Image', 'read-offline' ); ?></option>
+												<?php _e( 'Featured Image', 'read-offline' ); ?>
+											</option>
 											<option value="logo" <?php selected( $options[ 'cover' ] ?? '', 'logo' ); ?>>
 												<?php _e( 'Site Logo', 'read-offline' ); ?>
 											</option>
@@ -850,7 +865,8 @@ class Read_Offline_Admin {
 									<div>
 										<select name="read_offline_settings_epub[css_profile]">
 											<option value="light" <?php selected( $options[ 'css_profile' ] ?? '', 'light' ); ?>>
-												<?php _e( 'Light', 'read-offline' ); ?></option>
+												<?php _e( 'Light', 'read-offline' ); ?>
+											</option>
 											<option value="dark" <?php selected( $options[ 'css_profile' ] ?? '', 'dark' ); ?>>
 												<?php _e( 'Dark', 'read-offline' ); ?>
 											</option>
@@ -858,7 +874,8 @@ class Read_Offline_Admin {
 												<?php _e( 'None', 'read-offline' ); ?>
 											</option>
 											<option value="custom" <?php selected( $options[ 'css_profile' ] ?? '', 'custom' ); ?>>
-												<?php _e( 'Custom', 'read-offline' ); ?></option>
+												<?php _e( 'Custom', 'read-offline' ); ?>
+											</option>
 										</select>
 										<div class="read-offline-epub-css-preview-wrapper">
 											<div id="read-offline-epub-css-preview" class="read-offline-epub-css-preview"

@@ -167,7 +167,7 @@ class Read_Offline_Export {
 		}
 		return new WP_Error( 'invalid_format', 'Invalid format' );
 	}
-/**
+	/**
 	 * Generate Markdown file for a single post.
 	 * Basic conversion: strip HTML tags after applying filters, keep headings, links, images.
 	 * @param WP_Post $post Post.
@@ -181,7 +181,8 @@ class Read_Offline_Export {
 		if ( ! function_exists( 'WP_Filesystem' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
-		global $wp_filesystem; WP_Filesystem();
+		global $wp_filesystem;
+		WP_Filesystem();
 		$ok = false;
 		if ( $wp_filesystem && method_exists( $wp_filesystem, 'put_contents' ) ) {
 			$ok = $wp_filesystem->put_contents( $path, $md, FS_CHMOD_FILE );
@@ -191,7 +192,7 @@ class Read_Offline_Export {
 		}
 		return $ok ? $path : new WP_Error( 'md_write_failed', 'Could not write markdown file' );
 	}
-/**
+	/**
 	 * Generate combined Markdown file from multiple posts.
 	 * @param array $post_ids IDs.
 	 * @param string $path Path.
@@ -200,21 +201,31 @@ class Read_Offline_Export {
 	protected static function generate_combined_markdown( $post_ids, $path ) {
 		$parts = array();
 		foreach ( $post_ids as $pid ) {
-			$post = get_post( $pid ); if ( ! $post ) { continue; }
-			$title = get_the_title( $post );
-			$html  = apply_filters( 'the_content', $post->post_content );
-			$html  = apply_filters( 'read_offline_content_html', $html, $post, 'md' );
+			$post    = get_post( $pid );
+			if ( ! $post ) {
+				continue;
+			}
+			$title   = get_the_title( $post );
+			$html    = apply_filters( 'the_content', $post->post_content );
+			$html    = apply_filters( 'read_offline_content_html', $html, $post, 'md' );
 			$parts[] = self::html_to_markdown( $title, $html, array( 'include_author' => ! empty( get_option( 'read_offline_settings_general', array() )[ 'include_author' ] ) ? $post->post_author : 0, 'date' => get_the_date( '', $post ) ) );
 		}
 		$md = implode( "\n\n---\n\n", $parts );
-		if ( ! function_exists( 'WP_Filesystem' ) ) { require_once ABSPATH . 'wp-admin/includes/file.php'; }
-		global $wp_filesystem; WP_Filesystem();
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		global $wp_filesystem;
+		WP_Filesystem();
 		$ok = false;
-		if ( $wp_filesystem && method_exists( $wp_filesystem, 'put_contents' ) ) { $ok = $wp_filesystem->put_contents( $path, $md, FS_CHMOD_FILE ); }
-		if ( ! $ok ) { $ok = false !== @file_put_contents( $path, $md ); }
+		if ( $wp_filesystem && method_exists( $wp_filesystem, 'put_contents' ) ) {
+			$ok = $wp_filesystem->put_contents( $path, $md, FS_CHMOD_FILE );
+		}
+		if ( ! $ok ) {
+			$ok = false !== @file_put_contents( $path, $md );
+		}
 		return $ok ? $path : new WP_Error( 'md_write_failed', 'Could not write markdown file' );
 	}
-/**
+	/**
 	 * Convert HTML fragment into a rough Markdown representation.
 	 * This is intentionally lightweight to avoid adding large libraries.
 	 * @param string $title Title.
@@ -224,9 +235,11 @@ class Read_Offline_Export {
 	 */
 	protected static function html_to_markdown( $title, $html, $meta = array() ) {
 		$author_line = '';
-		if ( ! empty( $meta['include_author'] ) ) {
-			$author_line = '\n' . esc_html( get_the_author_meta( 'display_name', $meta['include_author'] ) );
-			if ( ! empty( $meta['date'] ) ) { $author_line .= ' — ' . esc_html( $meta['date'] ); }
+		if ( ! empty( $meta[ 'include_author' ] ) ) {
+			$author_line = '\n' . esc_html( get_the_author_meta( 'display_name', $meta[ 'include_author' ] ) );
+			if ( ! empty( $meta[ 'date' ] ) ) {
+				$author_line .= ' — ' . esc_html( $meta[ 'date' ] );
+			}
 		}
 		// Basic replacements
 		$md = $html;
@@ -240,9 +253,17 @@ class Read_Offline_Export {
 		$md = preg_replace( '#<(strong|b)>(.*?)</\1>#is', '**$2**', $md );
 		$md = preg_replace( '#<(em|i)>(.*?)</\1>#is', '*$2*', $md );
 		// Images ![alt](src)
-		$md = preg_replace_callback( '#<img[^>]*>#i', function( $m ) {
-			if ( preg_match( '#alt="([^"]*)"#i', $m[0], $alt ) ) { $a = $alt[1]; } else { $a = ''; }
-			if ( preg_match( '#src="([^"]*)"#i', $m[0], $src ) ) { $s = $src[1]; } else { $s = ''; }
+		$md = preg_replace_callback( '#<img[^>]*>#i', function ($m) {
+			if ( preg_match( '#alt="([^"]*)"#i', $m[ 0 ], $alt ) ) {
+				$a = $alt[ 1 ];
+			} else {
+				$a = '';
+			}
+			if ( preg_match( '#src="([^"]*)"#i', $m[ 0 ], $src ) ) {
+				$s = $src[ 1 ];
+			} else {
+				$s = '';
+			}
 			return $s ? '![' . $a . '](' . $s . ')' : '';
 		}, $md );
 		// Links [text](url)
@@ -262,7 +283,7 @@ class Read_Offline_Export {
 		// Decode entities
 		$md = html_entity_decode( $md, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		// Collapse excessive blank lines
-		$md = preg_replace( "/\n{3,}/", "\n\n", $md );
+		$md    = preg_replace( "/\n{3,}/", "\n\n", $md );
 		$front = '# ' . $title . $author_line . "\n\n";
 		return $front . trim( $md ) . "\n";
 	}
@@ -336,7 +357,16 @@ class Read_Offline_Export {
 				$mpdf->TOCpagebreakByArray( array( 'toc-preHTML' => '<h1>' . esc_html( __( 'Contents', 'read-offline' ) ) . '</h1>', 'links' => 1 ) );
 			}
 			$base_css         = 'img{max-width:100%;height:auto;} figure{margin:0;}';
-			$base_css .= $gen_opts[ 'css' ] ?? '';
+			$pdf_custom_css   = '';
+			if ( empty( $pdf_opts ) ) {
+				$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
+			}
+			if ( ! empty( $pdf_opts['custom_css'] ) ) {
+				$pdf_custom_css = $pdf_opts['custom_css'];
+			} elseif ( isset( $gen_opts['css'] ) ) { // legacy fallback.
+				$pdf_custom_css = $gen_opts['css'];
+			}
+			$base_css .= $pdf_custom_css;
 			$base_css .= apply_filters( 'read_offline_pdf_css', '', null );
 			$include_author   = ! empty( $gen_opts[ 'include_author' ] );
 			$include_featured = ! empty( $gen_opts[ 'include_featured' ] );
@@ -480,7 +510,9 @@ class Read_Offline_Export {
 			'b' => 15,
 			'l' => 15,
 		);
-		$css      = 'img{max-width:100%;height:auto;} figure{margin:0;}' . ( $gen_opts[ 'css' ] ?? '' );
+		$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
+		$legacy   = $gen_opts['css'] ?? '';
+		$css      = 'img{max-width:100%;height:auto;} figure{margin:0;}' . ( $pdf_opts['custom_css'] ?? $legacy );
 		$css .= apply_filters( 'read_offline_pdf_css', '', $post );
 
 		if ( class_exists( '\\Mpdf\\Mpdf' ) ) {
@@ -1068,8 +1100,16 @@ class Read_Offline_Export {
 		);
 		$name     = strtr( $template, $repl );
 		$name     = sanitize_file_name( $name );
-		if ( 'pdf' === $format ) { $ext = '.pdf'; } elseif ( 'epub' === $format ) { $ext = '.epub'; } elseif ( 'md' === $format ) { $ext = '.md'; } else { $ext = '.' . preg_replace( '/[^a-z0-9]/', '', $format ); }
-		$ver      = substr( $hash, 0, 8 );
+		if ( 'pdf' === $format ) {
+			$ext = '.pdf';
+		} elseif ( 'epub' === $format ) {
+			$ext = '.epub';
+		} elseif ( 'md' === $format ) {
+			$ext = '.md';
+		} else {
+			$ext = '.' . preg_replace( '/[^a-z0-9]/', '', $format );
+		}
+		$ver = substr( $hash, 0, 8 );
 		return $name . '-v' . $ver . $ext;
 	}
 
