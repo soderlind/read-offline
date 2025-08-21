@@ -49,9 +49,44 @@ class Read_Offline_Export {
 						'type'     => 'string',
 					),
 				),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( __CLASS__, 'rest_permission' ),
 			)
 		);
+	}
+
+	/**
+	 * Permission callback enforcing public toggle and simple rate limiting.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public static function rest_permission( $request ) {
+		$options = get_option( 'read_offline_settings_general', array() );
+		$public  = ! empty( $options[ 'rest_public' ] );
+		if ( ! $public && ! current_user_can( 'manage_options' ) ) {
+			return new WP_Error( 'forbidden', __( 'REST export disabled publicly.', 'read-offline' ), array( 'status' => 403 ) );
+		}
+		// Rate limiting only for unauthenticated users.
+		if ( $public && ! is_user_logged_in() ) {
+			$limit  = isset( $options[ 'rest_rate_limit' ] ) ? (int) $options[ 'rest_rate_limit' ] : 10;
+			$window = isset( $options[ 'rest_rate_window' ] ) ? (int) $options[ 'rest_rate_window' ] : 60;
+			if ( $limit > 0 && $window > 0 ) {
+				$ip        = isset( $_SERVER[ 'REMOTE_ADDR' ] ) ? sanitize_text_field( wp_unslash( $_SERVER[ 'REMOTE_ADDR' ] ) ) : 'unknown';
+				$key       = 'ro_rl_' . md5( $ip );
+				$record    = get_transient( $key );
+				$now       = time();
+				$reset_eta = $now + $window;
+				if ( ! is_array( $record ) || $record[ 'expires' ] <= $now ) {
+					$record = array( 'count' => 0, 'expires' => $now + $window );
+				}
+				if ( $record[ 'count' ] >= $limit ) {
+					$retry = max( 1, $record[ 'expires' ] - $now );
+					return new WP_Error( 'rate_limited', sprintf( __( 'Rate limit exceeded. Retry in %d seconds.', 'read-offline' ), $retry ), array( 'status' => 429, 'retry_after' => $retry ) );
+				}
+				$record[ 'count' ]++;
+				set_transient( $key, $record, $record[ 'expires' ] - $now );
+			}
+		}
+		return true;
 	}
 
 	/**

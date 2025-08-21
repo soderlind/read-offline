@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2 - 2025-08-22
+- Feature: Public REST access toggle to disable unauthenticated exports if desired.
+- Feature: Basic per-IP rate limiting (requests/window) for unauthenticated REST usage.
+- Admin: Settings fields (public toggle, rate limit, window) and help tab entries.
+- Removal: Deprecated Test export admin tool removed.
+- Docs: Updated readme/readme.txt with REST security guidance.
+
 ## 0.2.0 - 2025-08-21
 - Feature: Markdown (MD) export (single post + REST + front-end UI). Includes lightweight HTML→Markdown converter with headings, lists, links, images, emphasis, and fenced code blocks.
 - Admin: Added MD to selectable default formats and REST format documentation.

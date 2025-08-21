@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:       Read Offline
  * Description:       Export posts and pages to PDF, EPUB, and Markdown for offline reading or reuse.
- * Version:           0.2.0
+ * Version:           0.2.2
  * Author:            Your Name
  * Text Domain:       read-offline
  * Requires at least: 6.5

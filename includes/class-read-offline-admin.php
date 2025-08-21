@@ -91,6 +91,8 @@ class Read_Offline_Admin {
 					. '<li><strong>' . esc_html__( 'Include author/date', 'read-offline' ) . '</strong> – ' . esc_html__( 'Adds a small metadata line near the top of each export.', 'read-offline' ) . '</li>'
 					. '<li><strong>' . esc_html__( 'Combine bulk exports', 'read-offline' ) . '</strong> – ' . esc_html__( 'If enabled, multiple selected posts/pages become one combined PDF/EPUB. If disabled, a ZIP of individual files is generated.', 'read-offline' ) . '</li>'
 					. '<li><strong>' . esc_html__( 'Clear cache', 'read-offline' ) . '</strong> – ' . esc_html__( 'Removes previously generated files so they can regenerate with updated settings/content.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'Public REST access', 'read-offline' ) . '</strong> – ' . esc_html__( 'Toggle to allow or block unauthenticated exports of published posts.', 'read-offline' ) . '</li>'
+					. '<li><strong>' . esc_html__( 'REST rate limit', 'read-offline' ) . '</strong> – ' . esc_html__( 'Simple per-IP limit (requests per window) for unauthenticated usage.', 'read-offline' ) . '</li>'
 					// Removed Test export feature
 					. '</ul>'
 					. '<p>' . esc_html__( 'Custom PDF CSS moved to the PDF tab in version 0.2.0.', 'read-offline' ) . '</p>',
@@ -174,6 +176,9 @@ class Read_Offline_Admin {
 					'include_featured' => true,
 					'include_author'   => true,
 					'combine_bulk'     => true,
+					'rest_public'      => true, // Allow unauthenticated REST access to published posts.
+					'rest_rate_limit'  => 10,   // Requests per window.
+					'rest_rate_window' => 60,   // Window seconds.
 				),
 				'sanitize_callback' => array( __CLASS__, 'sanitize_general_settings' ),
 			)
@@ -245,6 +250,11 @@ class Read_Offline_Admin {
 		$clean[ 'include_featured' ] = ! empty( $input[ 'include_featured' ] ) ? 1 : 0;
 		$clean[ 'include_author' ]   = ! empty( $input[ 'include_author' ] ) ? 1 : 0;
 		$clean[ 'combine_bulk' ]     = ! empty( $input[ 'combine_bulk' ] ) ? 1 : 0;
+		$clean[ 'rest_public' ]      = ! empty( $input[ 'rest_public' ] ) ? 1 : 0;
+		$rate_limit                  = isset( $input[ 'rest_rate_limit' ] ) ? (int) $input[ 'rest_rate_limit' ] : 10;
+		$clean[ 'rest_rate_limit' ]  = max( 0, min( 1000, $rate_limit ) );
+		$window                      = isset( $input[ 'rest_rate_window' ] ) ? (int) $input[ 'rest_rate_window' ] : 60;
+		$clean[ 'rest_rate_window' ] = max( 10, min( 86400, $window ) );
 		return $clean;
 	}
 
@@ -691,6 +701,44 @@ class Read_Offline_Admin {
 										<p class="read-offline-field-desc">
 											<?php esc_html_e( 'Uncheck to revert to per-post files zipped together.', 'read-offline' ); ?>
 										</p>
+									</div>
+
+									<label><?php _e( 'Public REST access', 'read-offline' ); ?>
+										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
+											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
+											data-help="<?php echo esc_attr__( 'Allow unauthenticated requests to export published posts. When disabled, a valid logged-in capability or custom auth is required.', 'read-offline' ); ?>">?</span>
+									</label>
+									<div>
+										<input type="checkbox" name="read_offline_settings_general[rest_public]" value="1" <?php checked( ! empty( $options[ 'rest_public' ] ) ); ?> />
+										<p class="read-offline-field-desc">
+											<?php esc_html_e( 'If disabled, external clients must authenticate; published content will not export anonymously.', 'read-offline' ); ?>
+										</p>
+									</div>
+
+									<label><?php _e( 'REST rate limit', 'read-offline' ); ?>
+										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
+											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
+											data-help="<?php echo esc_attr__( 'Maximum number of export requests allowed per IP within the window. Set 0 for unlimited (not recommended).', 'read-offline' ); ?>">?</span>
+									</label>
+									<div>
+										<input type="number" name="read_offline_settings_general[rest_rate_limit]"
+											value="<?php echo isset( $options[ 'rest_rate_limit' ] ) ? intval( $options[ 'rest_rate_limit' ] ) : 10; ?>"
+											min="0" max="1000" style="width:100px;" />
+										<p class="read-offline-field-desc">
+											<?php esc_html_e( 'Requests per window per IP.', 'read-offline' ); ?></p>
+									</div>
+
+									<label><?php _e( 'REST window (seconds)', 'read-offline' ); ?>
+										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
+											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
+											data-help="<?php echo esc_attr__( 'Time window length used for rate limiting. Minimum 10 seconds.', 'read-offline' ); ?>">?</span>
+									</label>
+									<div>
+										<input type="number" name="read_offline_settings_general[rest_rate_window]"
+											value="<?php echo isset( $options[ 'rest_rate_window' ] ) ? intval( $options[ 'rest_rate_window' ] ) : 60; ?>"
+											min="10" max="86400" style="width:120px;" />
+										<p class="read-offline-field-desc">
+											<?php esc_html_e( 'Seconds per rate limit window.', 'read-offline' ); ?></p>
 									</div>
 
 									<!-- Removed: PDF Custom CSS moved to PDF tab -->

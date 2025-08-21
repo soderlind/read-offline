@@ -42,12 +42,14 @@ composer install
 - Select multiple posts/pages, pick a Read Offline bulk action (PDF or EPUB), and apply. (Markdown bulk action coming.)
 - By default a single combined document is generated. Disable "Combine bulk exports" in General settings to instead receive a ZIP of per‑post files.
 
-### REST API
-- Programmatic exports are available at: /wp-json/read-offline/v1/export (format=pdf|epub|md)
+## REST API
+- Endpoint: /wp-json/read-offline/v1/export (format=pdf|epub|md)
+- Public access to published posts can be toggled in General settings ("Public REST access").
+- Simple per-IP unauthenticated rate limiting: configure requests per window and window length.
 - Useful for scripts/integrations that need on-demand files.
 
 ## Settings overview
-- General: choose visible formats (PDF/EPUB/MD), placement, filename template, and whether bulk exports are combined or zipped.
+- General: choose visible formats (PDF/EPUB/MD), placement, filename template, bulk combination, cache clearing, REST public toggle, and rate limiting.
 - PDF: page size, margins, header/footer, watermark, TOC depth, and CSS tweaks (Custom CSS moved here in 0.2.0).
 - EPUB: metadata (author/publisher/lang), cover image, TOC, and CSS profile/custom CSS.
 
@@ -58,6 +60,8 @@ composer install
 
 ## Privacy & security
 - No telemetry. Exports are generated locally and cached under uploads.
+- Public REST access can be disabled entirely, forcing authentication.
+- Rate limiting helps blunt abuse of the export endpoint (basic per-IP sliding window).
 
 ## License & credits
 - GPLv2 or later. See License URI in readme.txt.

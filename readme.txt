@@ -4,11 +4,11 @@ Tags: pdf, epub, export, offline, download
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 8.2
-Stable tag: 0.2.0
+Stable tag: 0.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Export posts and pages to PDF, EPUB, and Markdown for offline reading or reuse. Shortcode and auto-insert UI, admin bulk exports (single combined file or ZIP), and a REST API.
+Export posts and pages to PDF, EPUB, and Markdown for offline reading or reuse. Shortcode and auto-insert UI, admin bulk exports (single combined file or ZIP), and a REST API (with optional public access & rate limiting).
 
 == Description ==
 Read Offline lets site visitors and editors download content as PDF, EPUB, or Markdown (MD).
@@ -16,7 +16,7 @@ Read Offline lets site visitors and editors download content as PDF, EPUB, or Ma
 Highlights:
 - Frontend "Save as" control (PDF/EPUB/MD) with shortcode [read_offline] and optional auto-insert.
 - Bulk export: combine multiple posts/pages into one PDF or EPUB (default) OR toggle setting to create a ZIP of individual files. (Markdown bulk action coming.)
-- REST endpoint for programmatic exports: /wp-json/read-offline/v1/export (format=pdf|epub|md)
+- REST endpoint for programmatic exports: /wp-json/read-offline/v1/export (format=pdf|epub|md) with configurable public toggle and basic per-IP rate limiting
 - Caching keyed by content/settings so repeated downloads are fast.
 - EPUB output is strict XHTML; PDF via mPDF.
 
@@ -51,6 +51,12 @@ If you expected a ZIP, uncheck the "Combine bulk exports" option under Settings 
 3. Bulk export actions in the posts list
 
 == Changelog ==
+= 0.2.2 =
+- Feature: Public REST access toggle (allow/deny unauthenticated exports of published posts).
+- Feature: Simple per-IP rate limiting for unauthenticated REST exports (configurable requests + window seconds).
+- Admin: Added settings for REST security (toggle + limits) on General tab.
+- Cleanup: Removed Test export tool from admin UI.
+
 = 0.2.0 =
 - Feature: Markdown export (single post UI + REST) with fenced code, lists, headings, links, images.
 - Admin: Added MD to selectable formats and REST help examples.
