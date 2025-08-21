@@ -343,9 +343,17 @@ class Read_Offline_Admin {
 
 				.read-offline-grid {
 					display: grid;
-					grid-template-columns: 220px 1fr;
-					gap: 12px;
-					align-items: center
+					grid-template-columns: 240px 1fr;
+					gap: 12px 20px;
+					align-items: start;
+				}
+				.read-offline-grid > label {
+					align-self: start;
+					justify-self: end;
+					text-align: right;
+					margin: 0;
+					font-weight: 600;
+					line-height: 1.3;
 				}
 
 				.read-offline-grid .full {
@@ -601,9 +609,9 @@ class Read_Offline_Admin {
 									</label>
 									<div><?php
 									// Show as checked if key absent (legacy installs) or explicitly truthy.
-									$combine_default_checked = ! array_key_exists( 'combine_bulk', (array) $options ) || ! empty( $options['combine_bulk'] );
+									$combine_default_checked = ! array_key_exists( 'combine_bulk', (array) $options ) || ! empty( $options[ 'combine_bulk' ] );
 									?>
-									<input type="checkbox" name="read_offline_settings_general[combine_bulk]" value="1" <?php checked( $combine_default_checked ); ?> />
+										<input type="checkbox" name="read_offline_settings_general[combine_bulk]" value="1" <?php checked( $combine_default_checked ); ?> />
 										<p class="read-offline-field-desc">
 											<?php esc_html_e( 'Uncheck to revert to per-post files zipped together.', 'read-offline' ); ?>
 										</p>
@@ -1160,7 +1168,7 @@ class Read_Offline_Admin {
 
 		$format = $doaction === 'read_offline_export_pdf' ? 'pdf' : 'epub';
 
-		$general_opts    = get_option( 'read_offline_settings_general', array() );
+		$general_opts = get_option( 'read_offline_settings_general', array() );
 		// If the setting key is absent (pre-feature installs), treat it as enabled by default.
 		$combine_setting = array_key_exists( 'combine_bulk', (array) $general_opts ) ? ! empty( $general_opts[ 'combine_bulk' ] ) : true;
 		$combine         = apply_filters( 'read_offline_bulk_combine', $combine_setting, $post_ids, $format, $post_type );
