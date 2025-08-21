@@ -47,6 +47,7 @@ class Read_Offline_Admin {
 		// PDF
 		register_setting( 'read_offline_settings_pdf', 'read_offline_settings_pdf', [ 'default' => [ 
 			'size'         => 'A4',
+			'custom_size'  => '',
 			'margins'      => [ 't' => 15, 'r' => 15, 'b' => 15, 'l' => 15 ],
 			'header'       => '',
 			'footer'       => '',
@@ -204,8 +205,31 @@ class Read_Offline_Admin {
 						<table class="form-table" role="presentation">
 							<tr>
 								<th scope="row"><?php _e( 'Page size', 'read-offline' ); ?></th>
-								<td><input type="text" name="read_offline_settings_pdf[size]"
-										value="<?php echo esc_attr( $options[ 'size' ] ?? '' ); ?>" class="regular-text" /></td>
+								<td>
+									<select id="ro-pdf-size" name="read_offline_settings_pdf[size]">
+										<?php $sizes = [ 'A4','Letter','Legal','A5','A6','B5','Tabloid','Executive','Custom' ];
+											$current = strtoupper( $options['size'] ?? 'A4' );
+											foreach ( $sizes as $s ) {
+												printf( '<option value="%1$s" %2$s>%1$s</option>', esc_attr( $s ), selected( $current, strtoupper( $s ), false ) );
+											}
+										?>
+									</select>
+									<div id="ro-pdf-size-custom" style="margin-top:8px;display:none;">
+										<label for="ro-pdf-custom"><?php _e( 'Custom size (mm):', 'read-offline' ); ?></label>
+										<input id="ro-pdf-custom" type="text" name="read_offline_settings_pdf[custom_size]" value="<?php echo esc_attr( $options['custom_size'] ?? '' ); ?>" placeholder="210x297" class="regular-text" />
+										<p class="read-offline-field-desc"><?php esc_html_e( 'Format: width x height in millimeters, e.g., 210x297', 'read-offline' ); ?></p>
+									</div>
+									<script>
+									(function(){
+										function toggleCustom(){
+											var v = document.getElementById('ro-pdf-size').value.toLowerCase();
+											document.getElementById('ro-pdf-size-custom').style.display = (v === 'custom') ? 'block' : 'none';
+										}
+										document.getElementById('ro-pdf-size').addEventListener('change', toggleCustom);
+										toggleCustom();
+									})();
+									</script>
+								</td>
 							</tr>
 							<tr>
 								<th scope="row"><?php _e( 'Margins (t,r,b,l)', 'read-offline' ); ?></th>
