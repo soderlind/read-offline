@@ -551,42 +551,31 @@ class Read_Offline_Admin {
 									</label>
 									<div>
 										<input type="checkbox" name="read_offline_settings_general[auto_insert]" value="1" <?php checked( ! empty( $options[ 'auto_insert' ] ) ); ?> />
-										<p class="read-offline-field-desc">
-											<?php esc_html_e( 'Append the Save As control after post content automatically.', 'read-offline' ); ?>
-										</p>
-									</div>
-
-									<label><?php _e( 'Default formats', 'read-offline' ); ?>
-										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
-											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
-											data-help="<?php echo esc_attr__( 'Choose which formats show up by default in the Save As UI. You can still filter these via hooks.', 'read-offline' ); ?>">?</span>
-									</label>
-									<div>
-										<label><input type="checkbox" name="read_offline_settings_general[formats][]" value="pdf"
-												<?php checked( in_array( 'pdf', (array) ( $options[ 'formats' ] ?? array() ), true ) ); ?> /> PDF</label>
-										<label style="margin-left:12px;"><input type="checkbox"
-												name="read_offline_settings_general[formats][]" value="epub" <?php checked( in_array( 'epub', (array) ( $options[ 'formats' ] ?? array() ), true ) ); ?> />
-											EPUB</label>
-									</div>
-
-									<label><?php _e( 'Filename template', 'read-offline' ); ?>
-										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
-											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
-											data-help="<?php echo esc_attr__( 'Use placeholders like {site}, {post_slug}, {title}, {format}, {date}, {lang}. The preview below shows an example.', 'read-offline' ); ?>">?</span>
-									</label>
-									<div>
-										<input id="ro-filename" type="text" name="read_offline_settings_general[filename]"
-											value="<?php echo esc_attr( $options[ 'filename' ] ?? '' ); ?>" class="regular-text" />
-										<div class="read-offline-chips" id="ro-chips"></div>
-										<p class="read-offline-field-desc">
-											<?php esc_html_e( 'Click to insert placeholders. Preview updates live.', 'read-offline' ); ?>
-										</p>
-										<p class="read-offline-field-desc">
-											<strong><?php esc_html_e( 'Preview:', 'read-offline' ); ?></strong> <span
-												id="ro-filename-preview"></span>
-										</p>
-									</div>
-
+										<?php
+										$show_health = defined( 'WP_DEBUG' ) && WP_DEBUG; // Only show Environment health when WP_DEBUG is enabled.
+										if ( $show_health ) : ?>
+											<div class="read-offline-card">
+												<h2><?php esc_html_e( 'Environment health', 'read-offline' ); ?></h2>
+												<p><?php esc_html_e( 'Checks for required PHP extensions and vendor libraries.', 'read-offline' ); ?></p>
+												<ul class="read-offline-health">
+													<li class="<?php echo esc_attr( $health[ 'zip' ] ? 'read-offline-ok' : 'read-offline-warn' ); ?>">
+														<?php echo esc_html( $health[ 'zip' ] ? '✔' : '⚠' ); ?>
+														<?php esc_html_e( 'ZipArchive extension', 'read-offline' ); ?>
+														<?php if ( ! $health[ 'zip' ] ) : ?> — <?php esc_html_e( 'Required for packaging bulk downloads (ZIP).', 'read-offline' ); ?><?php endif; ?>
+													</li>
+													<li class="<?php echo esc_attr( $health[ 'pdf' ] ? 'read-offline-ok' : 'read-offline-warn' ); ?>">
+														<?php echo esc_html( $health[ 'pdf' ] ? '✔' : '⚠' ); ?>
+														<?php esc_html_e( 'mPDF library', 'read-offline' ); ?>
+														<?php if ( ! $health[ 'pdf' ] ) : ?> — <?php esc_html_e( 'Install Composer deps to enable PDF export.', 'read-offline' ); ?><?php endif; ?>
+													</li>
+													<li class="<?php echo esc_attr( $health[ 'epub' ] ? 'read-offline-ok' : 'read-offline-warn' ); ?>">
+														<?php echo esc_html( $health[ 'epub' ] ? '✔' : '⚠' ); ?>
+														<?php esc_html_e( 'PHPePub library', 'read-offline' ); ?>
+														<?php if ( ! $health[ 'epub' ] ) : ?> — <?php esc_html_e( 'Install Composer deps to enable EPUB export.', 'read-offline' ); ?><?php endif; ?>
+													</li>
+												</ul>
+											</div>
+										<?php endif; ?>
 									<label><?php _e( 'Include featured image as cover', 'read-offline' ); ?>
 										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
 											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
