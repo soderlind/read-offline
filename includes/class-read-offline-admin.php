@@ -1,0 +1,647 @@
+<?php
+if ( ! defined( 'ABSPATH' ) )
+	exit;
+
+class Read_Offline_Admin {
+	public static function init() {
+		add_action( 'admin_menu', [ __CLASS__, 'add_settings_page' ] );
+		add_action( 'admin_init', [ __CLASS__, 'register_settings' ] );
+
+		// Bulk actions for Posts and Pages
+		add_filter( 'bulk_actions-edit-post', [ __CLASS__, 'register_bulk_actions_posts' ] );
+		add_filter( 'handle_bulk_actions-edit-post', [ __CLASS__, 'handle_bulk_actions_posts' ], 10, 3 );
+		add_filter( 'bulk_actions-edit-page', [ __CLASS__, 'register_bulk_actions_pages' ] );
+		add_filter( 'handle_bulk_actions-edit-page', [ __CLASS__, 'handle_bulk_actions_pages' ], 10, 3 );
+
+		// Download endpoint for generated ZIPs
+		add_action( 'admin_post_read_offline_download_zip', [ __CLASS__, 'download_zip' ] );
+		// Admin notices for results
+		add_action( 'admin_notices', [ __CLASS__, 'admin_notices' ] );
+		add_action( 'admin_post_read_offline_clear_cache', [ __CLASS__, 'clear_cache_action' ] );
+		// Test export endpoint
+		add_action( 'admin_post_read_offline_test_export', [ __CLASS__, 'test_export_action' ] );
+	}
+
+	public static function add_settings_page() {
+		add_options_page(
+			__( 'Read Offline Settings', 'read-offline' ),
+			__( 'Read Offline', 'read-offline' ),
+			'manage_options',
+			'read-offline-settings',
+			[ __CLASS__, 'render_settings_page' ]
+		);
+	}
+
+	public static function register_settings() {
+		// General
+		register_setting( 'read_offline_settings_general', 'read_offline_settings_general', [ 'default' => [ 
+			'auto_insert'      => true,
+			'formats'          => [ 'pdf', 'epub' ],
+			'filename'         => '{site}-{post_slug}-{format}',
+			'include_featured' => true,
+			'include_author'   => true,
+			'css'              => '',
+		] ] );
+		// PDF
+		register_setting( 'read_offline_settings_pdf', 'read_offline_settings_pdf', [ 'default' => [ 
+			'size'         => 'A4',
+			'margins'      => [ 't' => 15, 'r' => 15, 'b' => 15, 'l' => 15 ],
+			'header'       => '',
+			'footer'       => '',
+			'page_numbers' => true,
+			'toc'          => true,
+			'toc_depth'    => 3,
+			'watermark'    => '',
+			'printable'    => true,
+			'fonts'        => [],
+		] ] );
+		// EPUB
+		register_setting( 'read_offline_settings_epub', 'read_offline_settings_epub', [ 'default' => [ 
+			'meta'                       => [ 'author' => '', 'publisher' => '', 'lang' => '' ],
+			'toc'                        => true,
+			'toc_depth'                  => 3,
+			'cover'                      => 'featured',
+			'custom_cover_attachment_id' => 0,
+			'custom_cover_url'           => '',
+			'css_profile'                => 'light',
+			'custom_css'                 => '',
+		] ] );
+	}
+
+	public static function render_settings_page() {
+		$tabs        = [ 
+			'general' => __( 'General', 'read-offline' ),
+			'pdf'     => __( 'PDF', 'read-offline' ),
+			'epub'    => __( 'EPUB', 'read-offline' ),
+		];
+		$current_tab = isset( $_GET[ 'tab' ] ) && isset( $tabs[ $_GET[ 'tab' ] ] ) ? $_GET[ 'tab' ] : 'general';
+		if ( $current_tab === 'epub' && function_exists( 'wp_enqueue_media' ) ) {
+			wp_enqueue_media();
+		}
+
+		// Health checks
+		$health = [
+			'zip'     => class_exists( 'ZipArchive' ),
+			'pdf'     => class_exists( '\\Mpdf\\Mpdf' ),
+			'epub'    => class_exists( '\\PHPePub\\Core\\EPub' ),
+		];
+		?>
+		<div class="wrap">
+			<h1><?php esc_html_e( 'Read Offline Settings', 'read-offline' ); ?></h1>
+			<h2 class="nav-tab-wrapper">
+				<?php foreach ( $tabs as $tab => $label ) : ?>
+					<a href="?page=read-offline-settings&tab=<?php echo esc_attr( $tab ); ?>"
+						class="nav-tab<?php echo $current_tab === $tab ? ' nav-tab-active' : ''; ?>"><?php echo esc_html( $label ); ?></a>
+				<?php endforeach; ?>
+			</h2>
+			<style>
+				.read-offline-card {
+					background: #fff;
+					padding: 16px;
+					border: 1px solid #ccd0d4;
+					border-radius: 4px;
+					margin-top: 12px;
+				}
+
+				.read-offline-field-desc {
+					color: #555;
+					font-size: 12px;
+					margin-top: 4px;
+				}
+
+				.read-offline-cover-preview img {
+					max-width: 160px;
+					height: auto;
+					display: block;
+					margin-top: 8px;
+					border: 1px solid #e0e0e0;
+				}
+				.read-offline-health {
+					margin-top: 8px;
+				}
+				.read-offline-health li {
+					margin: 4px 0;
+				}
+				.read-offline-ok { color: #1a7f37; }
+				.read-offline-warn { color: #9a6700; }
+			</style>
+
+			<div class="read-offline-card">
+				<h2><?php esc_html_e( 'Environment health', 'read-offline' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Checks for required PHP extensions and vendor libraries.', 'read-offline' ); ?></p>
+				<ul class="read-offline-health">
+					<li class="<?php echo $health['zip'] ? 'read-offline-ok' : 'read-offline-warn'; ?>">
+						<?php echo $health['zip'] ? '✔' : '⚠'; ?> <?php esc_html_e( 'ZipArchive extension', 'read-offline' ); ?>
+						<?php if ( ! $health['zip'] ) : ?> — <?php esc_html_e( 'Required for packaging bulk downloads (ZIP).', 'read-offline' ); ?><?php endif; ?>
+					</li>
+					<li class="<?php echo $health['pdf'] ? 'read-offline-ok' : 'read-offline-warn'; ?>">
+						<?php echo $health['pdf'] ? '✔' : '⚠'; ?> <?php esc_html_e( 'mPDF library', 'read-offline' ); ?>
+						<?php if ( ! $health['pdf'] ) : ?> — <?php esc_html_e( 'Install Composer deps to enable PDF export.', 'read-offline' ); ?><?php endif; ?>
+					</li>
+					<li class="<?php echo $health['epub'] ? 'read-offline-ok' : 'read-offline-warn'; ?>">
+						<?php echo $health['epub'] ? '✔' : '⚠'; ?> <?php esc_html_e( 'PHPePub library', 'read-offline' ); ?>
+						<?php if ( ! $health['epub'] ) : ?> — <?php esc_html_e( 'Install Composer deps to enable EPUB export.', 'read-offline' ); ?><?php endif; ?>
+					</li>
+				</ul>
+			</div>
+			<form method="post" action="options.php">
+				<?php
+				if ( $current_tab === 'general' ) {
+					settings_fields( 'read_offline_settings_general' );
+					$options = get_option( 'read_offline_settings_general' );
+					?>
+					<div class="read-offline-card">
+						<table class="form-table" role="presentation">
+							<tr>
+								<th scope="row"><?php _e( 'Auto-insert Save As button', 'read-offline' ); ?></th>
+								<td>
+									<input type="checkbox" name="read_offline_settings_general[auto_insert]" value="1" <?php checked( ! empty( $options[ 'auto_insert' ] ) ); ?> />
+									<p class="read-offline-field-desc">
+										<?php esc_html_e( 'Append the Save As control after post content automatically.', 'read-offline' ); ?>
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Default formats', 'read-offline' ); ?></th>
+								<td>
+									<label><input type="checkbox" name="read_offline_settings_general[formats][]" value="pdf" <?php checked( in_array( 'pdf', (array) ( $options[ 'formats' ] ?? [] ), true ) ); ?> />
+										PDF</label>
+									<label style="margin-left:12px;"><input type="checkbox"
+											name="read_offline_settings_general[formats][]" value="epub" <?php checked( in_array( 'epub', (array) ( $options[ 'formats' ] ?? [] ), true ) ); ?> /> EPUB</label>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Filename template', 'read-offline' ); ?></th>
+								<td>
+									<input type="text" name="read_offline_settings_general[filename]"
+										value="<?php echo esc_attr( $options[ 'filename' ] ?? '' ); ?>" class="regular-text" />
+									<p class="read-offline-field-desc">
+										<?php esc_html_e( 'Placeholders: {site}, {post_slug}, {post_id}, {title}, {format}, {date}, {lang}', 'read-offline' ); ?>
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Include featured image as cover', 'read-offline' ); ?></th>
+								<td><input type="checkbox" name="read_offline_settings_general[include_featured]" value="1" <?php checked( ! empty( $options[ 'include_featured' ] ) ); ?> /></td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Include author/date', 'read-offline' ); ?></th>
+								<td><input type="checkbox" name="read_offline_settings_general[include_author]" value="1" <?php checked( ! empty( $options[ 'include_author' ] ) ); ?> /></td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Custom CSS for PDF', 'read-offline' ); ?></th>
+								<td><textarea name="read_offline_settings_general[css]" class="large-text"
+										rows="4"><?php echo esc_textarea( $options[ 'css' ] ?? '' ); ?></textarea></td>
+							</tr>
+						</table>
+					</div>
+					<?php
+				} elseif ( $current_tab === 'pdf' ) {
+					settings_fields( 'read_offline_settings_pdf' );
+					$options = get_option( 'read_offline_settings_pdf' );
+					?>
+					<div class="read-offline-card">
+						<table class="form-table" role="presentation">
+							<tr>
+								<th scope="row"><?php _e( 'Page size', 'read-offline' ); ?></th>
+								<td><input type="text" name="read_offline_settings_pdf[size]"
+										value="<?php echo esc_attr( $options[ 'size' ] ?? '' ); ?>" class="regular-text" /></td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Margins (t,r,b,l)', 'read-offline' ); ?></th>
+								<td>
+									<input type="text" name="read_offline_settings_pdf[margins][t]"
+										value="<?php echo esc_attr( $options[ 'margins' ][ 't' ] ?? '' ); ?>" size="2" />
+									<input type="text" name="read_offline_settings_pdf[margins][r]"
+										value="<?php echo esc_attr( $options[ 'margins' ][ 'r' ] ?? '' ); ?>" size="2" />
+									<input type="text" name="read_offline_settings_pdf[margins][b]"
+										value="<?php echo esc_attr( $options[ 'margins' ][ 'b' ] ?? '' ); ?>" size="2" />
+									<input type="text" name="read_offline_settings_pdf[margins][l]"
+										value="<?php echo esc_attr( $options[ 'margins' ][ 'l' ] ?? '' ); ?>" size="2" />
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Header', 'read-offline' ); ?></th>
+								<td><input type="text" name="read_offline_settings_pdf[header]"
+										value="<?php echo esc_attr( $options[ 'header' ] ?? '' ); ?>" class="regular-text" /></td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Footer', 'read-offline' ); ?></th>
+								<td><input type="text" name="read_offline_settings_pdf[footer]"
+										value="<?php echo esc_attr( $options[ 'footer' ] ?? '' ); ?>" class="regular-text" /></td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Page numbers', 'read-offline' ); ?></th>
+								<td><input type="checkbox" name="read_offline_settings_pdf[page_numbers]" value="1" <?php checked( ! empty( $options[ 'page_numbers' ] ) ); ?> /></td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Table of Contents', 'read-offline' ); ?></th>
+								<td>
+									<input type="checkbox" name="read_offline_settings_pdf[toc]" value="1" <?php checked( ! empty( $options[ 'toc' ] ) ); ?> />
+									<?php _e( 'Depth:', 'read-offline' ); ?>
+									<input type="number" name="read_offline_settings_pdf[toc_depth]"
+										value="<?php echo esc_attr( $options[ 'toc_depth' ] ?? 3 ); ?>" min="1" max="6" size="2" />
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Watermark text', 'read-offline' ); ?></th>
+								<td><input type="text" name="read_offline_settings_pdf[watermark]"
+										value="<?php echo esc_attr( $options[ 'watermark' ] ?? '' ); ?>" class="regular-text" /></td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Printable', 'read-offline' ); ?></th>
+								<td><input type="checkbox" name="read_offline_settings_pdf[printable]" value="1" <?php checked( ! empty( $options[ 'printable' ] ) ); ?> /></td>
+							</tr>
+						</table>
+					</div>
+					<?php
+				} else { // epub
+					settings_fields( 'read_offline_settings_epub' );
+					$options = get_option( 'read_offline_settings_epub' );
+					?>
+					<div class="read-offline-card">
+						<table class="form-table" role="presentation">
+							<tr>
+								<th scope="row"><?php _e( 'Author', 'read-offline' ); ?></th>
+								<td><input type="text" name="read_offline_settings_epub[meta][author]"
+										value="<?php echo esc_attr( $options[ 'meta' ][ 'author' ] ?? '' ); ?>" class="regular-text" />
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Publisher', 'read-offline' ); ?></th>
+								<td><input type="text" name="read_offline_settings_epub[meta][publisher]"
+										value="<?php echo esc_attr( $options[ 'meta' ][ 'publisher' ] ?? '' ); ?>"
+										class="regular-text" /></td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Language', 'read-offline' ); ?></th>
+								<td><input type="text" name="read_offline_settings_epub[meta][lang]"
+										value="<?php echo esc_attr( $options[ 'meta' ][ 'lang' ] ?? '' ); ?>" class="regular-text" />
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Table of Contents', 'read-offline' ); ?></th>
+								<td>
+									<input type="checkbox" name="read_offline_settings_epub[toc]" value="1" <?php checked( ! empty( $options[ 'toc' ] ) ); ?> />
+									<?php _e( 'Depth:', 'read-offline' ); ?>
+									<input type="number" name="read_offline_settings_epub[toc_depth]"
+										value="<?php echo esc_attr( $options[ 'toc_depth' ] ?? 3 ); ?>" min="1" max="6" size="2" />
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Cover source', 'read-offline' ); ?></th>
+								<td>
+									<select name="read_offline_settings_epub[cover]" id="read-offline-epub-cover-source">
+										<option value="featured" <?php selected( $options[ 'cover' ] ?? '', 'featured' ); ?>>
+											<?php _e( 'Featured Image', 'read-offline' ); ?></option>
+										<option value="logo" <?php selected( $options[ 'cover' ] ?? '', 'logo' ); ?>>
+											<?php _e( 'Site Logo', 'read-offline' ); ?></option>
+										<option value="custom" <?php selected( $options[ 'cover' ] ?? '', 'custom' ); ?>>
+											<?php _e( 'Custom Upload', 'read-offline' ); ?></option>
+									</select>
+									<div id="read-offline-custom-cover" style="margin-top:8px; display:none;">
+										<input type="hidden" id="read-offline-custom-cover-id"
+											name="read_offline_settings_epub[custom_cover_attachment_id]"
+											value="<?php echo esc_attr( (string) ( $options[ 'custom_cover_attachment_id' ] ?? 0 ) ); ?>" />
+										<button type="button" class="button"
+											id="read-offline-select-cover"><?php esc_html_e( 'Select image', 'read-offline' ); ?></button>
+										<button type="button" class="button" id="read-offline-remove-cover"
+											style="display:none; margin-left:6px;">&times;
+											<?php esc_html_e( 'Remove', 'read-offline' ); ?></button>
+										<div class="read-offline-cover-preview" id="read-offline-cover-preview"></div>
+										<p class="read-offline-field-desc">
+											<?php esc_html_e( 'Pick an image from the media library to use as EPUB cover.', 'read-offline' ); ?>
+										</p>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'CSS Profile', 'read-offline' ); ?></th>
+								<td>
+									<select name="read_offline_settings_epub[css_profile]">
+										<option value="light" <?php selected( $options[ 'css_profile' ] ?? '', 'light' ); ?>>
+											<?php _e( 'Light', 'read-offline' ); ?></option>
+										<option value="dark" <?php selected( $options[ 'css_profile' ] ?? '', 'dark' ); ?>>
+											<?php _e( 'Dark', 'read-offline' ); ?></option>
+										<option value="none" <?php selected( $options[ 'css_profile' ] ?? '', 'none' ); ?>>
+											<?php _e( 'None', 'read-offline' ); ?></option>
+										<option value="custom" <?php selected( $options[ 'css_profile' ] ?? '', 'custom' ); ?>>
+											<?php _e( 'Custom', 'read-offline' ); ?></option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><?php _e( 'Custom CSS', 'read-offline' ); ?></th>
+								<td><textarea name="read_offline_settings_epub[custom_css]" class="large-text"
+										rows="4"><?php echo esc_textarea( $options[ 'custom_css' ] ?? '' ); ?></textarea></td>
+							</tr>
+						</table>
+					</div>
+					<script>
+						(function ($) {
+							function toggleCustomCover() {
+								var v = $('#read-offline-epub-cover-source').val();
+								var $wrap = $('#read-offline-custom-cover');
+								if (v === 'custom') { $wrap.show(); } else { $wrap.hide(); }
+							}
+							function renderPreview(attachment) {
+								var $prev = $('#read-offline-cover-preview');
+								$prev.empty();
+								if (attachment && attachment.url) {
+									var url = (attachment.sizes && (attachment.sizes.medium || attachment.sizes.thumbnail)) ? (attachment.sizes.medium || attachment.sizes.thumbnail).url : attachment.url;
+									$prev.append('<img src="' + url + '" alt="cover" />');
+									$('#read-offline-remove-cover').show();
+								} else {
+									$('#read-offline-remove-cover').hide();
+								}
+							}
+							$(document).on('change', '#read-offline-epub-cover-source', toggleCustomCover);
+							$(document).on('click', '#read-offline-select-cover', function (e) {
+								e.preventDefault();
+								var frame = wp.media({ title: '<?php echo esc_js( __( 'Select EPUB cover', 'read-offline' ) ); ?>', multiple: false, library: { type: 'image' } });
+								frame.on('select', function () {
+									var att = frame.state().get('selection').first().toJSON();
+									$('#read-offline-custom-cover-id').val(att.id);
+									renderPreview(att);
+								});
+								frame.open();
+							});
+							$(document).on('click', '#read-offline-remove-cover', function (e) {
+								e.preventDefault();
+								$('#read-offline-custom-cover-id').val('0');
+								$('#read-offline-cover-preview').empty();
+								$(this).hide();
+							});
+							$(function () {
+								toggleCustomCover();
+								var existingId = $('#read-offline-custom-cover-id').val();
+								if (existingId && parseInt(existingId, 10) > 0) {
+									try { wp.media.attachment(existingId).fetch().then(function (att) { renderPreview(att.toJSON()); }); } catch (err) { }
+								}
+							});
+						})(jQuery);
+					</script>
+					<?php
+				}
+				submit_button();
+				?>
+			</form>
+			<?php if ( $current_tab === 'general' ) : ?>
+				<hr />
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-top:12px;">
+					<?php wp_nonce_field( 'read_offline_clear_cache', '_roc_nonce' ); ?>
+					<input type="hidden" name="action" value="read_offline_clear_cache" />
+					<?php submit_button( __( 'Clear cache', 'read-offline' ), 'secondary', 'submit', false ); ?>
+				</form>
+				<div class="read-offline-card" style="margin-top:12px;">
+					<?php $general_opts = get_option( 'read_offline_settings_general', [] ); ?>
+					<h2><?php esc_html_e( 'Test export', 'read-offline' ); ?></h2>
+					<p class="read-offline-field-desc"><?php esc_html_e( 'Run a quick export for a known post ID to verify the setup.', 'read-offline' ); ?></p>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<?php wp_nonce_field( 'read_offline_test_export', '_rot_nonce' ); ?>
+						<input type="hidden" name="action" value="read_offline_test_export" />
+						<input type="number" name="post_id" value="<?php echo isset( $general_opts['last_test_post_id'] ) ? intval( $general_opts['last_test_post_id'] ) : 0; ?>" min="1" style="width:120px;" />
+						&nbsp;
+						<select name="format">
+							<option value="pdf">PDF</option>
+							<option value="epub">EPUB</option>
+						</select>
+						&nbsp;
+						<?php submit_button( __( 'Test export', 'read-offline' ), 'secondary', 'submit', false ); ?>
+					</form>
+				</div>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	// ===== Bulk actions =====
+	public static function register_bulk_actions_posts( $bulk_actions ) {
+		$bulk_actions[ 'read_offline_export_pdf' ]  = __( 'Export to PDF (Read Offline)', 'read-offline' );
+		$bulk_actions[ 'read_offline_export_epub' ] = __( 'Export to EPUB (Read Offline)', 'read-offline' );
+		return $bulk_actions;
+	}
+	public static function register_bulk_actions_pages( $bulk_actions ) {
+		$bulk_actions[ 'read_offline_export_pdf' ]  = __( 'Export to PDF (Read Offline)', 'read-offline' );
+		$bulk_actions[ 'read_offline_export_epub' ] = __( 'Export to EPUB (Read Offline)', 'read-offline' );
+		return $bulk_actions;
+	}
+
+	public static function handle_bulk_actions_posts( $redirect_to, $doaction, $post_ids ) {
+		return self::handle_bulk_actions( $redirect_to, $doaction, $post_ids, 'post' );
+	}
+	public static function handle_bulk_actions_pages( $redirect_to, $doaction, $post_ids ) {
+		return self::handle_bulk_actions( $redirect_to, $doaction, $post_ids, 'page' );
+	}
+
+	protected static function handle_bulk_actions( $redirect_to, $doaction, $post_ids, $post_type ) {
+		if ( ! in_array( $doaction, [ 'read_offline_export_pdf', 'read_offline_export_epub' ], true ) ) {
+			return $redirect_to;
+		}
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return add_query_arg( [ 'read_offline_error' => 'forbidden' ], $redirect_to );
+		}
+
+		$format    = $doaction === 'read_offline_export_pdf' ? 'pdf' : 'epub';
+		$generated = [];
+		$errors    = [];
+
+		// Generate files
+		foreach ( (array) $post_ids as $post_id ) {
+			$post = get_post( $post_id );
+			if ( ! $post || $post->post_type !== $post_type ) {
+				$errors[] = $post_id;
+				continue;
+			}
+			// Capability per post
+			if ( ! current_user_can( 'read_post', $post_id ) ) {
+				$errors[] = $post_id;
+				continue;
+			}
+			$path = Read_Offline_Export::generate( $post_id, $format );
+			if ( is_wp_error( $path ) || ! $path ) {
+				$errors[] = $post_id;
+				continue;
+			}
+			$generated[] = [ 'post_id' => $post_id, 'path' => $path ];
+		}
+
+		if ( empty( $generated ) ) {
+			return add_query_arg( [ 'read_offline_error' => 'no_files' ], $redirect_to );
+		}
+
+		// Create ZIP package
+		$site     = sanitize_title( get_bloginfo( 'name' ) );
+		$ts       = current_time( 'Ymd_His' );
+		$zip_name = sprintf( '%s_%s_%s.zip', $site, $ts, $format );
+		$zip_path = Read_Offline_Export::zip_files( wp_list_pluck( $generated, 'path' ), $zip_name );
+		if ( is_wp_error( $zip_path ) || ! $zip_path ) {
+			return add_query_arg( [ 'read_offline_error' => 'zip_failed' ], $redirect_to );
+		}
+
+		// Store token to download
+		$token = wp_generate_password( 20, false, false );
+		set_transient( 'read_offline_zip_' . $token, $zip_path, HOUR_IN_SECONDS );
+
+		$redirect_to = add_query_arg( [ 
+			'read_offline_done' => 1,
+			'count'             => count( $generated ),
+			'errors'            => count( $errors ),
+			'token'             => $token,
+			'format'            => $format,
+		], $redirect_to );
+		return $redirect_to;
+	}
+
+	public static function download_zip() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_die( esc_html__( 'You do not have permission to download this file.', 'read-offline' ) );
+		}
+		$token = isset( $_GET[ 'token' ] ) ? sanitize_text_field( $_GET[ 'token' ] ) : '';
+		$path  = $token ? get_transient( 'read_offline_zip_' . $token ) : '';
+		if ( ! $path || ! file_exists( $path ) ) {
+			wp_die( esc_html__( 'The requested file is no longer available.', 'read-offline' ) );
+		}
+		// Stream file
+		header( 'Content-Type: application/zip' );
+		header( 'Content-Disposition: attachment; filename="' . basename( $path ) . '"' );
+		header( 'Content-Length: ' . filesize( $path ) );
+		readfile( $path );
+		// Optionally delete after download
+		@unlink( $path );
+		delete_transient( 'read_offline_zip_' . $token );
+		exit;
+	}
+
+	public static function clear_cache_action() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'read-offline' ) );
+		}
+		$nonce = isset( $_POST[ '_roc_nonce' ] ) ? sanitize_text_field( $_POST[ '_roc_nonce' ] ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'read_offline_clear_cache' ) ) {
+			wp_die( esc_html__( 'Nonce verification failed.', 'read-offline' ) );
+		}
+		if ( class_exists( 'Read_Offline_Export' ) && method_exists( 'Read_Offline_Export', 'clear_cache' ) ) {
+			Read_Offline_Export::clear_cache();
+		}
+		$redirect = wp_get_referer();
+		if ( ! $redirect ) {
+			$redirect = admin_url( 'options-general.php?page=read-offline-settings' );
+		}
+		$redirect = add_query_arg( 'read_offline_cleared', 1, $redirect );
+		wp_safe_redirect( $redirect );
+		exit;
+	}
+
+	public static function admin_notices() {
+		if ( isset( $_GET[ 'read_offline_done' ] ) && $_GET[ 'read_offline_done' ] ) {
+			$count  = isset( $_GET[ 'count' ] ) ? intval( $_GET[ 'count' ] ) : 0;
+			$errors = isset( $_GET[ 'errors' ] ) ? intval( $_GET[ 'errors' ] ) : 0;
+			$token  = isset( $_GET[ 'token' ] ) ? sanitize_text_field( $_GET[ 'token' ] ) : '';
+			$link   = $token ? esc_url( admin_url( 'admin-post.php?action=read_offline_download_zip&token=' . $token ) ) : '';
+			?>
+			<div class="notice notice-success is-dismissible">
+				<p><?php echo esc_html( sprintf( __( 'Read Offline: %d file(s) exported. %d error(s).', 'read-offline' ), $count, $errors ) ); ?>
+				</p>
+				<?php if ( $link ) : ?>
+					<p><a class="button button-primary"
+							href="<?php echo $link; ?>"><?php esc_html_e( 'Download ZIP', 'read-offline' ); ?></a></p>
+				<?php endif; ?>
+			</div>
+			<?php
+		}
+		if ( isset( $_GET[ 'read_offline_error' ] ) ) {
+			$error   = sanitize_text_field( $_GET[ 'read_offline_error' ] );
+			$message = __( 'Read Offline export failed.', 'read-offline' );
+			if ( $error === 'forbidden' )
+				$message = __( 'You do not have permission to export.', 'read-offline' );
+			if ( $error === 'no_files' )
+				$message = __( 'No files were generated.', 'read-offline' );
+			if ( $error === 'zip_failed' )
+				$message = __( 'Failed to create ZIP archive.', 'read-offline' );
+			?>
+			<div class="notice notice-error is-dismissible">
+				<p><?php echo esc_html( $message ); ?></p>
+			</div>
+			<?php
+		}
+		if ( isset( $_GET[ 'read_offline_cleared' ] ) && $_GET[ 'read_offline_cleared' ] ) {
+			?>
+			<div class="notice notice-success is-dismissible">
+				<p><?php esc_html_e( 'Read Offline cache cleared.', 'read-offline' ); ?></p>
+			</div>
+			<?php
+		}
+		if ( isset( $_GET['read_offline_test_done'] ) && $_GET['read_offline_test_done'] ) {
+			$token = isset( $_GET['token'] ) ? sanitize_text_field( $_GET['token'] ) : '';
+			$data  = $token ? get_transient( 'read_offline_test_' . $token ) : false;
+			if ( $data && ! empty( $data['url'] ) ) {
+				$format  = isset( $data['format'] ) ? strtoupper( $data['format'] ) : '';
+				$post_id = isset( $data['post_id'] ) ? intval( $data['post_id'] ) : 0;
+				delete_transient( 'read_offline_test_' . $token );
+				?>
+				<div class="notice notice-success is-dismissible">
+					<p><?php echo esc_html( sprintf( __( 'Test export succeeded for post ID %d (%s).', 'read-offline' ), $post_id, $format ) ); ?></p>
+					<p><a class="button" target="_blank" rel="noopener" href="<?php echo esc_url( $data['url'] ); ?>"><?php esc_html_e( 'Open file', 'read-offline' ); ?></a></p>
+				</div>
+				<?php
+			}
+		}
+		if ( isset( $_GET['read_offline_test_error'] ) ) {
+			$code = sanitize_text_field( $_GET['read_offline_test_error'] );
+			$messages = [
+				'forbidden'        => __( 'You do not have permission to run a test export.', 'read-offline' ),
+				'invalid_params'    => __( 'Please provide a valid post ID and format.', 'read-offline' ),
+				'not_found'         => __( 'The requested post could not be found.', 'read-offline' ),
+				'pdf_failed'        => __( 'PDF generation failed. Check the mPDF library and settings.', 'read-offline' ),
+				'epub_failed'       => __( 'EPUB generation failed. Check the PHPePub library and settings.', 'read-offline' ),
+				'mpdf_missing'      => __( 'mPDF is not available. Install Composer dependencies.', 'read-offline' ),
+				'phpepub_missing'   => __( 'PHPePub is not available. Install Composer dependencies.', 'read-offline' ),
+				'generation_failed' => __( 'Export failed for unknown reasons.', 'read-offline' ),
+			];
+			$message = isset( $messages[ $code ] ) ? $messages[ $code ] : __( 'Test export failed.', 'read-offline' );
+			?>
+			<div class="notice notice-error is-dismissible">
+				<p><?php echo esc_html( $message ); ?></p>
+			</div>
+			<?php
+		}
+	}
+
+	public static function test_export_action() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'read-offline' ) );
+		}
+		$nonce = isset( $_POST['_rot_nonce'] ) ? sanitize_text_field( $_POST['_rot_nonce'] ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'read_offline_test_export' ) ) {
+			wp_die( esc_html__( 'Nonce verification failed.', 'read-offline' ) );
+		}
+		$post_id = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
+		$format  = isset( $_POST['format'] ) ? sanitize_key( $_POST['format'] ) : '';
+		$redirect = wp_get_referer();
+		if ( ! $redirect ) {
+			$redirect = admin_url( 'options-general.php?page=read-offline-settings' );
+		}
+		if ( $post_id <= 0 || ! in_array( $format, [ 'pdf', 'epub' ], true ) ) {
+			wp_safe_redirect( add_query_arg( 'read_offline_test_error', 'invalid_params', $redirect ) );
+			exit;
+		}
+		$path = Read_Offline_Export::generate( $post_id, $format );
+		if ( is_wp_error( $path ) || ! $path ) {
+			$code = is_wp_error( $path ) ? $path->get_error_code() : 'generation_failed';
+			wp_safe_redirect( add_query_arg( 'read_offline_test_error', $code, $redirect ) );
+			exit;
+		}
+		// Convert path to URL (mirror of Read_Offline_Export::path_to_url)
+		$uploads = wp_upload_dir();
+		$url     = str_replace( $uploads['basedir'], $uploads['baseurl'], $path );
+		$token   = wp_generate_password( 20, false, false );
+		// Remember last tested ID
+		$opts = get_option( 'read_offline_settings_general', [] );
+		$opts['last_test_post_id'] = $post_id;
+		update_option( 'read_offline_settings_general', $opts );
+		set_transient( 'read_offline_test_' . $token, [ 'url' => $url, 'format' => $format, 'post_id' => $post_id ], 5 * MINUTE_IN_SECONDS );
+		wp_safe_redirect( add_query_arg( [ 'read_offline_test_done' => 1, 'token' => $token ], $redirect ) );
+		exit;
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"name": "your-vendor/read-offline",
+	"description": "Export WordPress posts and pages to PDF and EPUB",
+	"type": "project",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=7.4",
+		"mpdf/mpdf": "^8.2",
+		"grandt/phpepub": "^4.0"
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"sort-packages": true
+	}
+}
