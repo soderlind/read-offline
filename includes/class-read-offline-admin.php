@@ -176,7 +176,7 @@ class Read_Offline_Admin {
 					'include_featured' => true,
 					'include_author'   => true,
 					'combine_bulk'     => true,
-					'rest_public'      => true, // Allow unauthenticated REST access to published posts.
+					'rest_public'      => false, // Default OFF: unauthenticated REST export disabled unless explicitly enabled.
 					'rest_rate_limit'  => 10,   // Requests per window.
 					'rest_rate_window' => 60,   // Window seconds.
 				),
