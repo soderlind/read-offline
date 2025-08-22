@@ -14,12 +14,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Read_Offline_Export {
 	/**
+	 * Format -> handler map for single & combined generation.
+	 * @var array<string,array{single:string,combined:string}>
+	 */
+	protected static $format_handlers = array(
+		'pdf'  => array( 'single' => 'generate_pdf', 'combined' => 'generate_combined_pdf' ),
+		'epub' => array( 'single' => 'generate_epub', 'combined' => 'generate_combined_epub' ),
+		'md'   => array( 'single' => 'generate_markdown', 'combined' => 'generate_combined_markdown' ),
+	);
+	/**
+	 * Per-request rate limiting context.
+	 *
+	 * @var array{limit?:int,remaining?:int,reset?:int}
+	 */
+	private static $rate_context = array();
+	/**
 	 * Register hooks.
 	 *
 	 * @return void
 	 */
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'register_rest' ) );
+		add_filter( 'rest_request_dispatch', array( __CLASS__, 'add_rate_limit_headers' ), 10, 3 );
 	}
 
 	/**
@@ -60,30 +76,44 @@ class Read_Offline_Export {
 	 * @return bool|WP_Error
 	 */
 	public static function rest_permission( $request ) {
-		$options = get_option( 'read_offline_settings_general', array() );
-		$public  = ! empty( $options[ 'rest_public' ] );
+		// Reset per-request context.
+		self::$rate_context = array();
+		$options            = get_option( 'read_offline_settings_general', array() );
+		$public             = ! empty( $options[ 'rest_public' ] );
 		if ( ! $public && ! current_user_can( 'manage_options' ) ) {
 			return new WP_Error( 'forbidden', __( 'REST export disabled publicly.', 'read-offline' ), array( 'status' => 403 ) );
 		}
-		// Rate limiting only for unauthenticated users.
 		if ( $public && ! is_user_logged_in() ) {
 			$limit  = isset( $options[ 'rest_rate_limit' ] ) ? (int) $options[ 'rest_rate_limit' ] : 10;
 			$window = isset( $options[ 'rest_rate_window' ] ) ? (int) $options[ 'rest_rate_window' ] : 60;
 			if ( $limit > 0 && $window > 0 ) {
-				$ip        = isset( $_SERVER[ 'REMOTE_ADDR' ] ) ? sanitize_text_field( wp_unslash( $_SERVER[ 'REMOTE_ADDR' ] ) ) : 'unknown';
-				$key       = 'ro_rl_' . md5( $ip );
-				$record    = get_transient( $key );
-				$now       = time();
-				$reset_eta = $now + $window;
+				$ip     = isset( $_SERVER[ 'REMOTE_ADDR' ] ) ? sanitize_text_field( wp_unslash( $_SERVER[ 'REMOTE_ADDR' ] ) ) : 'unknown';
+				$key    = 'ro_rl_' . md5( $ip );
+				$record = wp_cache_get( $key, 'read_offline' );
+				if ( false === $record ) {
+					$record = get_transient( $key );
+				}
+				$now = time();
 				if ( ! is_array( $record ) || $record[ 'expires' ] <= $now ) {
 					$record = array( 'count' => 0, 'expires' => $now + $window );
 				}
 				if ( $record[ 'count' ] >= $limit ) {
-					$retry = max( 1, $record[ 'expires' ] - $now );
+					$retry              = max( 1, $record[ 'expires' ] - $now );
+					self::$rate_context = array(
+						'limit'     => $limit,
+						'remaining' => 0,
+						'reset'     => $record[ 'expires' ],
+					);
 					return new WP_Error( 'rate_limited', sprintf( __( 'Rate limit exceeded. Retry in %d seconds.', 'read-offline' ), $retry ), array( 'status' => 429, 'retry_after' => $retry ) );
 				}
 				$record[ 'count' ]++;
+				wp_cache_set( $key, $record, 'read_offline', $record[ 'expires' ] - $now );
 				set_transient( $key, $record, $record[ 'expires' ] - $now );
+				self::$rate_context = array(
+					'limit'     => $limit,
+					'remaining' => max( 0, $limit - $record[ 'count' ] ),
+					'reset'     => $record[ 'expires' ],
+				);
 			}
 		}
 		return true;
@@ -127,6 +157,42 @@ class Read_Offline_Export {
 	}
 
 	/**
+	 * Filter REST dispatch errors to append Retry-After header when rate limited.
+	 */
+	public static function add_rate_limit_headers( $response, $handler, $request ) {
+		$ctx = self::$rate_context;
+		if ( is_wp_error( $response ) && 'rate_limited' === $response->get_error_code() ) {
+			$retry = (int) $response->get_error_data( 'retry_after' );
+			if ( $retry > 0 ) {
+				$rest_response = new WP_REST_Response( array( 'error' => 'rate_limited', 'retry_after' => $retry ) );
+				$rest_response->set_status( 429 );
+				$rest_response->header( 'Retry-After', (string) $retry );
+				if ( ! empty( $ctx ) ) {
+					$rest_response->header( 'X-RateLimit-Limit', (string) $ctx[ 'limit' ] );
+					$rest_response->header( 'X-RateLimit-Remaining', (string) $ctx[ 'remaining' ] );
+					$rest_response->header( 'X-RateLimit-Reset', (string) $ctx[ 'reset' ] );
+				} else {
+					$rest_response->header( 'X-RateLimit-Remaining', '0' );
+				}
+				return $rest_response;
+			}
+		}
+		if ( ! is_wp_error( $response ) && ! empty( $ctx ) ) {
+			if ( $response instanceof WP_REST_Response ) {
+				$response->header( 'X-RateLimit-Limit', (string) $ctx[ 'limit' ] );
+				$response->header( 'X-RateLimit-Remaining', (string) $ctx[ 'remaining' ] );
+				$response->header( 'X-RateLimit-Reset', (string) $ctx[ 'reset' ] );
+			} elseif ( is_array( $response ) ) {
+				$rest_response = new WP_REST_Response( $response );
+				$rest_response->header( 'X-RateLimit-Limit', (string) $ctx[ 'limit' ] );
+				$rest_response->header( 'X-RateLimit-Remaining', (string) $ctx[ 'remaining' ] );
+				$rest_response->header( 'X-RateLimit-Reset', (string) $ctx[ 'reset' ] );
+				return $rest_response;
+			}
+		}
+		return $response;
+	}
+	/**
 	 * Generate an export file for a post.
 	 *
 	 * @param int    $post_id Post ID.
@@ -134,6 +200,10 @@ class Read_Offline_Export {
 	 * @return string|WP_Error Absolute file path or error.
 	 */
 	public static function generate( $post_id, $format ) {
+		$format = strtolower( (string) $format );
+		if ( empty( self::$format_handlers[ $format ] ) ) {
+			return new WP_Error( 'invalid_format', 'Invalid format' );
+		}
 		$post = get_post( $post_id );
 		if ( ! $post ) {
 			return new WP_Error( 'not_found', 'Post not found' );
@@ -143,29 +213,16 @@ class Read_Offline_Export {
 		$subdir  = '/read-offline/' . date( 'Y/m', current_time( 'timestamp' ) );
 		$dir     = trailingslashit( $uploads[ 'basedir' ] ) . ltrim( $subdir, '/' );
 		wp_mkdir_p( $dir );
-
 		$filename = self::build_filename( $post, $format, $hash );
 		$path     = trailingslashit( $dir ) . $filename;
-
 		if ( file_exists( $path ) ) {
-			return $path;
+			return $path; // cached
 		}
-
-		// Prepare content
 		$title   = get_the_title( $post );
 		$content = apply_filters( 'the_content', $post->post_content );
 		$content = apply_filters( 'read_offline_content_html', $content, $post, $format );
-
-		if ( 'pdf' === $format ) {
-			return self::generate_pdf( $post, $title, $content, $path );
-		}
-		if ( 'epub' === $format ) {
-			return self::generate_epub( $post, $title, $content, $path );
-		}
-		if ( 'md' === $format ) {
-			return self::generate_markdown( $post, $title, $content, $path );
-		}
-		return new WP_Error( 'invalid_format', 'Invalid format' );
+		$method  = self::$format_handlers[ $format ][ 'single' ];
+		return self::$method( $post, $title, $content, $path );
 	}
 
 	/**
@@ -177,10 +234,13 @@ class Read_Offline_Export {
 	 * @return string|WP_Error Absolute path or error.
 	 */
 	public static function generate_combined( $post_ids, $format ) {
+		$format = strtolower( (string) $format );
+		if ( empty( self::$format_handlers[ $format ] ) ) {
+			return new WP_Error( 'invalid_format', 'Invalid format' );
+		}
 		$post_ids = array_values( array_unique( array_map( 'intval', (array) $post_ids ) ) );
 		$post_ids = array_filter( $post_ids, function ($pid) {
-			return get_post( $pid );
-		} );
+			return get_post( $pid ); } );
 		if ( empty( $post_ids ) ) {
 			return new WP_Error( 'not_found', 'No valid posts provided' );
 		}
@@ -191,16 +251,8 @@ class Read_Offline_Export {
 		$ts       = current_time( 'Ymd_His' );
 		$filename = sprintf( '%s_%s_%dposts.%s', $site, $ts, count( $post_ids ), $format );
 		$path     = $dir . sanitize_file_name( $filename );
-		if ( 'pdf' === $format ) {
-			return self::generate_combined_pdf( $post_ids, $path );
-		}
-		if ( 'epub' === $format ) {
-			return self::generate_combined_epub( $post_ids, $path );
-		}
-		if ( 'md' === $format ) {
-			return self::generate_combined_markdown( $post_ids, $path );
-		}
-		return new WP_Error( 'invalid_format', 'Invalid format' );
+		$method   = self::$format_handlers[ $format ][ 'combined' ];
+		return self::$method( $post_ids, $path );
 	}
 	/**
 	 * Generate Markdown file for a single post.
@@ -212,21 +264,11 @@ class Read_Offline_Export {
 	 * @return string|WP_Error
 	 */
 	protected static function generate_markdown( WP_Post $post, $title, $html, $path ) {
-		$md = self::html_to_markdown( $title, $html, array( 'include_author' => ! empty( get_option( 'read_offline_settings_general', array() )[ 'include_author' ] ) ? $post->post_author : 0, 'date' => get_the_date( '', $post ) ) );
-		if ( ! function_exists( 'WP_Filesystem' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-		global $wp_filesystem;
-		WP_Filesystem();
-		$ok = false;
-		if ( $wp_filesystem && method_exists( $wp_filesystem, 'put_contents' ) ) {
-			$ok = $wp_filesystem->put_contents( $path, $md, FS_CHMOD_FILE );
-		}
-		if ( ! $ok ) {
-			$ok = false !== @file_put_contents( $path, $md );
-		}
-		return $ok ? $path : new WP_Error( 'md_write_failed', 'Could not write markdown file' );
+		$include_author = ! empty( get_option( 'read_offline_settings_general', array() )[ 'include_author' ] );
+		$md             = self::html_to_markdown( $title, $html, array( 'include_author' => $include_author ? $post->post_author : 0, 'date' => get_the_date( '', $post ) ) );
+		return self::write_file( $path, $md ) ? $path : new WP_Error( 'md_write_failed', 'Could not write markdown file' );
 	}
+
 	/**
 	 * Generate combined Markdown file from multiple posts.
 	 * @param array $post_ids IDs.
@@ -234,7 +276,8 @@ class Read_Offline_Export {
 	 * @return string|WP_Error
 	 */
 	protected static function generate_combined_markdown( $post_ids, $path ) {
-		$parts = array();
+		$include_author = ! empty( get_option( 'read_offline_settings_general', array() )[ 'include_author' ] );
+		$parts          = array();
 		foreach ( $post_ids as $pid ) {
 			$post = get_post( $pid );
 			if ( ! $post ) {
@@ -243,202 +286,295 @@ class Read_Offline_Export {
 			$title   = get_the_title( $post );
 			$html    = apply_filters( 'the_content', $post->post_content );
 			$html    = apply_filters( 'read_offline_content_html', $html, $post, 'md' );
-			$parts[] = self::html_to_markdown( $title, $html, array( 'include_author' => ! empty( get_option( 'read_offline_settings_general', array() )[ 'include_author' ] ) ? $post->post_author : 0, 'date' => get_the_date( '', $post ) ) );
+			$parts[] = self::html_to_markdown( $title, $html, array( 'include_author' => $include_author ? $post->post_author : 0, 'date' => get_the_date( '', $post ) ) );
 		}
 		$md = implode( "\n\n---\n\n", $parts );
-		if ( ! function_exists( 'WP_Filesystem' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-		global $wp_filesystem;
-		WP_Filesystem();
-		$ok = false;
-		if ( $wp_filesystem && method_exists( $wp_filesystem, 'put_contents' ) ) {
-			$ok = $wp_filesystem->put_contents( $path, $md, FS_CHMOD_FILE );
-		}
-		if ( ! $ok ) {
-			$ok = false !== @file_put_contents( $path, $md );
-		}
-		return $ok ? $path : new WP_Error( 'md_write_failed', 'Could not write markdown file' );
-	}
-	/**
-	 * Convert HTML fragment into a rough Markdown representation.
-	 * This is intentionally lightweight to avoid adding large libraries.
-	 * @param string $title Title.
-	 * @param string $html HTML content.
-	 * @param array $meta Meta (include_author => author_id|0, date => string).
-	 * @return string Markdown.
-	 */
-	protected static function html_to_markdown( $title, $html, $meta = array() ) {
-		$author_line = '';
-		if ( ! empty( $meta[ 'include_author' ] ) ) {
-			$author_line = esc_html( get_the_author_meta( 'display_name', $meta[ 'include_author' ] ) );
-			if ( ! empty( $meta[ 'date' ] ) ) {
-				$author_line .= ' — ' . esc_html( $meta[ 'date' ] );
-			}
-		}
-		// Basic replacements
-		$md = $html;
-		// Remove scripts/styles
-		$md = preg_replace( '#<(script|style)[^>]*>.*?</\1>#is', '', $md );
-		// Headings (ensure real newlines, not literal \n)
-		for ( $i = 6; $i >= 1; $i-- ) {
-			$md = preg_replace( '#<h' . $i . '[^>]*>(.*?)</h' . $i . '>#is', str_repeat( '#', $i ) . " $1\n\n", $md );
-		}
-		// Bold/italic
-		$md = preg_replace( '#<(strong|b)>(.*?)</\1>#is', '**$2**', $md );
-		$md = preg_replace( '#<(em|i)>(.*?)</\1>#is', '*$2*', $md );
-		// Images ![alt](src)
-		$md = preg_replace_callback( '#<img[^>]*>#i', function ($m) {
-			if ( preg_match( '#alt="([^"]*)"#i', $m[ 0 ], $alt ) ) {
-				$a = $alt[ 1 ];
-			} else {
-				$a = '';
-			}
-			if ( preg_match( '#src="([^"]*)"#i', $m[ 0 ], $src ) ) {
-				$s = $src[ 1 ];
-			} else {
-				$s = '';
-			}
-			return $s ? '![' . $a . '](' . $s . ')' : '';
-		}, $md );
-		// Links [text](url)
-		$md = preg_replace( '#<a\s+[^>]*href="([^"]*)"[^>]*>(.*?)</a>#is', '[$2]($1)', $md );
-		// Lists (real newline after each item)
-		$md = preg_replace( '#<li[^>]*>(.*?)</li>#is', "- $1\n", $md );
-		$md = preg_replace( '#</?(ul|ol)[^>]*>#i', "\n", $md );
-		// Code blocks (convert to fenced code blocks with triple backticks)
-		$md = preg_replace( '#<pre[^>]*><code[^>]*>(.*?)</code></pre>#is', "```\n$1\n```\n", $md );
-		$md = preg_replace( '#<code>(.*?)</code>#is', '`$1`', $md );
-		// Paragraphs / line breaks
-		$md = preg_replace( '#<br\s*/?>#i', "\n", $md );
-		$md = preg_replace( '#</p>#i', "\n\n", $md );
-		$md = preg_replace( '#<p[^>]*>#i', '', $md );
-		// Strip remaining tags
-		$md = wp_strip_all_tags( $md );
-		// Decode entities
-		$md = html_entity_decode( $md, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-		// Basic list spacing & trailing space cleanup
-		$md = preg_replace( "/[ \t]+\n/", "\n", $md ); // strip trailing spaces at line end
-		// Ensure blank line before list blocks
-		$md = preg_replace( '/(^|\n)(-\s)/', "\n$1$2", $md );
-		// Collapse excessive blank lines (3+ -> 2)
-		$md = preg_replace( "/\n{3,}/", "\n\n", $md );
-		// Ensure a blank line after list blocks not followed by another list or blank line
-		$md    = preg_replace( '/((?:^- .+\n)+)(?!- |\n)/m', "$1\n", $md );
-		$front = '# ' . $title;
-		if ( $author_line ) {
-			$front .= "\n" . $author_line;
-		}
-		$front .= "\n\n";
-		return $front . trim( $md ) . "\n";
+		return self::write_file( $path, $md ) ? $path : new WP_Error( 'md_write_failed', 'Could not write markdown file' );
 	}
 
 	/**
-	 * Internal: build combined PDF.
-	 *
-	 * @param array  $post_ids IDs.
-	 * @param string $path     Destination path.
-	 * @return string|WP_Error
+	 * Convert filtered HTML into a simple Markdown representation.
+	 * NOTE: This is a lightweight, heuristic conversion – not a full HTML->MD parser.
+	 * Filters: read_offline_markdown_pre / read_offline_markdown_post
+	 * @param string $title Document title (used to prepend as H1 if not present).
+	 * @param string $html  HTML markup.
+	 * @param array  $args  { include_author:int user_id, date:string }
+	 * @return string Markdown
 	 */
-	protected static function generate_combined_pdf( $post_ids, $path ) {
-		if ( ! class_exists( '\\Mpdf\\Mpdf' ) ) {
-			return new WP_Error( 'mpdf_missing', 'mPDF not available. Install dependencies.' );
+	protected static function html_to_markdown( $title, $html, $args = array() ) {
+		$pre = apply_filters( 'read_offline_markdown_pre', null, $title, $html, $args );
+		if ( null !== $pre ) {
+			return (string) $pre;
 		}
-		$pdf_opts  = get_option( 'read_offline_settings_pdf', array() );
-		$gen_opts  = get_option( 'read_offline_settings_general', array() );
-		$m         = $pdf_opts[ 'margins' ] ?? array( 't' => 15, 'r' => 15, 'b' => 15, 'l' => 15 );
-		$size      = $pdf_opts[ 'size' ] ?? 'A4';
-		$formatArg = $size;
-		if ( is_string( $size ) && 'custom' === strtolower( $size ) ) {
-			$custom = isset( $pdf_opts[ 'custom_size' ] ) ? trim( (string) $pdf_opts[ 'custom_size' ] ) : '';
-			if ( $custom && preg_match( '/^(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)$/i', $custom, $mm ) ) {
-				$w = (float) $mm[ 1 ];
-				$h = (float) $mm[ 2 ];
-				if ( $w > 0 && $h > 0 ) {
-					$formatArg = array( $w, $h );
+		// Basic normalisation.
+		$md = $html;
+		// Protect code blocks: convert <pre><code> ... </code></pre> to fenced blocks.
+		$md = preg_replace_callback( '#<pre[^>]*><code[^>]*>([\s\S]*?)</code></pre>#i', function ($m) {
+			$code = html_entity_decode( $m[ 1 ], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+			$code = preg_replace( "/\r?\n$/", '', $code );
+			return "\n```\n" . trim( $code ) . "\n```\n";
+		}, $md );
+		// Headings h1-h6.
+		for ( $i = 6; $i >= 1; $i-- ) {
+			$md = preg_replace( '#<h' . $i . '[^>]*>(.*?)</h' . $i . '>#is', function ($m) use ($i) {
+				$text = trim( wp_strip_all_tags( $m[ 1 ] ) );
+				return "\n" . str_repeat( '#', $i ) . ' ' . $text . "\n\n";
+			}, $md );
+		}
+		// Bold / italics.
+		$md = preg_replace( '#<(strong|b)[^>]*>(.*?)</\1>#is', '**$2**', $md );
+		$md = preg_replace( '#<(em|i)[^>]*>(.*?)</\1>#is', '*$2*', $md );
+		// Links.
+		$md = preg_replace_callback( '#<a\s+[^>]*href=("|\')(.*?)\1[^>]*>(.*?)</a>#is', function ($m) {
+			$text = trim( wp_strip_all_tags( $m[ 3 ] ) );
+			$url = trim( $m[ 2 ] );
+			return '[' . $text . '](' . $url . ')';
+		}, $md );
+		// Images.
+		$md = preg_replace_callback( '#<img\s+[^>]*src=("|\')(.*?)\1[^>]*>#i', function ($m) {
+			$alt = '';
+			if ( preg_match( '#alt=("|\')(.*?)\1#i', $m[ 0 ], $am ) ) {
+				$alt = $am[ 2 ];
+			}
+			return '![' . $alt . '](' . $m[ 2 ] . ')';
+		}, $md );
+		// Unordered lists.
+		$md = preg_replace_callback( '#<ul[^>]*>([\s\S]*?)</ul>#i', function ($m) {
+			$items = preg_replace( '#<li[^>]*>([\s\S]*?)</li>#i', function ($iMatch) {
+				return '* ' . trim( wp_strip_all_tags( $iMatch[ 1 ] ) ) . "\n";
+			}, $m[ 1 ] );
+			return "\n" . trim( $items ) . "\n";
+		}, $md );
+		// Ordered lists.
+		$listIndex = 0;
+		$md        = preg_replace_callback( '#<ol[^>]*>([\s\S]*?)</ol>#i', function ($m) use (&$listIndex) {
+			$listIndex = 0;
+			$items = preg_replace_callback( '#<li[^>]*>([\s\S]*?)</li>#i', function ($iMatch) use (&$listIndex) {
+				$listIndex++;
+				return $listIndex . '. ' . trim( wp_strip_all_tags( $iMatch[ 1 ] ) ) . "\n";
+			}, $m[ 1 ] );
+			return "\n" . trim( $items ) . "\n";
+		}, $md );
+		// Blockquotes.
+		$md = preg_replace_callback( '#<blockquote[^>]*>([\s\S]*?)</blockquote>#i', function ($m) {
+			$text = trim( wp_strip_all_tags( $m[ 1 ] ) );
+			$text = preg_replace( '/^/m', '> ', $text );
+			return "\n" . $text . "\n";
+		}, $md );
+		// Line breaks & paragraphs.
+		$md = preg_replace( '#<br\s*/?>#i', "\n", $md );
+		$md = preg_replace( '#</p>#i', "\n\n", $md );
+		$md = preg_replace( '#<p[^>]*>#i', '', $md );
+		// Strip remaining tags.
+		$md = wp_strip_all_tags( $md );
+		// Decode entities.
+		$md = html_entity_decode( $md, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$md = preg_replace( "/\n{3,}/", "\n\n", $md );
+		$md = trim( $md );
+		// Prepend title if not already first line heading.
+		if ( $title && ! preg_match( '/^# /', $md ) ) {
+			$md = '# ' . trim( wp_strip_all_tags( $title ) ) . "\n\n" . $md;
+		}
+		if ( ! empty( $args[ 'include_author' ] ) ) {
+			$author = get_the_author_meta( 'display_name', (int) $args[ 'include_author' ] );
+			$date   = isset( $args[ 'date' ] ) ? $args[ 'date' ] : '';
+			$meta   = trim( $author . ( $date ? ' – ' . $date : '' ) );
+			if ( $meta ) {
+				$md .= "\n\n_" . $meta . '_';
+			}
+		}
+		return apply_filters( 'read_offline_markdown_post', $md, $title, $html, $args );
+	}
+
+	/**
+	 * Build TOC HTML for EPUB: returns array( updatedHtml, tocHtml )
+	 * Adds IDs to headings if missing.
+	 * @param string $html
+	 * @param int $depth Max heading level.
+	 * @return array
+	 */
+	protected static function build_epub_toc_html( $html, $depth = 3 ) {
+		$dom = new DOMDocument();
+		libxml_use_internal_errors( true );
+		$loaded = $dom->loadHTML( '<!DOCTYPE html><html><body>' . $html . '</body></html>' );
+		libxml_clear_errors();
+		if ( ! $loaded ) {
+			return array( $html, '' );
+		}
+		$xpath  = new DOMXPath( $dom );
+		$nodes  = $xpath->query( '//h1 | //h2 | //h3 | //h4 | //h5 | //h6' );
+		$toc    = array();
+		$count  = 0;
+		$maxTag = 'h' . (int) $depth;
+		foreach ( $nodes as $n ) {
+			if ( strcasecmp( $n->nodeName, $maxTag ) > 0 ) {
+				continue; // deeper than allowed depth.
+			}
+			$count++;
+			$id = $n->getAttribute( 'id' );
+			if ( ! $id ) {
+				$id = 'toc-' . $count;
+				$n->setAttribute( 'id', $id );
+			}
+			$level = (int) substr( $n->nodeName, 1 );
+			$text  = trim( preg_replace( '/\s+/', ' ', $n->textContent ) );
+			$toc[] = array( 'level' => $level, 'id' => $id, 'text' => $text );
+		}
+		if ( empty( $toc ) ) {
+			return array( $html, '' );
+		}
+		// Build nested list.
+		$out   = '';
+		$stack = array();
+		$prev  = 0;
+		foreach ( $toc as $entry ) {
+			$l = $entry[ 'level' ];
+			if ( $prev === 0 ) {
+				$out .= '<ul>';
+				$stack[] = 'ul';
+			} elseif ( $l > $prev ) {
+				$out .= '<ul>';
+				$stack[] = 'ul';
+			} elseif ( $l < $prev ) {
+				while ( ! empty( $stack ) && $l < $prev ) {
+					$out .= '</ul>';
+					array_pop( $stack );
+					$prev--;
 				}
 			}
-			if ( 'custom' === $formatArg ) {
-				$formatArg = 'A4';
+			$out .= '<li><a href="#' . esc_attr( $entry[ 'id' ] ) . '">' . esc_html( $entry[ 'text' ] ) . '</a></li>';
+			$prev = $l;
+		}
+		while ( ! empty( $stack ) ) {
+			$out .= '</ul>';
+			array_pop( $stack );
+		}
+		$bodyNode = $xpath->query( '//body' )->item( 0 );
+		$newHtml  = '';
+		if ( $bodyNode ) {
+			foreach ( $bodyNode->childNodes as $child ) {
+				$newHtml .= $dom->saveHTML( $child );
 			}
 		}
+		return array( $newHtml, $out );
+	}
+
+	/* EPUB helpers for DRY */
+	protected static function epub_get_meta( $epub_opts ) {
+		$meta = $epub_opts[ 'meta' ] ?? array();
+		return array(
+			'author'    => $meta[ 'author' ] ?? get_bloginfo( 'name' ),
+			'publisher' => $meta[ 'publisher' ] ?? get_bloginfo( 'name' ),
+			'lang'      => $meta[ 'lang' ] ?? get_locale(),
+		);
+	}
+	protected static function epub_css_profile( $epub_opts, $post = null ) {
+		$profile    = $epub_opts[ 'css_profile' ] ?? 'light';
+		$custom_css = $epub_opts[ 'custom_css' ] ?? '';
+		switch ( $profile ) {
+			case 'light':
+				$css = 'body{font-family: serif;line-height:1.6;color:#222;background:#fff;padding:1em;} img{max-width:100%;height:auto;} h1,h2,h3{margin-top:1.2em;}';
+				break;
+			case 'dark':
+				$css = 'body{font-family: serif;line-height:1.6;color:#f5f5f5;background:#111;padding:1em;} a{color:#9cf;} img{max-width:100%;height:auto;} h1,h2,h3{margin-top:1.2em;}';
+				break;
+			case 'custom':
+				$css = (string) $custom_css;
+				break;
+			case 'none':
+			default:
+				$css = '';
+				break;
+		}
+		return apply_filters( 'read_offline_epub_css', $css, $post, $epub_opts );
+	}
+	protected static function epub_build_toc_and_body( $html, $epub_opts, $post_or_null, $lang ) {
+		$prefixToc = '';
+		if ( ! empty( $epub_opts[ 'toc' ] ) ) {
+			$depth                  = max( 1, min( 6, (int) ( $epub_opts[ 'toc_depth' ] ?? 3 ) ) );
+			list( $html, $tocHtml ) = self::build_epub_toc_html( $html, $depth );
+			if ( $tocHtml ) {
+				$tocHtml   = apply_filters( 'read_offline_epub_toc_html', $tocHtml, $post_or_null, $depth );
+				$prefixToc = '<div class="read-offline-epub-toc-wrap"><h1>' . esc_html( __( 'Contents', 'read-offline' ) ) . '</h1>' . $tocHtml . '</div>';
+			}
+		}
+		return $prefixToc . $html;
+	}
+
+	/* ================= Additional Core Helpers (restored) ================= */
+	protected static function compute_hash( $post, $format ) {
+		$general = get_option( 'read_offline_settings_general', array() );
+		$epub    = ( 'epub' === $format ) ? get_option( 'read_offline_settings_epub', array() ) : array();
+		$pdf     = ( 'pdf' === $format ) ? get_option( 'read_offline_settings_pdf', array() ) : array();
+		$payload = array(
+			$post->ID,
+			$post->post_modified_gmt,
+			$format,
+			md5( wp_json_encode( $general ) ),
+			md5( wp_json_encode( $epub ) ),
+			md5( wp_json_encode( $pdf ) ),
+		);
+		return substr( md5( implode( '|', $payload ) ), 0, 12 );
+	}
+
+	protected static function build_filename( $post, $format, $hash ) {
+		$slug = sanitize_title( get_the_title( $post ) );
+		return $slug . '-' . $hash . '.' . $format;
+	}
+
+	protected static function path_to_url( $path ) {
+		$uploads = wp_upload_dir();
+		$base    = trailingslashit( $uploads[ 'basedir' ] );
+		$baseurl = trailingslashit( $uploads[ 'baseurl' ] );
+		if ( str_starts_with( $path, $base ) ) {
+			return $baseurl . ltrim( substr( $path, strlen( $base ) ), '/' );
+		}
+		return $path;
+	}
+
+	protected static function resolve_cover_image( $post, $mode, $opts = array() ) {
+		$bytes = $mime = $filename = null;
+		if ( 'featured' === $mode && has_post_thumbnail( $post ) ) {
+			$id  = get_post_thumbnail_id( $post );
+			$src = wp_get_attachment_image_src( $id, 'large' );
+			if ( $src ) {
+				$filename = basename( parse_url( $src[ 0 ], PHP_URL_PATH ) );
+				$bytes    = wp_remote_retrieve_body( wp_remote_get( $src[ 0 ] ) );
+				$mime     = get_post_mime_type( $id );
+			}
+		} elseif ( 'first' === $mode ) {
+			if ( preg_match( '#<img[^>]+src=("|\')(.*?)\1#i', $post->post_content, $m ) ) {
+				$src      = $m[ 2 ];
+				$filename = basename( parse_url( $src, PHP_URL_PATH ) );
+				$bytes    = wp_remote_retrieve_body( wp_remote_get( $src ) );
+				$mime     = wp_check_filetype( $filename )[ 'type' ] ?? 'image/jpeg';
+			}
+		}
+		if ( $bytes && $filename ) {
+			return array( $filename, $bytes, $mime ?: 'image/jpeg' );
+		}
+		return null;
+	}
+
+	protected static function wrap_epub_xhtml_document( $title, $lang, $body_html, $css ) {
+		return '<?xml version="1.0" encoding="UTF-8"?>' .
+			'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">' .
+			'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="' . esc_attr( $lang ) . '"><head><meta charset="utf-8" />' .
+			'<title>' . esc_html( $title ) . '</title><style type="text/css">' . $css . '</style></head><body>' . $body_html . '</body></html>';
+	}
+
+	/* ================= PDF Generation ================= */
+	protected static function generate_pdf( WP_Post $post, $title, $html, $path ) {
+		$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
+		$gen_opts = get_option( 'read_offline_settings_general', array() );
+		$mpdf     = self::build_mpdf_instance( $pdf_opts, $gen_opts, $title, $post );
+		if ( is_wp_error( $mpdf ) ) {
+			return $mpdf;
+		}
+		$css = self::assemble_pdf_css( $pdf_opts, $gen_opts, $post );
+		$mpdf->WriteHTML( '<style>' . $css . '</style>', \Mpdf\HTMLParserMode::HEADER_CSS );
+		$mpdf->WriteHTML( $html, \Mpdf\HTMLParserMode::HTML_BODY );
 		try {
-			$mpdf = new \Mpdf\Mpdf(
-				array(
-					'format'        => $formatArg,
-					'margin_left'   => (int) ( $m[ 'l' ] ?? 15 ),
-					'margin_right'  => (int) ( $m[ 'r' ] ?? 15 ),
-					'margin_top'    => (int) ( $m[ 't' ] ?? 15 ),
-					'margin_bottom' => (int) ( $m[ 'b' ] ?? 15 ),
-				)
-			);
-			$mpdf->SetTitle( get_bloginfo( 'name' ) . ' – Combined Export' );
-			$mpdf->SetAuthor( get_bloginfo( 'name' ) );
-			if ( ! empty( $pdf_opts[ 'header' ] ) ) {
-				$mpdf->SetHTMLHeader( $pdf_opts[ 'header' ] );
-			}
-			if ( ! empty( $pdf_opts[ 'footer' ] ) ) {
-				$mpdf->SetHTMLFooter( $pdf_opts[ 'footer' ] );
-			} elseif ( ! empty( $pdf_opts[ 'page_numbers' ] ) ) {
-				$mpdf->SetFooter( '{PAGENO}/{nbpg}' );
-			}
-			if ( ! empty( $pdf_opts[ 'printable' ] ) ) {
-				$mpdf->SetProtection( array( 'print' ) );
-			} else {
-				$mpdf->SetProtection( array( 'copy' ) );
-			}
-			if ( ! empty( $pdf_opts[ 'watermark' ] ) ) {
-				$mpdf->SetWatermarkText( $pdf_opts[ 'watermark' ] );
-				$mpdf->showWatermarkText = true;
-			}
-			// TOC
-			if ( ! empty( $pdf_opts[ 'toc' ] ) ) {
-				$depth = max( 1, min( 6, (int) ( $pdf_opts[ 'toc_depth' ] ?? 3 ) ) );
-				$h2toc = array();
-				for ( $i = 1; $i <= $depth; $i++ ) {
-					$h2toc[ 'H' . $i ] = $i - 1;
-				}
-				$mpdf->h2toc = $h2toc;
-				$mpdf->TOCpagebreakByArray( array( 'toc-preHTML' => '<h1>' . esc_html( __( 'Contents', 'read-offline' ) ) . '</h1>', 'links' => 1 ) );
-			}
-			$base_css       = 'img{max-width:100%;height:auto;} figure{margin:0;}';
-			$pdf_custom_css = '';
-			if ( empty( $pdf_opts ) ) {
-				$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
-			}
-			if ( ! empty( $pdf_opts[ 'custom_css' ] ) ) {
-				$pdf_custom_css = $pdf_opts[ 'custom_css' ];
-			} elseif ( isset( $gen_opts[ 'css' ] ) ) { // legacy fallback.
-				$pdf_custom_css = $gen_opts[ 'css' ];
-			}
-			$base_css .= $pdf_custom_css;
-			$base_css .= apply_filters( 'read_offline_pdf_css', '', null );
-			$include_author   = ! empty( $gen_opts[ 'include_author' ] );
-			$include_featured = ! empty( $gen_opts[ 'include_featured' ] );
-			$first            = true;
-			foreach ( $post_ids as $pid ) {
-				$post = get_post( $pid );
-				if ( ! $post ) {
-					continue;
-				}
-				if ( ! $first ) {
-					$mpdf->AddPage();
-				}
-				$first      = false;
-				$title      = get_the_title( $post );
-				$content    = apply_filters( 'the_content', $post->post_content );
-				$content    = apply_filters( 'read_offline_content_html', $content, $post, 'pdf' );
-				$headerBits = '<h1>' . esc_html( $title ) . '</h1>';
-				$metaBits   = '';
-				if ( $include_author ) {
-					$metaBits .= '<p style="font-size:12px;color:#555;">' . esc_html( get_the_author_meta( 'display_name', $post->post_author ) ) . ' – ' . esc_html( get_the_date( '', $post ) ) . '</p>';
-				}
-				if ( $include_featured && has_post_thumbnail( $post ) ) {
-					$img        = get_the_post_thumbnail( $post, 'large', array( 'style' => 'max-width:100%;height:auto;margin:0 0 16px;' ) );
-					$headerBits .= $img ? $img : '';
-				}
-				$mpdf->WriteHTML( '<style>' . $base_css . '</style>' . $headerBits . $metaBits . $content );
-			}
 			$mpdf->Output( $path, \Mpdf\Output\Destination::FILE );
 			return $path;
 		} catch (\Throwable $e) {
@@ -446,743 +582,47 @@ class Read_Offline_Export {
 		}
 	}
 
-	/**
-	 * Internal: build combined EPUB.
-	 *
-	 * @param array  $post_ids IDs.
-	 * @param string $path     Destination path.
-	 * @return string|WP_Error
-	 */
-	protected static function generate_combined_epub( $post_ids, $path ) {
-		if ( ! class_exists( '\\PHPePub\\Core\\EPub' ) ) {
-			return new WP_Error( 'phpepub_missing', 'PHPePub not available. Install dependencies.' );
-		}
-		$epub_opts        = get_option( 'read_offline_settings_epub', array() );
-		$gen_opts         = get_option( 'read_offline_settings_general', array() );
-		$meta             = $epub_opts[ 'meta' ] ?? array();
-		$author           = $meta[ 'author' ] ?? get_bloginfo( 'name' );
-		$publisher        = $meta[ 'publisher' ] ?? get_bloginfo( 'name' );
-		$lang             = $meta[ 'lang' ] ?? get_locale();
-		$profile          = $epub_opts[ 'css_profile' ] ?? 'light';
-		$custom_css       = $epub_opts[ 'custom_css' ] ?? '';
-		$include_author   = ! empty( $gen_opts[ 'include_author' ] );
-		$include_featured = ! empty( $gen_opts[ 'include_featured' ] );
-		$css              = '';
-		switch ( $profile ) {
-			case 'light':
-				$css = 'body{font-family: serif;line-height:1.6;color:#222;background:#fff;padding:1em;} img{max-width:100%;height:auto;} h1,h2,h3{margin-top:1.2em;}';
-				break;
-			case 'dark':
-				$css = 'body{font-family: serif;line-height:1.6;color:#f5f5f5;background:#111;padding:1em;} a{color:#9cf;} img{max-width:100%;height:auto;} h1,h2,h3{margin-top:1.2em;}';
-				break;
-			case 'custom':
-				$css = (string) $custom_css;
-				break;
-			case 'none':
-			default:
-				$css = '';
-		}
-		$css = apply_filters( 'read_offline_epub_css', $css, null, $epub_opts );
-		try {
-			$book = new \PHPePub\Core\EPub();
-			$book->setTitle( get_bloginfo( 'name' ) . ' – Combined Export' );
-			$book->setIdentifier( home_url(), \PHPePub\Core\EPub::IDENTIFIER_URI );
-			$book->setLanguage( $lang );
-			$book->setAuthor( $author, $author );
-			$book->setPublisher( $publisher, get_site_url() );
-			$book->setSourceURL( home_url() );
-			$cover = apply_filters( 'read_offline_epub_cover', null, null, $epub_opts );
-			if ( ! $cover ) {
-				// Attempt to derive from first post's featured image.
-				$first = get_post( $post_ids[ 0 ] );
-				if ( $first ) {
-					$cover = self::resolve_cover_image( $first, $epub_opts[ 'cover' ] ?? 'featured', $epub_opts );
-				}
-			}
-			if ( $cover && method_exists( $book, 'setCoverImage' ) ) {
-				list( $fn, $bytes, $mime ) = $cover;
-				$book->setCoverImage( $fn, $bytes, $mime );
-			}
-			$index = 1;
-			foreach ( $post_ids as $pid ) {
-				$post = get_post( $pid );
-				if ( ! $post ) {
-					continue;
-				}
-				$title   = get_the_title( $post );
-				$content = apply_filters( 'the_content', $post->post_content );
-				$content = apply_filters( 'read_offline_content_html', $content, $post, 'epub' );
-				$header  = '<h1>' . esc_html( $title ) . '</h1>';
-				if ( $include_featured && has_post_thumbnail( $post ) ) {
-					$img    = get_the_post_thumbnail( $post, 'large', array( 'style' => 'max-width:100%;height:auto;margin:0 0 1em;' ) );
-					$header .= $img ? $img : '';
-				}
-				if ( $include_author ) {
-					$header .= '<p style="font-size:0.8em;color:#555;">' . esc_html( get_the_author_meta( 'display_name', $post->post_author ) ) . ' – ' . esc_html( get_the_date( '', $post ) ) . '</p>';
-				}
-				$body      = $header . $content;
-				$xhtml     = self::wrap_epub_xhtml_document( $title, $lang, $body, $css );
-				$chapterFN = 'chapter' . $index . '.xhtml';
-				$book->addChapter( sanitize_title( $title ), $chapterFN, $xhtml );
-				$index++;
-			}
-			$book->finalize();
-			$dir      = dirname( $path );
-			$basename = preg_replace( '/\.epub$/', '', basename( $path ) );
-			$book->saveBook( $basename, $dir );
-			return $path;
-		} catch (\Throwable $e) {
-			return new WP_Error( 'epub_failed', $e->getMessage() );
-		}
-	}
-
-	/**
-	 * Generate PDF using mPDF.
-	 *
-	 * @param WP_Post $post  Post object.
-	 * @param string  $title Title.
-	 * @param string  $html  HTML content.
-	 * @param string  $path  Destination path.
-	 * @return string|WP_Error
-	 */
-	protected static function generate_pdf( WP_Post $post, $title, $html, $path ) {
+	protected static function generate_combined_pdf( $post_ids, $path ) {
 		$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
 		$gen_opts = get_option( 'read_offline_settings_general', array() );
-		$size     = $pdf_opts[ 'size' ] ?? 'A4';
-		$m        = $pdf_opts[ 'margins' ] ?? array(
-			't' => 15,
-			'r' => 15,
-			'b' => 15,
-			'l' => 15,
+		$dummy    = (object) array( 'post_title' => get_bloginfo( 'name' ) . ' – Combined Export' );
+		$mpdf     = self::build_mpdf_instance( $pdf_opts, $gen_opts, $dummy->post_title, null );
+		if ( is_wp_error( $mpdf ) ) {
+			return $mpdf;
+		}
+		$css = self::assemble_pdf_css( $pdf_opts, $gen_opts, null );
+		$mpdf->WriteHTML( '<style>' . $css . '</style>', \Mpdf\HTMLParserMode::HEADER_CSS );
+		$include_author   = ! empty( $gen_opts[ 'include_author' ] );
+		$include_featured = ! empty( $gen_opts[ 'include_featured' ] );
+		foreach ( $post_ids as $pid ) {
+			$post = get_post( $pid );
+			if ( ! $post ) {
+				continue;
+			}
+			$title   = get_the_title( $post );
+			$content = apply_filters( 'the_content', $post->post_content );
+			$content = apply_filters( 'read_offline_content_html', $content, $post, 'pdf' );
+			$header  = self::build_post_header_html( $post, $include_featured, $include_author );
+			$mpdf->WriteHTML( '<pagebreak />' . $header . $content, \Mpdf\HTMLParserMode::HTML_BODY );
+		}
+		try {
+			$mpdf->Output( $path, \Mpdf\Output\Destination::FILE );
+			return $path;
+		} catch (\Throwable $e) {
+			return new WP_Error( 'pdf_failed', $e->getMessage() );
+		}
+	}
+
+	/* Smoke test method (manual invocation) */
+	public static function debug_smoke_capabilities() {
+		if ( ! function_exists( 'get_option' ) ) {
+			return array( 'wp_loaded' => false );
+		}
+		return array(
+			'wp_loaded'      => true,
+			'mpdf_available' => class_exists( '\\Mpdf\\Mpdf' ),
+			'epub_available' => class_exists( '\\PHPePub\\Core\\EPub' ),
 		);
-		$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
-		$legacy   = $gen_opts[ 'css' ] ?? '';
-		$css      = 'img{max-width:100%;height:auto;} figure{margin:0;}' . ( $pdf_opts[ 'custom_css' ] ?? $legacy );
-		$css .= apply_filters( 'read_offline_pdf_css', '', $post );
-
-		if ( class_exists( '\\Mpdf\\Mpdf' ) ) {
-			try {
-				// Support custom size like "210x297" (mm) when size is set to Custom
-				$formatArg = $size;
-				if ( is_string( $size ) && 'custom' === strtolower( $size ) ) {
-					$custom = isset( $pdf_opts[ 'custom_size' ] ) ? trim( (string) $pdf_opts[ 'custom_size' ] ) : '';
-					if ( $custom && preg_match( '/^\s*(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)\s*$/i', $custom, $mm ) ) {
-						$w = (float) $mm[ 1 ];
-						$h = (float) $mm[ 2 ];
-						if ( 0 < $w && 0 < $h ) {
-							$formatArg = array( $w, $h );
-						}
-					}
-					// If custom was selected but not valid, fall back to A4 to avoid mPDF errors.
-					if ( 'custom' === $formatArg ) {
-						$formatArg = 'A4';
-					}
-				}
-				$mpdf = new \Mpdf\Mpdf(
-					array(
-						'format'        => $formatArg,
-						'margin_left'   => (int) ( $m[ 'l' ] ?? 15 ),
-						'margin_right'  => (int) ( $m[ 'r' ] ?? 15 ),
-						'margin_top'    => (int) ( $m[ 't' ] ?? 15 ),
-						'margin_bottom' => (int) ( $m[ 'b' ] ?? 15 ),
-					)
-				);
-				$mpdf->SetTitle( $title );
-				$mpdf->SetAuthor( get_bloginfo( 'name' ) );
-
-				// Header/footer
-				if ( ! empty( $pdf_opts[ 'header' ] ) ) {
-					$mpdf->SetHTMLHeader( $pdf_opts[ 'header' ] );
-				}
-				if ( ! empty( $pdf_opts[ 'footer' ] ) ) {
-					$mpdf->SetHTMLFooter( $pdf_opts[ 'footer' ] );
-				} elseif ( ! empty( $pdf_opts[ 'page_numbers' ] ) ) {
-					$mpdf->SetFooter( '{PAGENO}/{nbpg}' );
-				}
-
-				// Printable toggle
-				if ( isset( $pdf_opts[ 'printable' ] ) && ! $pdf_opts[ 'printable' ] ) {
-					$mpdf->SetProtection( array( 'copy' ) );
-				} else {
-					$mpdf->SetProtection( array( 'print' ) );
-				}
-				// Watermark
-				if ( ! empty( $pdf_opts[ 'watermark' ] ) ) {
-					$mpdf->SetWatermarkText( $pdf_opts[ 'watermark' ] );
-					$mpdf->showWatermarkText = true;
-				}
-
-				// TOC before content
-				if ( ! empty( $pdf_opts[ 'toc' ] ) ) {
-					$depth = max( 1, min( 6, (int) ( $pdf_opts[ 'toc_depth' ] ?? 3 ) ) );
-					$h2toc = array();
-					for ( $i = 1; $i <= $depth; $i++ ) {
-						$h2toc[ 'H' . $i ] = $i - 1;
-					}
-					$mpdf->h2toc = $h2toc;
-					$mpdf->TOCpagebreakByArray(
-						array(
-							'toc-preHTML' => '<h1>' . esc_html( __( 'Contents', 'read-offline' ) ) . '</h1>',
-							'links'       => 1,
-						)
-					);
-				}
-
-				// Write CSS + HTML
-				$mpdf->WriteHTML( '<style>' . $css . '</style>' . $html );
-				$mpdf->Output( $path, \Mpdf\Output\Destination::FILE );
-				return $path;
-			} catch (\Throwable $e) {
-				return new WP_Error( 'pdf_failed', $e->getMessage() );
-			}
-		}
-		// Fallback: save HTML with .pdf name to signal missing dependency
-		if ( ! function_exists( 'WP_Filesystem' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-		global $wp_filesystem;
-		WP_Filesystem();
-		if ( $wp_filesystem && $wp_filesystem->put_contents( $path, $html, FS_CHMOD_FILE ) ) {
-			// Saved via WP_Filesystem
-		} else {
-			@file_put_contents( $path, $html );
-		}
-		return new WP_Error( 'mpdf_missing', 'mPDF not available. Install dependencies.' );
-	}
-
-	/**
-	 * Generate EPUB using PHPePub.
-	 *
-	 * @param WP_Post $post  Post object.
-	 * @param string  $title Title.
-	 * @param string  $html  HTML content.
-	 * @param string  $path  Destination path.
-	 * @return string|WP_Error
-	 */
-	protected static function generate_epub( WP_Post $post, $title, $html, $path ) {
-		$epub_opts  = get_option( 'read_offline_settings_epub', array() );
-		$meta       = $epub_opts[ 'meta' ] ?? array();
-		$author     = $meta[ 'author' ] ?? get_bloginfo( 'name' );
-		$publisher  = $meta[ 'publisher' ] ?? get_bloginfo( 'name' );
-		$lang       = $meta[ 'lang' ] ?? get_locale();
-		$profile    = $epub_opts[ 'css_profile' ] ?? 'light';
-		$custom_css = $epub_opts[ 'custom_css' ] ?? '';
-
-		$css = '';
-		switch ( $profile ) {
-			case 'light':
-				$css = 'body{font-family: serif;line-height:1.6;color:#222;background:#fff;padding:1em;} img{max-width:100%;height:auto;} h1,h2,h3{margin-top:1.2em;}';
-				break;
-			case 'dark':
-				$css = 'body{font-family: serif;line-height:1.6;color:#f5f5f5;background:#111;padding:1em;} a{color:#9cf;} img{max-width:100%;height:auto;} h1,h2,h3{margin-top:1.2em;}';
-				break;
-			case 'custom':
-				$css = (string) $custom_css;
-				break;
-			case 'none':
-			default:
-				$css = '';
-		}
-		$css = apply_filters( 'read_offline_epub_css', $css, $post, $epub_opts );
-
-		// Optional inline TOC (EPUB-friendly div, not HTML5 nav), honoring toc_depth
-		$prefixToc = '';
-		if ( ! empty( $epub_opts[ 'toc' ] ) ) {
-			$depth                  = max( 1, min( 6, (int) ( $epub_opts[ 'toc_depth' ] ?? 3 ) ) );
-			list( $html, $tocHtml ) = self::build_epub_toc_html( $html, $depth );
-			if ( $tocHtml ) {
-				$tocHtml   = apply_filters( 'read_offline_epub_toc_html', $tocHtml, $post, $depth );
-				$prefixToc = '<div class="read-offline-epub-toc-wrap"><h1>' . esc_html( __( 'Contents', 'read-offline' ) ) . '</h1>' . $tocHtml . '</div>';
-			}
-		}
-
-		$bodyHtml = $prefixToc . $html;
-		$xhtml    = self::wrap_epub_xhtml_document( $title, $lang, $bodyHtml, $css );
-
-		$dir      = dirname( $path );
-		$basename = preg_replace( '/\.epub$/', '', basename( $path ) );
-
-		if ( class_exists( '\\PHPePub\\Core\\EPub' ) ) {
-			try {
-				$book = new \PHPePub\Core\EPub();
-				$book->setTitle( $title );
-				$book->setIdentifier( get_permalink( $post ), \PHPePub\Core\EPub::IDENTIFIER_URI );
-				$book->setLanguage( $lang );
-				$book->setAuthor( $author, $author );
-				$book->setPublisher( $publisher, get_site_url() );
-				$book->setSourceURL( get_permalink( $post ) );
-
-				// Cover
-				$cover = apply_filters( 'read_offline_epub_cover', null, $post, $epub_opts );
-				if ( ! $cover ) {
-					$cover = self::resolve_cover_image( $post, $epub_opts[ 'cover' ] ?? 'featured', $epub_opts );
-				}
-				if ( $cover && method_exists( $book, 'setCoverImage' ) ) {
-					list( $filename, $data, $mime ) = $cover;
-					$book->setCoverImage( $filename, $data, $mime );
-				}
-
-				// Chapter (single) with valid XHTML
-				$book->addChapter( 'content', 'chapter1.xhtml', $xhtml );
-
-				$book->finalize();
-				$book->saveBook( $basename, $dir );
-				return $path;
-			} catch (\Throwable $e) {
-				return new WP_Error( 'epub_failed', $e->getMessage() );
-			}
-		}
-		if ( ! function_exists( 'WP_Filesystem' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-		global $wp_filesystem;
-		WP_Filesystem();
-		if ( $wp_filesystem && $wp_filesystem->put_contents( $path, $html, FS_CHMOD_FILE ) ) {
-			// Saved via WP_Filesystem
-		} else {
-			@file_put_contents( $path, $html );
-		}
-		return new WP_Error( 'phpepub_missing', 'PHPePub not available. Install dependencies.' );
-	}
-
-	// Build a well-formed XHTML document for EPUB content
-	/**
-	 * Wrap an XHTML 1.1 document around body content suitable for EPUB.
-	 *
-	 * @param string $title    Title.
-	 * @param string $lang     Language tag.
-	 * @param string $bodyHtml Body inner HTML.
-	 * @param string $css      Optional CSS.
-	 * @return string Well-formed XHTML string.
-	 */
-	protected static function wrap_epub_xhtml_document( $title, $lang, $bodyHtml, $css = '' ) {
-		// Normalize entities, unescaped ampersands in attributes, and self-close void elements for XHTML parsers
-		$bodyHtml = self::normalize_xml_entities_for_epub( $bodyHtml );
-		$bodyHtml = self::normalize_xml_ampersands_in_attributes( $bodyHtml );
-		$bodyHtml = self::repair_html_fragment_with_dom( $bodyHtml );
-		$bodyHtml = self::normalize_xhtml_attributes_quoted( $bodyHtml );
-		$bodyHtml = self::normalize_xhtml_void_elements( $bodyHtml );
-		$headCss  = $css ? ( '<style type="text/css">' . $css . '</style>' ) : '';
-		$doc      = '';
-		$doc .= "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-		$doc .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">' . "\n";
-		$doc .= '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="' . esc_attr( $lang ) . '" lang="' . esc_attr( $lang ) . '">';
-		$doc .= '<head>';
-		$doc .= '<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />';
-		$doc .= '<title>' . esc_html( $title ) . '</title>';
-		$doc .= $headCss;
-		$doc .= '</head>';
-		$doc .= '<body>' . $bodyHtml . '</body>';
-		$doc .= '</html>';
-		// If Tidy is available, use it to ensure strict XHTML output
-		$tidied = self::maybe_tidy_xhtml( $doc );
-		$final  = $tidied ?: $doc;
-		// Final safeguard: ensure void elements are self-closed in the final XHTML
-		$final = self::normalize_xhtml_void_elements( $final );
-		return $final;
-	}
-
-	// Ensure attributes on void elements are quoted per XHTML rules
-	/**
-	 * Ensure attributes on void elements are quoted per XHTML rules.
-	 *
-	 * @param string $html HTML fragment.
-	 * @return string
-	 */
-	protected static function normalize_xhtml_attributes_quoted( $html ) {
-		$tags    = array( 'img', 'source', 'track', 'input', 'meta', 'link', 'area', 'base', 'col', 'embed', 'param', 'br', 'hr', 'wbr' );
-		$pattern = '/<(' . implode( '|', $tags ) . ')\b([^>]*?)\/?>(?!\s*<\/\1>)/i';
-		return preg_replace_callback(
-			$pattern,
-			function ($m) {
-				$tag   = strtolower( $m[ 1 ] );
-				$attrs = trim( $m[ 2 ] );
-				if ( '' === $attrs ) {
-					return '<' . $tag . ' />';
-				}
-				$rebuilt   = array();
-				$regexAttr = '/([:\w-]+)(?:\s*=\\s*(?:"([^"]*)"|\'([^\']*)\'|([^\\s"\'<>/]+)))?/';
-				if ( preg_match_all( $regexAttr, $attrs, $am, PREG_SET_ORDER ) ) {
-					foreach ( $am as $a ) {
-						$name  = strtolower( $a[ 1 ] );
-						$value = '';
-						if ( isset( $a[ 3 ] ) && '' !== $a[ 3 ] ) {
-							$value = $a[ 3 ];
-						} elseif ( isset( $a[ 4 ] ) && '' !== $a[ 4 ] ) {
-							$value = $a[ 4 ];
-						} elseif ( isset( $a[ 5 ] ) && '' !== $a[ 5 ] ) {
-							$value = $a[ 5 ];
-						}
-						// XHTML boolean attributes must be name="name"
-						if ( '' === $value ) {
-							$value = $name;
-						}
-						$value     = str_replace( '"', '&quot;', $value );
-						$rebuilt[] = $name . '="' . $value . '"';
-					}
-				}
-				return '<' . $tag . ' ' . implode( ' ', $rebuilt ) . ' />';
-			},
-			$html
-		);
-	}
-
-	// Try to repair malformed HTML fragments using DOMDocument, returning a cleaner HTML string
-	/**
-	 * Attempt to repair a malformed HTML fragment using DOMDocument.
-	 *
-	 * @param string $html HTML fragment.
-	 * @return string
-	 */
-	protected static function repair_html_fragment_with_dom( $html ) {
-		if ( ! class_exists( '\\DOMDocument' ) ) {
-			return $html;
-		}
-		$dom  = new \DOMDocument();
-		$prev = libxml_use_internal_errors( true );
-		$opts = LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NOERROR | LIBXML_NOWARNING;
-		// Ensure UTF-8 handling
-		$loaded = $dom->loadHTML( '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . $html, $opts );
-		libxml_clear_errors();
-		libxml_use_internal_errors( $prev );
-		if ( ! $loaded ) {
-			return $html;
-		}
-		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
-		if ( ! $body ) {
-			return $html;
-		}
-		$out = '';
-		foreach ( $body->childNodes as $child ) {
-			$out .= $dom->saveHTML( $child );
-		}
-		return '' !== $out ? $out : $html;
-	}
-
-	/**
-	 * Normalize XHTML void elements to self-closing.
-	 *
-	 * @param string $html HTML fragment.
-	 * @return string
-	 */
-	protected static function normalize_xhtml_void_elements( $html ) {
-		$tags = array( 'img', 'br', 'hr', 'input', 'meta', 'link', 'source', 'track', 'wbr', 'area', 'base', 'col', 'embed', 'param' );
-		foreach ( $tags as $t ) {
-			$pattern = '/<' . $t . '\b((?>[^"\'<>]|"[^"]*"|\'[^\']*\')*)>/i';
-			$html    = preg_replace_callback(
-				$pattern,
-				function ($m) use ($t) {
-					$attrs = rtrim( $m[ 1 ] );
-					// Already self-closed? (<tag .../>)
-					if ( preg_match( '/\/$/', $attrs ) ) {
-						$attrs = rtrim( substr( $attrs, 0, -1 ) );
-						$space = $attrs !== '' ? ' ' : '';
-						return '<' . strtolower( $t ) . $space . $attrs . ' />';
-					}
-					$space = '' !== $attrs ? ' ' : '';
-					return '<' . strtolower( $t ) . $space . $attrs . ' />';
-				},
-				$html
-			);
-			// Remove any erroneous closing tags for void elements: </tag>
-			$html = preg_replace( '/<\/' . $t . '\s*>/i', '', $html );
-		}
-		return $html;
-	}
-
-	/**
-	 * Replace raw ampersands in attribute values with &amp; unless they are valid entities.
-	 *
-	 * @param string $html HTML fragment.
-	 * @return string
-	 */
-	protected static function normalize_xml_ampersands_in_attributes( $html ) {
-		// Replace raw & in attribute values with &amp; unless already an entity
-		return preg_replace_callback(
-			'/(\w+)=("|")(.*?)(\2)/s',
-			function ($m) {
-				$before = $m[ 1 ] . '=' . $m[ 2 ];
-				$val    = $m[ 3 ];
-				$after  = $m[ 4 ];
-				$val    = preg_replace( '/&(?!amp;|lt;|gt;|quot;|apos;|#[0-9]+;|#x[0-9A-Fa-f]+;)/', '&amp;', $val );
-				return $before . $val . $after;
-			},
-			$html
-		);
-	}
-
-	/**
-	 * Run Tidy if available to normalize XHTML.
-	 *
-	 * @param string $xhtml XHTML content.
-	 * @return string Empty string if Tidy unavailable or failed, otherwise fixed content.
-	 */
-	protected static function maybe_tidy_xhtml( $xhtml ) {
-		if ( function_exists( 'tidy_repair_string' ) ) {
-			$cfg   = array(
-				'indent'              => false,
-				'wrap'                => 0,
-				'output-xhtml'        => true,
-				'show-body-only'      => false,
-				'clean'               => true,
-				'numeric-entities'    => true,
-				'char-encoding'       => 'utf8',
-				'new-blocklevel-tags' => 'nav,section,article,header,footer,figure,figcaption',
-			);
-			$fixed = tidy_repair_string( $xhtml, $cfg, 'utf8' );
-			if ( is_string( $fixed ) && '' !== trim( $fixed ) ) {
-				return $fixed;
-			}
-		}
-		return '';
-	}
-
-	/**
-	 * Convert named HTML entities to numeric references for EPUB safety.
-	 *
-	 * @param string $html HTML fragment.
-	 * @return string
-	 */
-	protected static function normalize_xml_entities_for_epub( $html ) {
-		// Convert &nbsp; and most named HTML entities to numeric references, keep the XML 1.0 five
-		$keep = array( 'lt', 'gt', 'amp', 'apos', 'quot' );
-		$html = preg_replace_callback(
-			'/&([a-zA-Z][a-zA-Z0-9]+);/',
-			function ($m) use ($keep) {
-				$name = $m[ 1 ];
-				if ( in_array( $name, $keep, true ) ) {
-					return $m[ 0 ];
-				}
-				$decoded = html_entity_decode( '&' . $name . ';', ENT_HTML5, 'UTF-8' );
-				if ( '&' . $name . ';' === $decoded ) {
-					// Unknown entity, leave as-is
-					return $m[ 0 ];
-				}
-				if ( function_exists( 'mb_ord' ) ) {
-					$code = mb_ord( $decoded, 'UTF-8' );
-				} else {
-					$u    = unpack( 'N', mb_convert_encoding( $decoded, 'UCS-4BE', 'UTF-8' ) );
-					$code = $u ? $u[ 1 ] : ord( $decoded );
-				}
-				return '&#' . $code . ';';
-			},
-			$html
-		);
-		return $html;
-	}
-
-	/**
-	 * Resolve cover image bytes from featured image, site logo, or custom.
-	 *
-	 * @param WP_Post $post   Post.
-	 * @param string  $source featured|logo|custom.
-	 * @param array   $opts   EPUB options.
-	 * @return array|null [filename, bytes, mime] or null
-	 */
-	protected static function resolve_cover_image( WP_Post $post, $source, $opts = array() ) {
-		$attachment_id = 0;
-		if ( 'featured' === $source ) {
-			$attachment_id = get_post_thumbnail_id( $post );
-		} elseif ( 'logo' === $source ) {
-			$logo_id       = get_theme_mod( 'custom_logo' );
-			$attachment_id = $logo_id ? (int) $logo_id : 0;
-		} elseif ( 'custom' === $source ) {
-			if ( ! empty( $opts[ 'custom_cover_attachment_id' ] ) ) {
-				$attachment_id = (int) $opts[ 'custom_cover_attachment_id' ];
-			} elseif ( ! empty( $opts[ 'custom_cover_url' ] ) ) {
-				// Try to read from a custom URL (best-effort)
-				$url = esc_url_raw( $opts[ 'custom_cover_url' ] );
-				if ( $url ) {
-					$bits = wp_remote_get( $url );
-					if ( ! is_wp_error( $bits ) && 200 === wp_remote_retrieve_response_code( $bits ) ) {
-						$data     = wp_remote_retrieve_body( $bits );
-						$mime     = wp_remote_retrieve_header( $bits, 'content-type' ) ?: 'image/jpeg';
-						$filename = basename( parse_url( $url, PHP_URL_PATH ) );
-						return array( $filename ?: 'cover.jpg', $data, $mime );
-					}
-				}
-			}
-		}
-		if ( ! $attachment_id ) {
-			return null;
-		}
-		$file = get_attached_file( $attachment_id );
-		if ( ! $file || ! file_exists( $file ) ) {
-			return null;
-		}
-		// Prefer WP_Filesystem if available
-		if ( ! function_exists( 'WP_Filesystem' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-		global $wp_filesystem;
-		WP_Filesystem();
-		$data = null;
-		if ( $wp_filesystem && method_exists( $wp_filesystem, 'get_contents' ) ) {
-			$data = $wp_filesystem->get_contents( $file );
-		} else {
-			$data = @file_get_contents( $file );
-		}
-		if ( false === $data || null === $data ) {
-			return null;
-		}
-		$mime     = function_exists( 'mime_content_type' ) ? mime_content_type( $file ) : 'image/jpeg';
-		$filename = basename( $file );
-		return array( $filename, $data, $mime );
-	}
-
-	// Build a simple inline HTML TOC from headings up to the given depth. Returns [newHtml, tocHtml]
-	/**
-	 * Build a simple inline HTML TOC from headings up to the given depth.
-	 *
-	 * @param string $html  HTML.
-	 * @param int    $depth Depth 1-6.
-	 * @return array{0:string,1:string}
-	 */
-	protected static function build_epub_toc_html( $html, $depth ) {
-		$pattern = '#<h([1-6])(\s+[^>]*)?>(.*?)</h\1>#is';
-		$matches = array();
-		$toc     = array();
-		$usedIds = array();
-		$newHtml = $html;
-		if ( preg_match_all( $pattern, $html, $matches, PREG_SET_ORDER ) ) {
-			foreach ( $matches as $m ) {
-				$level = (int) $m[ 1 ];
-				if ( $level > $depth ) {
-					continue;
-				}
-				$attrs = isset( $m[ 2 ] ) ? $m[ 2 ] : '';
-				$text  = wp_strip_all_tags( $m[ 3 ] );
-				$id    = self::slugify( $text );
-				$base  = $id;
-				$i     = 2;
-				while ( isset( $usedIds[ $id ] ) ) {
-					$id = $base . '-' . $i++;
-				}
-				$usedIds[ $id ] = true;
-				// Insert id attribute
-				$withId  = sprintf( '<h%d id="%s"%s>%s</h%d>', $level, esc_attr( $id ), $attrs, $m[ 3 ], $level );
-				$newHtml = str_replace( $m[ 0 ], $withId, $newHtml );
-				$toc[]   = array(
-					'level' => $level,
-					'text'  => $text,
-					'id'    => $id,
-				);
-			}
-		}
-		if ( empty( $toc ) ) {
-			return array( $newHtml, '' );
-		}
-		// Flat list with level classes
-		$out = '<ul class="read-offline-epub-toc">';
-		foreach ( $toc as $item ) {
-			$out .= sprintf( '<li class="lvl-%d"><a href="#%s">%s</a></li>', $item[ 'level' ], esc_attr( $item[ 'id' ] ), esc_html( $item[ 'text' ] ) );
-		}
-		$out .= '</ul>';
-		return array( $newHtml, $out );
-	}
-
-	/**
-	 * Make a simple slug from text.
-	 *
-	 * @param string $text Text.
-	 * @return string
-	 */
-	protected static function slugify( $text ) {
-		$text = strtolower( trim( $text ) );
-		$text = preg_replace( '/[^a-z0-9\s-]/', '', $text );
-		$text = preg_replace( '/[\s-]+/', '-', $text );
-		return trim( $text, '-' );
-	}
-
-	/**
-	 * Create a ZIP from file paths.
-	 *
-	 * @param array  $paths    List of absolute file paths.
-	 * @param string $zip_name Desired ZIP filename.
-	 * @return string|WP_Error Absolute path or error.
-	 */
-	public static function zip_files( $paths, $zip_name ) {
-		$uploads = wp_upload_dir();
-		$dir     = trailingslashit( $uploads[ 'basedir' ] ) . 'read-offline/';
-		wp_mkdir_p( $dir );
-		$zip_path = $dir . sanitize_file_name( $zip_name );
-
-		if ( class_exists( 'ZipArchive' ) ) {
-			$zip = new ZipArchive();
-			if ( true !== $zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) {
-				return new WP_Error( 'zip_open_failed', 'Could not create zip' );
-			}
-			foreach ( (array) $paths as $path ) {
-				if ( file_exists( $path ) ) {
-					$zip->addFile( $path, basename( $path ) );
-				}
-			}
-			$zip->close();
-			return $zip_path;
-		}
-		return new WP_Error( 'zip_missing', 'Zip extension not available' );
-	}
-
-	/**
-	 * Build a cache filename based on template and short hash.
-	 *
-	 * @param WP_Post $post   Post.
-	 * @param string  $format Format.
-	 * @param string  $hash   Hash.
-	 * @return string
-	 */
-	protected static function build_filename( WP_Post $post, $format, $hash ) {
-		$settings = get_option( 'read_offline_settings_general', array() );
-		$template = $settings[ 'filename' ] ?? '{site}-{post_slug}-{format}';
-		$repl     = array(
-			'{site}'      => sanitize_title( get_bloginfo( 'name' ) ),
-			'{post_slug}' => $post->post_name,
-			'{post_id}'   => $post->ID,
-			'{title}'     => sanitize_title( $post->post_title ),
-			'{format}'    => $format,
-			'{date}'      => date( 'Ymd' ),
-			'{lang}'      => get_locale(),
-		);
-		$name     = strtr( $template, $repl );
-		$name     = sanitize_file_name( $name );
-		if ( 'pdf' === $format ) {
-			$ext = '.pdf';
-		} elseif ( 'epub' === $format ) {
-			$ext = '.epub';
-		} elseif ( 'md' === $format ) {
-			$ext = '.md';
-		} else {
-			$ext = '.' . preg_replace( '/[^a-z0-9]/', '', $format );
-		}
-		$ver = substr( $hash, 0, 8 );
-		return $name . '-v' . $ver . $ext;
-	}
-
-	/**
-	 * Convert cache path to URL in uploads.
-	 *
-	 * @param string $path Absolute path.
-	 * @return string URL.
-	 */
-	protected static function path_to_url( $path ) {
-		$uploads = wp_upload_dir();
-		return str_replace( $uploads[ 'basedir' ], $uploads[ 'baseurl' ], $path );
-	}
-
-	/**
-	 * Compute a content/settings hash for cache versioning.
-	 *
-	 * @param WP_Post $post   Post.
-	 * @param string  $format Format.
-	 * @return string SHA1 hash.
-	 */
-	protected static function compute_hash( WP_Post $post, $format ) {
-		$general   = get_option( 'read_offline_settings_general', array() );
-		$pdf       = get_option( 'read_offline_settings_pdf', array() );
-		$epub      = get_option( 'read_offline_settings_epub', array() );
-		$content   = apply_filters( 'the_content', $post->post_content );
-		$signature = wp_json_encode( array( $post->post_modified_gmt, $format, $general, $pdf, $epub, md5( $content ) ) );
-		return sha1( $signature );
 	}
 
 	/**
@@ -1231,5 +671,219 @@ class Read_Offline_Export {
 			}
 		}
 		@rmdir( $dir );
+	}
+
+	// Add DRY helper methods.
+	/** Ensure WP_Filesystem initialized. */
+	protected static function ensure_filesystem() {
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		global $wp_filesystem;
+		WP_Filesystem();
+		return $wp_filesystem;
+	}
+
+	/** Generic write file helper with WP_Filesystem fallback. */
+	protected static function write_file( $path, $content, $binary = false ) {
+		$wp_filesystem = self::ensure_filesystem();
+		$mode          = $binary ? FS_CHMOD_FILE : FS_CHMOD_FILE; // same, semantic flag.
+		if ( $wp_filesystem && method_exists( $wp_filesystem, 'put_contents' ) ) {
+			if ( $wp_filesystem->put_contents( $path, $content, $mode ) ) {
+				return true;
+			}
+		}
+		return false !== @file_put_contents( $path, $content );
+	}
+
+	/** Parse PDF size option into mPDF format argument (supports custom WxH mm). */
+	protected static function parse_pdf_format_arg( $pdf_opts ) {
+		$size = $pdf_opts[ 'size' ] ?? 'A4';
+		if ( is_string( $size ) && 'custom' === strtolower( $size ) ) {
+			$custom = trim( (string) ( $pdf_opts[ 'custom_size' ] ?? '' ) );
+			if ( $custom && preg_match( '/^(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)\s*$/i', $custom, $mm ) ) {
+				$w = (float) $mm[ 1 ];
+				$h = (float) $mm[ 2 ];
+				if ( $w > 0 && $h > 0 ) {
+					return array( $w, $h );
+				}
+			}
+			return 'A4';
+		}
+		return $size ?: 'A4';
+	}
+
+	/** Build mPDF instance with core settings; returns WP_Error on failure. */
+	protected static function build_mpdf_instance( $pdf_opts, $gen_opts, $title, $post = null ) {
+		if ( ! class_exists( '\\Mpdf\\Mpdf' ) ) {
+			return new WP_Error( 'mpdf_missing', 'mPDF not available' );
+		}
+		$m    = $pdf_opts[ 'margins' ] ?? array();
+		$mpdf = new \Mpdf\Mpdf( array(
+			'format'        => self::parse_pdf_format_arg( $pdf_opts ),
+			'margin_left'   => (int) ( $m[ 'l' ] ?? 15 ),
+			'margin_right'  => (int) ( $m[ 'r' ] ?? 15 ),
+			'margin_top'    => (int) ( $m[ 't' ] ?? 15 ),
+			'margin_bottom' => (int) ( $m[ 'b' ] ?? 15 ),
+		) );
+		$mpdf->SetTitle( $title );
+		$mpdf->SetAuthor( get_bloginfo( 'name' ) );
+		return $mpdf;
+	}
+
+	/** Assemble PDF CSS with legacy and custom plus filter. */
+	protected static function assemble_pdf_css( $pdf_opts, $gen_opts, $post = null ) {
+		$legacy = $gen_opts[ 'css' ] ?? '';
+		$css    = 'img{max-width:100%;height:auto;} figure{margin:0;}' . ( $pdf_opts[ 'custom_css' ] ?? $legacy );
+		return $css . apply_filters( 'read_offline_pdf_css', '', $post );
+	}
+
+	/** Standard header block (title, featured image, author/date) used in multi exports. */
+	protected static function build_post_header_html( $post, $include_featured, $include_author, $h_tag = 'h1' ) {
+		$title = get_the_title( $post );
+		$html  = '<' . tag_escape( $h_tag ) . '>' . esc_html( $title ) . '</' . tag_escape( $h_tag ) . '>';
+		if ( $include_featured && has_post_thumbnail( $post ) ) {
+			$img = get_the_post_thumbnail( $post, 'large', array( 'style' => 'max-width:100%;height:auto;margin:0 0 1em;' ) );
+			if ( $img ) {
+				$html .= $img;
+			}
+		}
+		if ( $include_author ) {
+			$html .= '<p class="read-offline-meta" style="font-size:0.8em;color:#555;">' . esc_html( get_the_author_meta( 'display_name', $post->post_author ) ) . ' – ' . esc_html( get_the_date( '', $post ) ) . '</p>';
+		}
+		return $html;
+	}
+
+	/* Refactored single EPUB generator using helpers */
+	protected static function generate_epub( WP_Post $post, $title, $html, $path ) {
+		$epub_opts = get_option( 'read_offline_settings_epub', array() );
+		$gen_opts  = get_option( 'read_offline_settings_general', array() );
+		$meta      = self::epub_get_meta( $epub_opts );
+		$css       = self::epub_css_profile( $epub_opts, $post );
+		$bodyHtml  = self::epub_build_toc_and_body( $html, $epub_opts, $post, $meta[ 'lang' ] );
+		$dir       = dirname( $path );
+		$basename  = preg_replace( '/\.epub$/', '', basename( $path ) );
+		if ( class_exists( '\\PHPePub\\Core\\EPub' ) ) {
+			try {
+				$book = new \PHPePub\Core\EPub();
+				$book->setTitle( $title );
+				$book->setIdentifier( get_permalink( $post ), \PHPePub\Core\EPub::IDENTIFIER_URI );
+				$book->setLanguage( $meta[ 'lang' ] );
+				$book->setAuthor( $meta[ 'author' ], $meta[ 'author' ] );
+				$book->setPublisher( $meta[ 'publisher' ], get_site_url() );
+				$book->setSourceURL( get_permalink( $post ) );
+				$cover = apply_filters( 'read_offline_epub_cover', null, $post, $epub_opts );
+				if ( ! $cover ) {
+					$cover = self::resolve_cover_image( $post, $epub_opts[ 'cover' ] ?? 'featured', $epub_opts );
+				}
+				if ( $cover && method_exists( $book, 'setCoverImage' ) ) {
+					list( $filename, $data, $mime ) = $cover;
+					$book->setCoverImage( $filename, $data, $mime );
+				}
+				$xhtml = self::wrap_epub_xhtml_document( $title, $meta[ 'lang' ], $bodyHtml, $css );
+				$book->addChapter( sanitize_title( $title ), 'chapter1.xhtml', $xhtml );
+				$book->finalize();
+				$book->saveBook( $basename, $dir );
+				return $path;
+			} catch (\Throwable $e) {
+				return new WP_Error( 'epub_failed', $e->getMessage() );
+			}
+		}
+		// Fallback: write raw HTML (indicates missing library)
+		self::write_file( $path, $html );
+		return new WP_Error( 'phpepub_missing', 'PHPePub not available. Install dependencies.' );
+	}
+
+	/* Refactored combined EPUB */
+	protected static function generate_combined_epub( $post_ids, $path ) {
+		if ( ! class_exists( '\\PHPePub\\Core\\EPub' ) ) {
+			return new WP_Error( 'phpepub_missing', 'PHPePub not available. Install dependencies.' );
+		}
+		$epub_opts        = get_option( 'read_offline_settings_epub', array() );
+		$gen_opts         = get_option( 'read_offline_settings_general', array() );
+		$meta             = self::epub_get_meta( $epub_opts );
+		$css              = self::epub_css_profile( $epub_opts, null );
+		$include_author   = ! empty( $gen_opts[ 'include_author' ] );
+		$include_featured = ! empty( $gen_opts[ 'include_featured' ] );
+		try {
+			$book = new \PHPePub\Core\EPub();
+			$book->setTitle( get_bloginfo( 'name' ) . ' – Combined Export' );
+			$book->setIdentifier( home_url(), \PHPePub\Core\EPub::IDENTIFIER_URI );
+			$book->setLanguage( $meta[ 'lang' ] );
+			$book->setAuthor( $meta[ 'author' ], $meta[ 'author' ] );
+			$book->setPublisher( $meta[ 'publisher' ], get_site_url() );
+			$book->setSourceURL( home_url() );
+			$cover = apply_filters( 'read_offline_epub_cover', null, null, $epub_opts );
+			if ( ! $cover && ! empty( $post_ids ) ) {
+				$first = get_post( $post_ids[ 0 ] );
+				if ( $first ) {
+					$cover = self::resolve_cover_image( $first, $epub_opts[ 'cover' ] ?? 'featured', $epub_opts );
+				}
+			}
+			if ( $cover && method_exists( $book, 'setCoverImage' ) ) {
+				list( $fn, $bytes, $mime ) = $cover;
+				$book->setCoverImage( $fn, $bytes, $mime );
+			}
+			$index = 1;
+			foreach ( $post_ids as $pid ) {
+				$post = get_post( $pid );
+				if ( ! $post ) {
+					continue;
+				}
+				$title   = get_the_title( $post );
+				$content = apply_filters( 'the_content', $post->post_content );
+				$content = apply_filters( 'read_offline_content_html', $content, $post, 'epub' );
+				// Build header via existing helper for consistency (H1 always)
+				$header = self::build_post_header_html( $post, $include_featured, $include_author );
+				// TOC handling per chapter not needed; optional global inline TOC can be added here later
+				$body  = $header . $content;
+				$xhtml = self::wrap_epub_xhtml_document( $title, $meta[ 'lang' ], $body, $css );
+				$book->addChapter( sanitize_title( $title ), 'chapter' . $index . '.xhtml', $xhtml );
+				$index++;
+			}
+			$book->finalize();
+			$dir      = dirname( $path );
+			$basename = preg_replace( '/\.epub$/', '', basename( $path ) );
+			$book->saveBook( $basename, $dir );
+			return $path;
+		} catch (\Throwable $e) {
+			return new WP_Error( 'epub_failed', $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Recursively delete the plugin's auxiliary cache/db directory.
+	 * Filter: read_offline_db_path to override path.
+	 * Action: read_offline_db_deleted after attempt.
+	 */
+	public static function delete_aux_db_dir() {
+		if ( ! defined( 'WP_CONTENT_DIR' ) ) {
+			return false;
+		}
+		$default_path = WP_CONTENT_DIR . '/wp-loupe-db';
+		$path         = apply_filters( 'read_offline_db_path', $default_path );
+		$path         = wp_normalize_path( $path );
+		$wc_dir       = wp_normalize_path( WP_CONTENT_DIR );
+		if ( ! class_exists( 'WP_Filesystem_Direct' ) ) {
+			// Load required classes if not already loaded.
+			@include_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+			@include_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+		}
+		if ( ! class_exists( 'WP_Filesystem_Direct' ) ) {
+			do_action( 'read_offline_db_deleted', $path, false );
+			return false;
+		}
+		$fs = new \WP_Filesystem_Direct( false );
+		$ok = false;
+		if (
+			$fs->exists( $path ) &&
+			$fs->is_dir( $path ) &&
+			strpos( $path, $wc_dir ) === 0 &&
+			$path !== $wc_dir
+		) {
+			$ok = $fs->rmdir( $path, true );
+		}
+		do_action( 'read_offline_db_deleted', $path, $ok );
+		return $ok;
 	}
 }

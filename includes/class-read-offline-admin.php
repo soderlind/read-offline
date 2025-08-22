@@ -725,7 +725,8 @@ class Read_Offline_Admin {
 											value="<?php echo isset( $options[ 'rest_rate_limit' ] ) ? intval( $options[ 'rest_rate_limit' ] ) : 10; ?>"
 											min="0" max="1000" style="width:100px;" />
 										<p class="read-offline-field-desc">
-											<?php esc_html_e( 'Requests per window per IP.', 'read-offline' ); ?></p>
+											<?php esc_html_e( 'Requests per window per IP.', 'read-offline' ); ?>
+										</p>
 									</div>
 
 									<label><?php _e( 'REST window (seconds)', 'read-offline' ); ?>
@@ -738,7 +739,8 @@ class Read_Offline_Admin {
 											value="<?php echo isset( $options[ 'rest_rate_window' ] ) ? intval( $options[ 'rest_rate_window' ] ) : 60; ?>"
 											min="10" max="86400" style="width:120px;" />
 										<p class="read-offline-field-desc">
-											<?php esc_html_e( 'Seconds per rate limit window.', 'read-offline' ); ?></p>
+											<?php esc_html_e( 'Seconds per rate limit window.', 'read-offline' ); ?>
+										</p>
 									</div>
 
 									<!-- Removed: PDF Custom CSS moved to PDF tab -->
@@ -751,6 +753,15 @@ class Read_Offline_Admin {
 						<div class="read-offline-actions" style="margin-top:16px;">
 							<button type="submit" form="read-offline-settings-form"
 								class="button button-primary"><?php esc_html_e( 'Save Changes', 'read-offline' ); ?></button>
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+								style="display:inline;margin-left:8px;">
+								<?php wp_nonce_field( 'read_offline_reset_settings', '_ror_nonce' ); ?>
+								<input type="hidden" name="action" value="read_offline_reset_settings" />
+								<input type="hidden" name="tab" value="<?php echo esc_attr( $current_tab ); ?>" />
+								<input type="hidden" name="redirect_to"
+									value="<?php echo esc_url( admin_url( 'options-general.php?page=read-offline-settings&tab=' . $current_tab ) ); ?>" />
+								<?php submit_button( __( 'Reset this tab to defaults', 'read-offline' ), 'secondary', 'submit', false ); ?>
+							</form>
 							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
 								style="display:inline;"
 								onsubmit="return confirm('<?php echo esc_js( __( 'Clear all generated export files? They will be regenerated on demand.', 'read-offline' ) ); ?>');">
@@ -887,9 +898,15 @@ class Read_Offline_Admin {
 						<?php
 						// PDF tab actions
 						?>
-						<p class="submit"><button type="submit"
+						<div class="read-offline-actions" style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+							<button type="submit"
 								class="button button-primary"><?php esc_html_e( 'Save Changes', 'read-offline' ); ?></button>
-						</p>
+							<button type="submit" name="read_offline_reset_pdf" value="1" class="button"
+								onclick="if(!confirm('<?php echo esc_js( __( 'Reset PDF settings to defaults?', 'read-offline' ) ); ?>')) return false; this.form.read_offline_force_reset.value='pdf';">
+								<?php esc_html_e( 'Reset to defaults', 'read-offline' ); ?>
+							</button>
+							<input type="hidden" name="read_offline_force_reset" value="" />
+						</div>
 						<?php
 						} else { // epub
 							settings_fields( 'read_offline_settings_epub' );
@@ -1101,9 +1118,15 @@ class Read_Offline_Admin {
 						<?php
 						// EPUB tab actions
 						?>
-						<p class="submit"><button type="submit"
+						<div class="read-offline-actions" style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+							<button type="submit"
 								class="button button-primary"><?php esc_html_e( 'Save Changes', 'read-offline' ); ?></button>
-						</p>
+							<button type="submit" name="read_offline_reset_epub" value="1" class="button"
+								onclick="if(!confirm('<?php echo esc_js( __( 'Reset EPUB settings to defaults?', 'read-offline' ) ); ?>')) return false; this.form.read_offline_force_reset.value='epub';">
+								<?php esc_html_e( 'Reset to defaults', 'read-offline' ); ?>
+							</button>
+							<input type="hidden" name="read_offline_force_reset" value="" />
+						</div>
 						<?php
 						}
 						?>
@@ -1121,12 +1144,6 @@ class Read_Offline_Admin {
 					<div class="read-offline-card">
 						<h2><?php esc_html_e( 'Placeholders', 'read-offline' ); ?></h2>
 						<p class="read-offline-field-desc">{site}, {post_slug}, {post_id}, {title}, {format}, {date}, {lang}</p>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-							<?php wp_nonce_field( 'read_offline_reset_settings', '_ror_nonce' ); ?>
-							<input type="hidden" name="action" value="read_offline_reset_settings" />
-							<input type="hidden" name="tab" value="<?php echo esc_attr( $current_tab ); ?>" />
-							<?php submit_button( __( 'Reset this tab to defaults', 'read-offline' ), 'small', 'submit', false ); ?>
-						</form>
 					</div>
 				</div><!-- /.read-offline-aside -->
 			</div><!-- /.read-offline-layout -->
@@ -1542,7 +1559,8 @@ class Read_Offline_Admin {
 		if ( ! wp_verify_nonce( $nonce, 'read_offline_reset_settings' ) ) {
 			wp_die( esc_html__( 'Nonce verification failed.', 'read-offline' ) );
 		}
-		$tab = isset( $_POST[ 'tab' ] ) ? sanitize_key( wp_unslash( $_POST[ 'tab' ] ) ) : 'general';
+		$tab         = isset( $_POST[ 'tab' ] ) ? sanitize_key( wp_unslash( $_POST[ 'tab' ] ) ) : 'general';
+		$redirect_to = isset( $_POST[ 'redirect_to' ] ) ? esc_url_raw( wp_unslash( $_POST[ 'redirect_to' ] ) ) : '';
 		switch ( $tab ) {
 			case 'pdf':
 				delete_option( 'read_offline_settings_pdf' );
@@ -1555,8 +1573,8 @@ class Read_Offline_Admin {
 				delete_option( 'read_offline_settings_general' );
 				break;
 		}
-		$redirect = wp_get_referer();
-		if ( ! $redirect ) {
+		$redirect = $redirect_to ? $redirect_to : wp_get_referer();
+		if ( ! $redirect || false === strpos( $redirect, 'read-offline-settings' ) ) {
 			$redirect = admin_url( 'options-general.php?page=read-offline-settings&tab=' . $tab );
 		}
 		$redirect = add_query_arg( 'read_offline_reset', 1, $redirect );

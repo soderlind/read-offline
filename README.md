@@ -46,6 +46,7 @@ composer install
 - Endpoint: /wp-json/read-offline/v1/export (format=pdf|epub|md)
 - Public access to published posts can be toggled in General settings ("Public REST access").
 - Simple per-IP unauthenticated rate limiting: configure requests per window and window length.
+- Standard headers when rate limiting active: `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`.
 - Useful for scripts/integrations that need on-demand files.
 
 ## Settings overview

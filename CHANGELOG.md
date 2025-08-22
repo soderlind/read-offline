@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3 - 2025-08-22
+- Enhancement: Add standard rate limit response headers (Retry-After, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) to REST export endpoint.
+- Enhancement: Successful responses also include current remaining quota when rate limiting active.
+
 ## 0.2.2 - 2025-08-22
 - Feature: Public REST access toggle to disable unauthenticated exports if desired.
 - Feature: Basic per-IP rate limiting (requests/window) for unauthenticated REST usage.

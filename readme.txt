@@ -4,7 +4,7 @@ Tags: pdf, epub, export, offline, download
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 8.2
-Stable tag: 0.2.2
+Stable tag: 0.2.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,6 +51,10 @@ If you expected a ZIP, uncheck the "Combine bulk exports" option under Settings 
 3. Bulk export actions in the posts list
 
 == Changelog ==
+= 0.2.3 =
+- Enhancement: Added standard rate limit headers (Retry-After, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) to REST responses.
+- Enhancement: Successful REST responses now include remaining quota when rate limiting applies.
+
 = 0.2.2 =
 - Feature: Public REST access toggle (allow/deny unauthenticated exports of published posts).
 - Feature: Simple per-IP rate limiting for unauthenticated REST exports (configurable requests + window seconds).
