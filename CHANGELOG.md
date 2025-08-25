@@ -1,7 +1,7 @@
 # Changelog
 
 ## 2.2.4
-- Meta: Switched default branch to `Refactor` (was `master`); preserved prior history at `legacy-master`.
+- Meta: Switched default branch to `main` (was `master`); preserved prior history at `legacy-master` (previous interim branch was `Refactor`).
 - Meta: Version alignment / documentation consolidation for 2.x line (README + readme.txt synchronized).
 
 ## 2.2.3
