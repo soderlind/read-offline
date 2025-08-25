@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.4
+- Meta: Switched default branch to `Refactor` (was `master`); preserved prior history at `legacy-master`.
+- Meta: Version alignment / documentation consolidation for 2.x line (README + readme.txt synchronized).
+
 ## 2.2.3
 - Fix: Restored PDF Table of Contents generation (regression after refactor) using shared heading parser; respects `toc` + `toc_depth` settings.
 - Fix: Eliminated leading blank first page in single + combined PDF exports (first page now starts with TOC or content).
