@@ -14,8 +14,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Read_Offline_Frontend {
 	/**
+	 * Frontend integration: shortcode, auto-inserted UI, and JS bootstrap.
+	 *
+	 * Renders the small “Save as” control (PDF/EPUB/Markdown) and exposes a
+	 * fetch-based downloader for the REST export endpoint.
+	 *
+	 * @since 2.1.1
+	 */
+	/**
 	 * Bootstrap hooks.
 	 *
+	 * @since 2.1.1
 	 * @return void
 	 */
 	public static function init() {

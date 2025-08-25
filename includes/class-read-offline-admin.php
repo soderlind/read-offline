@@ -617,6 +617,85 @@ class Read_Offline_Admin {
 					padding: 2px 4px
 				}
 			</style>
+			<style id="read-offline-responsive">
+				/* Responsive enhancements */
+				@media (max-width: 980px) {
+					.read-offline-layout {
+						flex-direction: column;
+					}
+
+					.read-offline-aside {
+						order: 2;
+						margin-top: 24px;
+					}
+
+					.read-offline-main {
+						order: 1;
+					}
+
+					.read-offline-grid {
+						grid-template-columns: 1fr;
+					}
+
+					.read-offline-grid>label {
+						padding-bottom: 2px;
+						text-align: left;
+						justify-self: start;
+					}
+
+					.read-offline-grid>div {
+						padding-bottom: 16px;
+					}
+
+					.read-offline-grid>label:after {
+						content: ':';
+						margin-left: 2px;
+					}
+				}
+
+				@media (max-width: 600px) {
+					.read-offline-actions {
+						flex-direction: column;
+						align-items: stretch;
+					}
+
+					.read-offline-actions form,
+					.read-offline-actions button {
+						width: 100%;
+					}
+
+					.read-offline-grid {
+						gap: 12px 20px;
+					}
+
+					#ro-filename {
+						width: 100%;
+					}
+				}
+
+				/* Improve tap targets on touch */
+				@media (hover: none) {
+					.read-offline-grid input[type=checkbox] {
+						transform: scale(1.2);
+						margin-right: 4px;
+					}
+				}
+
+				/* Scroll container for very tall forms on small screens */
+				.read-offline-card {
+					max-width: 100%;
+					overflow-x: auto;
+				}
+
+				/* Utility class for stacking label + control horizontally on wide screens */
+				@media (min-width: 981px) {
+					.read-offline-inline-fields {
+						display: flex;
+						gap: 12px;
+						flex-wrap: wrap;
+					}
+				}
+			</style>
 
 			<div class="read-offline-layout">
 				<div class="read-offline-main">
@@ -1385,6 +1464,17 @@ class Read_Offline_Admin {
 		$site     = sanitize_title( get_bloginfo( 'name' ) );
 		$ts       = current_time( 'Ymd_His' );
 		$zip_name = sprintf( '%s_%s_%s.zip', $site, $ts, $format );
+		/**
+		 * Filter the bulk export ZIP filename (before creation).
+		 *
+			 * @since 2.2.3
+		 *
+		 * @param string $zip_name Default filename.
+		 * @param array  $generated Array of arrays with keys post_id, path.
+		 * @param string $format    Export format.
+		 * @param string $post_type Post type being exported.
+		 */
+		$zip_name = apply_filters( 'read_offline_bulk_zip_name', $zip_name, $generated, $format, $post_type );
 		$zip_path = Read_Offline_Export::zip_files( wp_list_pluck( $generated, 'path' ), $zip_name );
 		if ( is_wp_error( $zip_path ) || ! $zip_path ) {
 			return add_query_arg( array( 'read_offline_error' => 'zip_failed' ), $redirect_to );
@@ -1419,9 +1509,14 @@ class Read_Offline_Admin {
 		}
 		// Stream file
 		$download_name = sanitize_file_name( basename( $path ) );
+		$size          = filesize( $path );
+		$md5           = md5_file( $path );
+		$sha256        = hash_file( 'sha256', $path );
 		header( 'Content-Type: application/zip' );
 		header( 'Content-Disposition: attachment; filename="' . $download_name . '"' );
-		header( 'Content-Length: ' . filesize( $path ) );
+		header( 'Content-Length: ' . $size );
+		header( 'X-Checksum-MD5: ' . $md5 );
+		header( 'X-Checksum-SHA256: ' . $sha256 );
 		readfile( $path );
 		// Optionally delete after download
 		@unlink( $path );
@@ -1446,9 +1541,14 @@ class Read_Offline_Admin {
 		$ext           = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
 		$ct            = ( 'pdf' === $ext ) ? 'application/pdf' : ( 'epub' === $ext ? 'application/epub+zip' : 'application/octet-stream' );
 		$download_name = sanitize_file_name( basename( $path ) );
+		$size          = filesize( $path );
+		$md5           = md5_file( $path );
+		$sha256        = hash_file( 'sha256', $path );
 		header( 'Content-Type: ' . $ct );
 		header( 'Content-Disposition: attachment; filename="' . $download_name . '"' );
-		header( 'Content-Length: ' . filesize( $path ) );
+		header( 'Content-Length: ' . $size );
+		header( 'X-Checksum-MD5: ' . $md5 );
+		header( 'X-Checksum-SHA256: ' . $sha256 );
 		readfile( $path );
 		@unlink( $path );
 		delete_transient( 'read_offline_file_' . $token );
