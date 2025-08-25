@@ -11,7 +11,7 @@
  * - Lightweight Markdown conversion (heuristic) with pre/post filters.
  * - Cache invalidation helpers and auxiliary DB directory cleanup.
  *
- * @since 2.1.1
+ * @since 2.0.0
  * @package Read_Offline
  */
 
@@ -23,7 +23,7 @@ class Read_Offline_Export {
 	/**
 	 * Core export orchestrator holding static helpers only.
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 */
 	/**
 	 * Format -> handler map for single & combined generation.
@@ -436,7 +436,7 @@ class Read_Offline_Export {
 	 *
 	 * Adds IDs where missing and respects a maximum depth.
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 * @since 2.2.3 Reused by PDF manual TOC fallback.
 	 *
 	 * @param string $html  Input body HTML.
@@ -513,7 +513,7 @@ class Read_Offline_Export {
 	/**
 	 * Extract core EPUB metadata with sensible defaults.
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 *
 	 * @param array $epub_opts Settings.
 	 * @return array{author:string,publisher:string,lang:string}
@@ -529,7 +529,7 @@ class Read_Offline_Export {
 	/**
 	 * Resolve EPUB CSS profile (light/dark/custom/none) and filter.
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 *
 	 * @param array       $epub_opts Settings.
 	 * @param WP_Post|nil $post      Post or null for combined.
@@ -558,7 +558,7 @@ class Read_Offline_Export {
 	/**
 	 * Optionally prepend EPUB TOC wrapper + heading list to body HTML.
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 *
 	 * @param string          $html         Body HTML.
 	 * @param array           $epub_opts    EPUB settings.
@@ -583,7 +583,7 @@ class Read_Offline_Export {
 	/**
 	 * Compute cache hash for a post + format + relevant settings.
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 * @since 2.2.3 Added PDF/EPUB option sub‑hashing for cache busting.
 	 *
 	 * @param WP_Post $post   Post.
@@ -608,7 +608,7 @@ class Read_Offline_Export {
 	/**
 	 * Build sanitized export filename.
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 *
 	 * @param WP_Post $post   Post.
 	 * @param string  $format Format.
@@ -623,7 +623,7 @@ class Read_Offline_Export {
 	/**
 	 * Convert cached path into public URL (uploads base relative).
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 *
 	 * @param string $path Absolute file path.
 	 * @return string URL (or original path if outside uploads).
@@ -643,7 +643,7 @@ class Read_Offline_Export {
 	 *
 	 * Strategies: featured | first (first <img> tag) | none (null).
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 *
 	 * @param WP_Post $post Post.
 	 * @param string  $mode Strategy.
@@ -726,7 +726,7 @@ class Read_Offline_Export {
 	 * the configured depth. If page numbers are disabled a manual hierarchical list is
 	 * prepended instead (without page numbers).
 	 *
-	 * @since 2.1.1 Initial version.
+	 * @since 2.0.0 Initial version.
 	 * @since 2.2.3 Restored / refactored TOC logic (bookmark injection + fallback list).
 	 *
 	 * @param WP_Post $post  Post object being exported.
@@ -996,7 +996,7 @@ class Read_Offline_Export {
 	/**
 	 * Recursively delete a directory path (internal helper).
 	 *
-	 * @since 0.1.0
+	 * @since 2.0.0
 	 *
 	 * @param string $dir Directory absolute path.
 	 * @return void
@@ -1073,8 +1073,8 @@ class Read_Offline_Export {
 	/**
 	 * Parse PDF size setting into mPDF 'format' argument.
 	 *
-	 * @since 0.1.0
-	 * @since 0.2.4 Added custom WxH parsing logic.
+	 * @since 2.0.0
+	 * @since 2.2.3 Added custom WxH parsing logic.
 	 *
 	 * @param array $pdf_opts PDF options.
 	 * @return string|array Format.
@@ -1100,7 +1100,7 @@ class Read_Offline_Export {
 	 *
 	 * Used for bulk per-post exports when not combining into a single document.
 	 *
-	 * @since 0.2.4
+	 * @since 2.2.3
 	 *
 	 * @param string[] $paths    Absolute file paths to include.
 	 * @param string   $zip_name Desired archive filename (sanitized).
@@ -1153,8 +1153,8 @@ class Read_Offline_Export {
 	/**
 	 * Instantiate configured mPDF object or return WP_Error.
 	 *
-	 * @since 0.1.0
-	 * @since 0.2.4 Explicit margins & author metadata consolidation.
+	 * @since 2.0.0
+	 * @since 2.2.3 Explicit margins & author metadata consolidation.
 	 *
 	 * @param array        $pdf_opts PDF options.
 	 * @param array        $gen_opts General options.
@@ -1183,7 +1183,7 @@ class Read_Offline_Export {
 	/**
 	 * Build core PDF CSS (images + legacy + custom) plus filter output.
 	 *
-	 * @since 0.1.0
+	 * @since 2.0.0
 	 *
 	 * @param array        $pdf_opts PDF options.
 	 * @param array        $gen_opts General options.
@@ -1200,8 +1200,8 @@ class Read_Offline_Export {
 	/**
 	 * Compose reusable document header (title, featured image, meta line).
 	 *
-	 * @since 0.1.0
-	 * @since 0.2.4 Added custom heading tag argument.
+	 * @since 2.0.0
+	 * @since 2.2.3 Added custom heading tag argument.
 	 *
 	 * @param WP_Post $post             Post.
 	 * @param bool    $include_featured Include featured image.
@@ -1228,8 +1228,8 @@ class Read_Offline_Export {
 	/**
 	 * Generate single EPUB file via PHPePub library.
 	 *
-	 * @since 0.1.0
-	 * @since 0.2.4 Utilises modular helper methods (CSS/TOC/meta).
+	 * @since 2.0.0
+	 * @since 2.2.3 Utilises modular helper methods (CSS/TOC/meta).
 	 *
 	 * @param WP_Post $post  Post object.
 	 * @param string  $title Title.
@@ -1272,7 +1272,7 @@ class Read_Offline_Export {
 				 * Use this to run external validators (e.g., epubcheck) or post-process.
 				 * Return a WP_Error via filter to signal validation failure; file will remain but error propagates.
 				 *
-				 * @since 0.2.4
+				 * @since 2.2.3
 				 *
 				 * @param string  $path Absolute path to the generated EPUB.
 				 * @param WP_Post $post Post object.
@@ -1297,8 +1297,8 @@ class Read_Offline_Export {
 	/**
 	 * Generate combined EPUB containing multiple posts.
 	 *
-	 * @since 0.1.0
-	 * @since 0.2.4 Consistent header usage per post.
+	 * @since 2.0.0
+	 * @since 2.2.3 Consistent header usage per post.
 	 *
 	 * @param int[]  $post_ids IDs.
 	 * @param string $path     Destination path.
