@@ -4,7 +4,7 @@ Tags: pdf, epub, export, offline, download
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 8.2
-Stable tag: 0.2.3
+Stable tag: 2.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,17 +51,26 @@ If you expected a ZIP, uncheck the "Combine bulk exports" option under Settings 
 3. Bulk export actions in the posts list
 
 == Changelog ==
-= 0.2.3 =
+= 2.2.4 =
+Version alignment release: bumps plugin to 2.2.4 (was 2.2.3 codebase) to finalize renumbering from 0.x.y -> 2.x.y. No functional changes beyond updated documentation and @since annotations.
+
+= 2.2.3 (formerly 0.2.4) =
+- Fix: Restored PDF Table of Contents (regression) with hierarchical structure and page numbers when page numbering enabled (no leading blank page).
+- Change: Public REST access default remains disabled; docs clarified (privacy-first).
+- Dev: Added `read_offline_toc_title` (PDF/EPUB) and `read_offline_pdf_toc_html` (manual fallback) filters.
+- Dev: Added `Read_Offline_Export::invalidate_post_cache( $post_id, $format )` helper for targeted cache purges.
+- Dev: Reused EPUB heading parser for PDF TOC/bookmarks; injected mPDF bookmarks when page numbers active.
+= 2.2.2 (formerly 0.2.3) =
 - Enhancement: Added standard rate limit headers (Retry-After, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) to REST responses.
 - Enhancement: Successful REST responses now include remaining quota when rate limiting applies.
 
-= 0.2.2 =
+= 2.2.1 (formerly 0.2.2) =
 - Feature: Public REST access toggle (allow/deny unauthenticated exports of published posts).
 - Feature: Simple per-IP rate limiting for unauthenticated REST exports (configurable requests + window seconds).
 - Admin: Added settings for REST security (toggle + limits) on General tab.
 - Cleanup: Removed Test export tool from admin UI.
 
-= 0.2.0 =
+= 2.2.0 (formerly 0.2.0) =
 - Feature: Markdown export (single post UI + REST) with fenced code, lists, headings, links, images.
 - Admin: Added MD to selectable formats and REST help examples.
 - Admin: Moved Custom PDF CSS from General tab to PDF tab (auto migration/fallback).
@@ -70,15 +79,17 @@ If you expected a ZIP, uncheck the "Combine bulk exports" option under Settings 
 - Docs: Updated README/readme.txt.
 - Note: Bulk action + combined Markdown export planned.
 
-= 0.1.1 =
+= 2.1.1 (formerly 0.1.1) =
 - Add settings validation/sanitization (General, PDF, EPUB).
 - Tighten escaping and add translators’ comments.
 - Safer fallback when PDF custom size is invalid.
 
-= 0.1.0 =
+= 2.0.0 (formerly 0.1.0) =
 - Initial release with PDF/EPUB export, REST API, caching, and admin bulk ZIP.
 
 == Upgrade Notice ==
+= 0.2.4 =
+Restores PDF TOC generation (with page numbers when enabled) and removes the initial blank page. Adds TOC title customization and per-post cache invalidation helper.
 = 0.2.0 =
 Adds Markdown export and relocates Custom PDF CSS setting; update if you need MD downloads or cleaner PDF CSS management.
 
