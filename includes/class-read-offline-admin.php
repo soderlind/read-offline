@@ -1467,7 +1467,7 @@ class Read_Offline_Admin {
 		/**
 		 * Filter the bulk export ZIP filename (before creation).
 		 *
-			 * @since 2.2.3
+		 * @since 2.2.3
 		 *
 		 * @param string $zip_name Default filename.
 		 * @param array  $generated Array of arrays with keys post_id, path.

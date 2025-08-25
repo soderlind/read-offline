@@ -19,12 +19,12 @@ class Read_Offline_Frontend {
 	 * Renders the small “Save as” control (PDF/EPUB/Markdown) and exposes a
 	 * fetch-based downloader for the REST export endpoint.
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 */
 	/**
 	 * Bootstrap hooks.
 	 *
-	 * @since 2.1.1
+	 * @since 2.0.0
 	 * @return void
 	 */
 	public static function init() {
