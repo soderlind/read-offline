@@ -4,7 +4,7 @@ Tags: pdf, epub, export, offline, download, markdown, bulk-export, documents
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 8.2
-Stable tag: 2.2.4
+Stable tag: 2.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -133,6 +133,9 @@ Check out HOOKS.md for 50+ customization filters and actions.
 
 == Changelog ==
 
+= 2.2.5 - Update Plugin =
+* Add automatic plugin updates via GitHub
+
 = 2.2.4 - Current Release =
 **Stability & Documentation Update**
 * Version alignment release: Updated from 0.x.y to 2.x.y numbering system
@@ -188,6 +191,9 @@ Check out HOOKS.md for 50+ customization filters and actions.
 * **UI**: Clean, intuitive interface with shortcode support
 
 == Upgrade Notice ==
+
+= 2.2.5 =
+Preview release adding optional modern settings UI. Safe to skip if you prefer classic admin; enable flag to test.
 
 = 2.2.4 =
 Documentation and stability improvements. Recommended update for better user experience and developer documentation.

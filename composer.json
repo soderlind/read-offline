@@ -6,7 +6,8 @@
 	"require": {
 		"php": ">=8.2",
 		"mpdf/mpdf": "^8.2",
-		"grandt/phpepub": "^4.0"
+		"grandt/phpepub": "^4.0",
+		"yahnis-elsts/plugin-update-checker": "^5.0"
 	},
 	"config": {
 		"optimize-autoloader": true,

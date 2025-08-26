@@ -47,7 +47,15 @@ Create professional **PDF**, **EPUB**, and **Markdown** files from your WordPres
 ## ⚡ Quick Start (3 Simple Steps)
 
 ### 1. **Install & Activate**
-Upload to your plugins folder or install directly from WordPress admin. No complex setup required!
+
+- **Quick Install**
+
+   - Download [`read-offline.zip`](https://github.com/soderlind/read-offline/releases/latest/download/read-offline.zip)
+   - Upload via  Plugins > Add New > Upload Plugin
+   - Activate the plugin.
+
+- **Updates**
+   * Plugin updates are handled automatically via GitHub. No need to manually download and install updates.
 
 ### 2. **Configure Your Preferences**
 Visit *Settings → Read Offline* to choose your default formats and customize appearance.
