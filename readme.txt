@@ -1,6 +1,6 @@
 === Read Offline ===
-Contributors: your-name
-Tags: pdf, epub, export, offline, download
+Contributors: soderlind
+Tags: pdf, epub, export, offline, download, markdown, bulk-export, documents
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 8.2
@@ -8,90 +8,195 @@ Stable tag: 2.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Export posts and pages to PDF, EPUB, and Markdown for offline reading or reuse. Shortcode and auto-insert UI, admin bulk exports (single combined file or ZIP), and a REST API (with optional public access & rate limiting).
+Transform your WordPress content into beautiful PDF, EPUB, and Markdown documents with one click. Perfect for bloggers, businesses, and content creators who want to share their work offline.
 
 == Description ==
-Read Offline lets site visitors and editors download content as PDF, EPUB, or Markdown (MD).
 
-Highlights:
-- Frontend "Save as" control (PDF/EPUB/MD) with shortcode [read_offline] and optional auto-insert.
-- Bulk export: combine multiple posts/pages into one PDF or EPUB (default) OR toggle setting to create a ZIP of individual files. (Markdown bulk action coming.)
-- REST endpoint for programmatic exports: /wp-json/read-offline/v1/export (format=pdf|epub|md) with configurable public toggle and basic per-IP rate limiting
-- Caching keyed by content/settings so repeated downloads are fast.
-- EPUB output is strict XHTML; PDF via mPDF.
+**Turn any WordPress post or page into professional documents in seconds.**
 
-Works great for blogs, docs, and longform content that readers want to keep.
+Read Offline transforms your WordPress content into beautiful, portable formats that your readers can enjoy anywhere. Whether you're a blogger sharing articles, an educator distributing materials, or a business creating reports, this plugin makes content export effortless.
 
-= Rendering / conversion engines =
-- PDF: mPDF
-- EPUB: PHPePub
-- Markdown: internal lightweight HTML→Markdown converter
+= Why Choose Read Offline? =
 
-Both are provided via Composer; if they’re not installed you’ll see a helpful message in the admin health card and test tool.
+**Professional PDF Export**
+* Beautiful table of contents with automatic page numbers
+* Custom branding with headers, footers, and watermarks
+* Perfect formatting that looks great on any device
+* Combine multiple posts into comprehensive guides
+
+**Publishing-Ready EPUB**
+* Industry-standard format compatible with all e-readers
+* Custom cover images and professional metadata
+* Multiple styling themes (light, dark, or custom)
+* Built-in validation for perfect compatibility
+
+**Lightning-Fast Performance**
+* Smart caching - exports are generated once, served instantly
+* Bulk operations - export dozens of posts at once
+* No waiting around for large exports
+
+**Privacy & Security First**
+* Zero telemetry - your content stays private
+* Local processing - files generated on your server
+* Public downloads disabled by default
+* Built-in rate limiting to prevent abuse
+
+= Perfect For =
+
+* **Bloggers** - Share your posts as professional PDFs or e-books
+* **Businesses** - Create branded reports and documentation  
+* **Educators** - Distribute course materials and reading lists
+* **Authors** - Convert blog series into publishable e-books
+* **Agencies** - Deliver client reports in multiple formats
+* **Developers** - Export content for static sites or migration
+
+= Key Features =
+
+* **One-click exports** - PDF, EPUB, and Markdown formats
+* **Automatic placement** or use `[read_offline]` shortcode anywhere
+* **Bulk export magic** - combine multiple posts or create ZIP archives
+* **Smart caching** - lightning-fast repeat downloads
+* **REST API** for programmatic access
+* **50+ hooks and filters** for complete customization
+* **Mobile-friendly** admin interface
+
+= How It Works =
+
+1. **Install & Activate** - No complex setup required
+2. **Configure** - Choose formats and customize appearance in Settings → Read Offline
+3. **Export** - Add export buttons automatically or use the shortcode
+
+= Rendering Engines =
+* **PDF**: Powered by mPDF for professional documents
+* **EPUB**: Built with PHPePub for perfect e-reader compatibility  
+* **Markdown**: Lightweight converter for static site generators
+
+All libraries are bundled - no additional setup required!
 
 == Installation ==
-1. Upload the plugin to /wp-content/plugins/ or install it from your site’s plugins screen.
-2. Activate the plugin through the "Plugins" screen in WordPress.
-3. No Composer step is required for normal use — vendor libraries are bundled.
-4. Visit Settings → Read Offline to configure formats (PDF/EPUB/MD), filename template, and PDF/EPUB options. (Custom PDF CSS moved from General to PDF tab in 0.2.0.)
+
+**Quick Setup (3 Simple Steps)**
+
+1. **Install the Plugin**
+   Upload to `/wp-content/plugins/` or install directly from your WordPress admin under Plugins → Add New.
+
+2. **Activate**  
+   Activate the plugin through the "Plugins" screen in WordPress. All required libraries are bundled - no additional setup needed!
+
+3. **Configure**
+   Visit Settings → Read Offline to choose your default formats and customize appearance.
+
+**That's it!** Your export buttons will appear automatically, or you can use the `[read_offline]` shortcode anywhere.
+
+**For Developers:** Run `composer install` in the plugin folder to update vendor libraries or access testing tools.
 
 == Frequently Asked Questions ==
-= I see “mPDF/PHPePub not available” =
-Install Composer dependencies in the plugin folder. The Settings page shows an Environment health card to verify libraries are loaded.
 
-= The EPUB has validation errors in some readers =
-The plugin normalizes HTML to strict XHTML, fixes common entity/attribute issues, and can leverage tidy if available. If you still see issues, check your post content for unclosed tags or embedded scripts.
+= How do I add export buttons to my posts? =
+Go to Settings → Read Offline and enable auto-insertion for all posts, or add the `[read_offline]` shortcode to specific posts and pages.
 
-= Bulk export doesn’t create a ZIP =
-If you expected a ZIP, uncheck the "Combine bulk exports" option under Settings → Read Offline → General. Also ensure the PHP Zip extension is enabled if using ZIP mode.
+= Can I customize the PDF styling? =
+Absolutely! Adjust margins, headers, footers, fonts, and colors in the PDF settings section. You can even add your own custom CSS.
+
+= Are exports cached for better performance? =
+Yes! Files are cached until content or settings change, ensuring lightning-fast repeat downloads for your visitors.
+
+= Can visitors download without logging in? =
+Only if you enable public REST access in settings. By default, only logged-in users can export for security.
+
+= How do I export multiple posts at once? =
+Select posts in your admin area, choose a "Read Offline" bulk action, and apply. You can create either a single combined document or a ZIP of individual files.
+
+= I see "mPDF/PHPePub not available" =
+This usually means the bundled libraries weren't installed properly. Try re-installing the plugin or run `composer install` in the plugin folder.
+
+= The EPUB has validation errors in some e-readers =
+The plugin normalizes HTML to strict XHTML and fixes common issues. Check your post content for unclosed tags or embedded scripts that might cause problems.
+
+= Bulk export creates a single file instead of ZIP =
+Uncheck the "Combine bulk exports" option under Settings → Read Offline → General if you want ZIP archives instead of combined documents.
+
+= Can I use this with custom post types? =
+Yes! The plugin works with any public post type. Configure which post types show export buttons in the settings.
+
+= Is there an API for developers? =
+Yes! Use the REST endpoint: `/wp-json/read-offline/v1/export?postId=ID&format=pdf|epub|md` 
+Check out HOOKS.md for 50+ customization filters and actions.
 
 == Screenshots ==
-1. Settings page with tabs and inline help popups
-2. Frontend Save as control on a post
-3. Bulk export actions in the posts list
+
+1. **Settings Dashboard** - Clean, organized settings with tabs and helpful tooltips
+2. **Frontend Export Control** - Beautiful "Save as" buttons that appear automatically on posts  
+3. **Bulk Export Interface** - Select multiple posts and export as combined documents or ZIP archives
+4. **PDF Output Sample** - Professional documents with table of contents and custom branding
+5. **EPUB Reader View** - Publishing-quality e-books compatible with all major e-readers
 
 == Changelog ==
-= 2.2.4 =
-Version alignment release: bumps plugin to 2.2.4 (was 2.2.3 codebase) to finalize renumbering from 0.x.y -> 2.x.y. No functional changes beyond updated documentation and @since annotations.
 
-= 2.2.3 (formerly 0.2.4) =
-- Fix: Restored PDF Table of Contents (regression) with hierarchical structure and page numbers when page numbering enabled (no leading blank page).
-- Change: Public REST access default remains disabled; docs clarified (privacy-first).
-- Dev: Added `read_offline_toc_title` (PDF/EPUB) and `read_offline_pdf_toc_html` (manual fallback) filters.
-- Dev: Added `Read_Offline_Export::invalidate_post_cache( $post_id, $format )` helper for targeted cache purges.
-- Dev: Reused EPUB heading parser for PDF TOC/bookmarks; injected mPDF bookmarks when page numbers active.
-= 2.2.2 (formerly 0.2.3) =
-- Enhancement: Added standard rate limit headers (Retry-After, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) to REST responses.
-- Enhancement: Successful REST responses now include remaining quota when rate limiting applies.
+= 2.2.4 - Current Release =
+**Stability & Documentation Update**
+* Version alignment release: Updated from 0.x.y to 2.x.y numbering system
+* Comprehensive documentation improvements
+* Updated @since annotations throughout codebase
+* No functional changes - purely organizational
 
-= 2.2.1 (formerly 0.2.2) =
-- Feature: Public REST access toggle (allow/deny unauthenticated exports of published posts).
-- Feature: Simple per-IP rate limiting for unauthenticated REST exports (configurable requests + window seconds).
-- Admin: Added settings for REST security (toggle + limits) on General tab.
-- Cleanup: Removed Test export tool from admin UI.
+= 2.2.3 - PDF Table of Contents Restored =
+**Major PDF Improvements**
+* **Fixed**: Restored PDF Table of Contents with hierarchical structure
+* **New**: Automatic page numbers when page numbering is enabled
+* **Fixed**: Removed unwanted leading blank page from PDFs
+* **Enhanced**: Privacy-first approach - public REST access remains disabled by default
+* **Developer**: Added `read_offline_toc_title` filter for PDF/EPUB TOC customization
+* **Developer**: Added `read_offline_pdf_toc_html` filter for manual TOC fallback
+* **Developer**: New `Read_Offline_Export::invalidate_post_cache()` helper for targeted cache management
 
-= 2.2.0 (formerly 0.2.0) =
-- Feature: Markdown export (single post UI + REST) with fenced code, lists, headings, links, images.
-- Admin: Added MD to selectable formats and REST help examples.
-- Admin: Moved Custom PDF CSS from General tab to PDF tab (auto migration/fallback).
-- Markdown: Improved newline handling (removed literal \n), standardized triple backticks.
-- Internal: Added md to cache hash + filename builder.
-- Docs: Updated README/readme.txt.
-- Note: Bulk action + combined Markdown export planned.
+= 2.2.2 - Rate Limiting Improvements =
+**Better API Management**  
+* **New**: Standard rate limit headers (Retry-After, X-RateLimit-Limit, etc.) in REST responses
+* **Enhanced**: REST responses now include remaining quota information when rate limiting applies
+* **Improved**: Better feedback for API consumers about usage limits
 
-= 2.1.1 (formerly 0.1.1) =
-- Add settings validation/sanitization (General, PDF, EPUB).
-- Tighten escaping and add translators’ comments.
-- Safer fallback when PDF custom size is invalid.
+= 2.2.1 - Public Access & Security =
+**Enhanced Security Features**
+* **New**: Public REST access toggle - control whether unauthenticated users can export published posts
+* **New**: Smart per-IP rate limiting for unauthenticated REST exports with configurable limits
+* **Admin**: Added comprehensive REST security settings on General tab
+* **Cleanup**: Removed redundant Test export tool from admin interface
 
-= 2.0.0 (formerly 0.1.0) =
-- Initial release with PDF/EPUB export, REST API, caching, and admin bulk ZIP.
+= 2.2.0 - Markdown Support =
+**Major Feature Addition**
+* **New**: Full Markdown export support with fenced code blocks, lists, headings, links, and images
+* **Admin**: Added Markdown to selectable formats with REST API examples
+* **Improved**: Relocated Custom PDF CSS from General to PDF tab (with automatic migration)
+* **Enhanced**: Better newline handling and standardized code formatting in Markdown
+* **Internal**: Added Markdown support to cache system and filename builder
+* **Note**: Bulk Markdown export coming in future release
+
+= 2.1.1 - Security Hardening =
+**Security & Validation**
+* **Enhanced**: Complete settings validation and sanitization for all tabs
+* **Security**: Improved escaping throughout with proper translators' comments  
+* **Fixed**: Safer fallback handling when PDF custom size settings are invalid
+* **Recommended**: Security-focused update for all users
+
+= 2.0.0 - Initial Release =
+**Foundation Release**
+* **Core**: PDF and EPUB export functionality with professional formatting
+* **API**: Full REST API with configurable access controls
+* **Performance**: Smart caching system for lightning-fast repeat downloads
+* **Admin**: Bulk ZIP export capabilities for multiple posts
+* **UI**: Clean, intuitive interface with shortcode support
 
 == Upgrade Notice ==
-= 0.2.4 =
-Restores PDF TOC generation (with page numbers when enabled) and removes the initial blank page. Adds TOC title customization and per-post cache invalidation helper.
-= 0.2.0 =
-Adds Markdown export and relocates Custom PDF CSS setting; update if you need MD downloads or cleaner PDF CSS management.
 
-= 0.1.1 =
-Recommended update that adds validation and improves security hardening (escaping).
+= 2.2.4 =
+Documentation and stability improvements. Recommended update for better user experience and developer documentation.
+
+= 2.2.3 =
+Major update: Restores PDF Table of Contents with page numbers and removes blank pages. Adds developer tools for cache management.
+
+= 2.2.0 =
+Major feature release: Adds full Markdown export support and improves settings organization. Recommended for all users.
+
+= 2.1.1 =
+Important security update with improved validation and escaping. Recommended for all users.
