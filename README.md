@@ -4,7 +4,9 @@
 
 Create professional **PDF**, **EPUB**, and **Markdown** files from your WordPress content with one click. Perfect for bloggers, content creators, businesses, and anyone who wants to share their content offline or across different platforms.
 
+
 ✨ **Lightning fast** • 🔒 **Privacy-first** • 🎨 **Beautifully formatted** • 🔧 **Developer-friendly**
+
 
 <img src="assets/bulk-export.png">
 
