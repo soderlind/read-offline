@@ -1,114 +1,138 @@
-# Read Offline 2.x
+# 📚 Read Offline - Transform Your WordPress Content
 
-Refactored, cache‑aware export engine for turning any WordPress post or page into beautiful, portable documents: **PDF**, **EPUB**, and **Markdown**.
+**Turn any WordPress post or page into beautiful, portable documents in seconds.**
 
-The 2.x series focuses on: reliability, privacy‑first defaults, extensibility via hooks, and clean, fast generation with hashing & selective invalidation.
+Create professional **PDF**, **EPUB**, and **Markdown** files from your WordPress content with one click. Perfect for bloggers, content creators, businesses, and anyone who wants to share their content offline or across different platforms.
+
+✨ **Lightning fast** • 🔒 **Privacy-first** • 🎨 **Beautifully formatted** • 🔧 **Developer-friendly**
 
 <img src="assets/bulk-export.png">
 
-## 2.x Highlights
-**Fast repeat downloads** – Content + settings hashing caches per‑post exports (PDF/EPUB/MD) under uploads; manual or programmatic cache invalidation provided.
+## 🚀 Why Choose Read Offline?
 
-**Flexible front‑end UI** – Auto‑insert or shortcode `[read_offline]` with a format selector (PDF/EPUB/Markdown) and rate‑limit friendly REST calls.
+### 📄 **Professional PDF Export**
+- **Beautiful table of contents** with automatic page numbers
+- **Custom branding** with headers, footers, and watermarks
+- **Responsive layouts** that look great on any device
+- **Multi-post exports** - combine articles into comprehensive guides
 
-**Robust PDF output** – mPDF with restored hierarchical Table of Contents, optional page numbers (automatically switches between bookmark TOC and manual list), custom CSS, margins, headers/footers, watermark, and combined multi‑post exports.
+### 📖 **Publishing-Ready EPUB**
+- **Industry-standard format** compatible with all e-readers
+- **Custom cover images** and professional metadata
+- **Multiple styling options** - light, dark, or completely custom
+- **Validation tools** to ensure perfect compatibility
 
-**Standards‑minded EPUB** – Strict XHTML generation, optional cover image strategies, configurable metadata & CSS profile (light/dark/none/custom), plus hookable validation step.
+### ⚡ **Lightning-Fast Performance**
+- **Smart caching** - exports are generated once, served instantly
+- **Bulk operations** - export dozens of posts at once
+- **Background processing** - no waiting around for large exports
 
-**Developer‑friendly Markdown** – Lightweight deterministic HTML→MD converter for reuse in static site pipelines or content migration.
+### 🔒 **Privacy & Security First**
+- **No tracking or telemetry** - your content stays private
+- **Local processing** - files generated on your server
+- **Rate limiting** to prevent abuse
+- **Secure access controls** with optional public sharing
 
-**Privacy & rate limiting** – Public REST access is OFF by default; enable only if you want anonymous downloads. Simple per‑IP sliding window limiting with standard headers (Retry‑After & X‑RateLimit-*).
+## 🎯 Perfect For
 
-**Hook ecosystem** – Dozens of filters/actions (`read_offline_pdf_toc_html`, `read_offline_epub_css`, `read_offline_content_html`, `read_offline_epub_validate`, etc.). See `HOOKS.md` for the catalogue.
+- **📝 Bloggers** - Share your posts as professional PDFs or e-books
+- **🏢 Businesses** - Create branded reports and documentation
+- **👩‍🏫 Educators** - Distribute course materials and reading lists
+- **📚 Authors** - Convert blog series into publishable e-books
+- **💼 Agencies** - Deliver client reports in multiple formats
+- **🔧 Developers** - Export content for static sites or migration
 
-**Selective invalidation** – Call `Read_Offline_Export::invalidate_post_cache( $post_id, $format )` after programmatic content changes (or omit `$format` for all formats).
+## ⚡ Quick Start (3 Simple Steps)
 
-## Recently Added (2.2.x)
-- Restored & improved PDF TOC (hierarchical, no numbering; page numbers when numbering active) & removed leading blank page.
-- Non‑public mode now still allows front‑end exports via per‑post nonce (secure while disabling blind anonymous hits).
-- Integrity headers for downloads (Content-Length plus optional checksum headers if served via helper endpoints).
-- EPUB generation action & validation filter for external epubcheck integration.
-- Admin UI responsive refinements and environment health card.
+### 1. **Install & Activate**
+Upload to your plugins folder or install directly from WordPress admin. No complex setup required!
 
-## What it does
-- Adds a “Save as” control on posts/pages (auto or shortcode) for PDF, EPUB, Markdown.
-- Bulk exports: combine multiple posts/pages into one PDF or EPUB – or switch to a ZIP of individual files. (Combined Markdown export on roadmap.)
-- Hash‑based caching keyed to content + relevant settings; invalidated on demand.
-- Segmented settings UI (General / PDF / EPUB) with inline help popups & responsive layout.
+### 2. **Configure Your Preferences**
+Visit *Settings → Read Offline* to choose your default formats and customize appearance.
 
-## Requirements
-- WordPress 6.5+
-- PHP 8.2+
-- Tested up to: WordPress 6.8
-- Zip extension (for ZIP bulk or multiple file archive mode)
-- Bundled Composer libraries:
-	- mPDF (PDF)
-	- PHPePub (EPUB)
+<img src="assets/back-end.png">
 
-## Install
-1. Upload to `wp-content/plugins/read-offline` or install via Plugins → Add New.
-2. Activate. (Composer already bundled; no build step needed.)
-3. Visit Settings → Read Offline to configure.
+### 3. **Start Exporting**
+Add the export button to any post automatically, or use the `[read_offline]` shortcode anywhere.
 
+<img src="assets/front-end.png">
 
+## 🛠️ Advanced Features
 
-Developer: to update vendors or run tests:
+### 📦 **Bulk Export Magic**
+Select multiple posts and pages from your admin area and export them as:
+- **Single combined document** - Perfect for creating comprehensive guides
+- **ZIP archive** - Individual files for easy distribution  
+- **Custom filename patterns** - Organize your exports automatically
 
-```bash
-cd wp-content/plugins/read-offline
-composer install
-```
+<img src="assets/bulk-export.png">
 
-## Quick start
-1. Settings → Read Offline: pick default formats & filename pattern.
-2. Open a post, use the “Save as” control (or place `[read_offline]`).
-3. Bulk export from Posts list (choose action, apply) – optionally toggle ZIP vs combined.
+### 🎨 **Customization Options**
+- **PDF Styling**: Custom margins, headers, footers, and watermarks
+- **EPUB Themes**: Light, dark, or completely custom CSS
+- **Brand Integration**: Add your logo and company information
+- **Table of Contents**: Automatic generation with smart formatting
 
-## Usage details
-### Frontend
-- Auto-insert the “Save as” control from Settings, or add the shortcode:
-	- [read_offline]
+### 🔌 **Developer Friendly**
+- **REST API** for programmatic access: `GET /wp-json/read-offline/v1/export`
+- **50+ hooks and filters** for complete customization ([see HOOKS.md](HOOKS.md))
+- **Smart caching** for optimal performance
+- **Markdown export** for static site generators
 
-### Admin bulk export
-- Select multiple posts/pages, pick a Read Offline bulk action (PDF or EPUB), and apply. (Markdown bulk action coming.)
-- By default a single combined document is generated. Disable "Combine bulk exports" in General settings to instead receive a ZIP of per‑post files.
+*For developers: Run `composer install` to update vendors or access testing tools.*
 
-## REST API
-`GET /wp-json/read-offline/v1/export?postId=ID&format=pdf|epub|md&nonce=...`
+## 💻 System Requirements
 
-Behavior:
-- With Public REST OFF (default) a valid per‑post nonce or capability is required.
-- With Public REST ON published posts are anonymous‑fetchable, still rate limited.
+- ✅ **WordPress 6.5+**
+- ✅ **PHP 8.2+** 
+- ✅ **Zip extension** (for bulk exports)
+- ✅ **Tested up to WordPress 6.8**
 
-Rate limiting for unauthenticated requests sets:
-`Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`.
+*All required libraries are bundled - no additional setup needed!*
 
-## Settings overview
-- General: choose visible formats (PDF/EPUB/MD), placement, filename template, bulk combination, cache clearing, REST public toggle (default off), and rate limiting.
-- PDF: page size, margins, header/footer, watermark, TOC (depth + automatic page-number TOC when page numbers enabled), and CSS tweaks.
-- EPUB: metadata (author/publisher/lang), cover image, TOC, and CSS profile/custom CSS.
+## ❓ Common Questions
 
-## Troubleshooting
-| Issue | Likely Cause / Fix |
-|-------|--------------------|
-| Missing mPDF / PHPePub | Re-install vendors (`composer install`). |
-| PDF TOC lacks page numbers | Enable page numbering in PDF settings. |
-| ZIP not produced | Zip extension missing OR combine mode enabled. |
-| Stale output | Invalidate via helper or Clear Cache button. |
-| EPUB warnings | Check source HTML for unclosed tags / scripts. |
+| **Question** | **Answer** |
+|--------------|------------|
+| **How do I add the export button to my posts?** | Go to *Settings → Read Offline* and enable auto-insertion, or use the `[read_offline]` shortcode anywhere. |
+| **Can I customize the PDF styling?** | Yes! Adjust margins, headers, footers, fonts, and colors in the PDF settings section. |
+| **Are exports cached for performance?** | Absolutely! Files are cached until content or settings change, ensuring lightning-fast repeat downloads. |
+| **Can visitors download without logging in?** | Only if you enable public REST access in settings. By default, only logged-in users can export. |
+| **How do I export multiple posts at once?** | Select posts in your admin area, choose a "Read Offline" bulk action, and apply. |
 
-## Privacy & security
-- Zero telemetry; files generated locally.
-- Public REST OFF by default; enable only if you intend anonymous downloads.
-- Basic IP rate limiting to reduce scraping load.
+## 🛡️ Privacy & Security
 
-## License & credits
-- GPLv2 or later. See License URI in readme.txt.
-- PDF powered by mPDF. EPUB powered by PHPePub.
+- **🔒 Zero telemetry** - Your content never leaves your server
+- **🚫 No external dependencies** - All processing happens locally
+- **⚡ Rate limiting** - Built-in protection against abuse
+- **🔐 Access controls** - Public downloads disabled by default
 
-—
+## 📋 What's New in 2.x
 
-For deeper details see: `readme.txt` (WP directory format), `CHANGELOG.md`, and `HOOKS.md` for the full action/filter reference.
+- ✨ **Improved PDF TOCs** with hierarchical structure and page numbers
+- 🔒 **Enhanced security** with nonce-based access for non-public mode  
+- 📊 **Integrity headers** for download verification (Content-Length, checksums)
+- 🔧 **EPUB validation** with external epubcheck integration support
+- 📱 **Responsive admin UI** with better mobile experience
+
+## 🆘 Need Help?
+
+**Quick Fixes:**
+- **Missing export buttons?** Check if formats are enabled in Settings → Read Offline
+- **PDF missing page numbers?** Enable page numbering in PDF settings
+- **Getting ZIP instead of combined file?** Make sure "Combine bulk exports" is turned on
+- **Stale content in exports?** Use the "Clear Cache" button in settings
+
+**Still stuck?** Check out the detailed [HOOKS.md](HOOKS.md) for developer documentation or open an issue on GitHub.
+
+## 📄 License & Credits
+
+- **License:** GPLv2 or later
+- **PDF Engine:** Powered by mPDF
+- **EPUB Engine:** Powered by PHPePub
 
 ---
-Happy exporting.
+
+**Ready to transform your WordPress content?** Install Read Offline today and start creating beautiful documents in seconds.
+
+*For complete technical details, see [`readme.txt`](readme.txt), [`CHANGELOG.md`](CHANGELOG.md), and [`HOOKS.md`](HOOKS.md).*
