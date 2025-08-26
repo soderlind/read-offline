@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.2.6
+- Minor fixes
+
 ## 2.2.5
 - Add automatic plugin updates via GitHub
 
