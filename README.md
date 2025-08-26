@@ -4,6 +4,8 @@ Refactored, cache‑aware export engine for turning any WordPress post or page i
 
 The 2.x series focuses on: reliability, privacy‑first defaults, extensibility via hooks, and clean, fast generation with hashing & selective invalidation.
 
+<img src="assets/bulk-export.png">
+
 ## 2.x Highlights
 **Fast repeat downloads** – Content + settings hashing caches per‑post exports (PDF/EPUB/MD) under uploads; manual or programmatic cache invalidation provided.
 
