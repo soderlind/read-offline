@@ -1,5 +1,5 @@
 === Read Offline ===
-Contributors: soderlind
+Contributors: PerS
 Tags: pdf, epub, export, offline, download, markdown, bulk-export, documents
 Requires at least: 6.5
 Tested up to: 6.8
@@ -132,6 +132,9 @@ Check out HOOKS.md for 50+ customization filters and actions.
 5. **EPUB Reader View** - Publishing-quality e-books compatible with all major e-readers
 
 == Changelog ==
+
+= 2.2.6 - Update Plugin =
+* Minor fixes
 
 = 2.2.5 - Update Plugin =
 * Add automatic plugin updates via GitHub
