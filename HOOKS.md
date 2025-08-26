@@ -5,16 +5,20 @@ Comprehensive list of filters and actions exposed by the Read Offline plugin (ve
 Each entry shows: Purpose • Arguments • Expected return (for filters) • Example usage.
 
 ## Table of Contents
-- Filters
-  - Content & Format
-  - Markdown
-  - EPUB
-  - PDF
-  - TOC
-  - Covers / Assets
-  - Bulk / UI
-  - Internal paths
-- Actions
+ - [Filters](#filters)
+     - [Content & Format](#1-content--format)
+     - [Markdown](#2-markdown)
+     - [EPUB](#3-epub)
+     - [PDF](#4-pdf)
+     - [TOC](#5-toc)
+     - [Covers / Assets](#6-covers--assets)
+     - [Bulk / UI](#7-bulk--ui)
+     - [Internal Paths](#8-internal-paths)
+ - [Actions](#actions)
+ - [Validation Filter](#validation-filter)
+ - [Download Integrity Headers](#download-integrity-headers)
+ - [Helper Methods (Public)](#helper-methods-public)
+ - [Notes](#notes)
 
 ---
 
