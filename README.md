@@ -55,7 +55,7 @@ Create professional **PDF**, **EPUB**, and **Markdown** files from your WordPres
    - Activate the plugin.
 
 - **Updates**
-   * Plugin updates are handled automatically via GitHub. No need to manually download and install updates.
+   * Plugin [updates are handled automatically](https://github.com/soderlind/wordpress-plugin-github-updater#readme) via GitHub. No need to manually download and install updates.
 
 ### 2. **Configure Your Preferences**
 Visit *Settings → Read Offline* to choose your default formats and customize appearance.
