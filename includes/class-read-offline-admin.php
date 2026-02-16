@@ -243,20 +243,20 @@ class Read_Offline_Admin {
 	 * @return array
 	 */
 	public static function sanitize_general_settings( $input ) {
-		$clean                       = array();
-		$clean[ 'auto_insert' ]      = ! empty( $input[ 'auto_insert' ] ) ? 1 : 0;
-		$allowed_formats             = array( 'pdf', 'epub', 'md' );
-		$in_formats                  = isset( $input[ 'formats' ] ) ? (array) $input[ 'formats' ] : array();
-		$clean[ 'formats' ]          = array_values( array_intersect( $allowed_formats, array_map( 'sanitize_key', $in_formats ) ) );
-		$clean[ 'filename' ]         = isset( $input[ 'filename' ] ) ? sanitize_text_field( wp_unslash( $input[ 'filename' ] ) ) : '{site}-{post_slug}-{format}';
-		$clean[ 'include_featured' ] = ! empty( $input[ 'include_featured' ] ) ? 1 : 0;
-		$clean[ 'include_author' ]   = ! empty( $input[ 'include_author' ] ) ? 1 : 0;
-		$clean[ 'combine_bulk' ]     = ! empty( $input[ 'combine_bulk' ] ) ? 1 : 0;
-		$clean[ 'rest_public' ]      = ! empty( $input[ 'rest_public' ] ) ? 1 : 0;
-		$rate_limit                  = isset( $input[ 'rest_rate_limit' ] ) ? (int) $input[ 'rest_rate_limit' ] : 10;
-		$clean[ 'rest_rate_limit' ]  = max( 0, min( 1000, $rate_limit ) );
-		$window                      = isset( $input[ 'rest_rate_window' ] ) ? (int) $input[ 'rest_rate_window' ] : 60;
-		$clean[ 'rest_rate_window' ] = max( 10, min( 86400, $window ) );
+		$clean                            = array();
+		$clean[ 'auto_insert' ]           = ! empty( $input[ 'auto_insert' ] ) ? 1 : 0;
+		$allowed_formats                  = array( 'pdf', 'epub', 'md' );
+		$in_formats                       = isset( $input[ 'formats' ] ) ? (array) $input[ 'formats' ] : array();
+		$clean[ 'formats' ]               = array_values( array_intersect( $allowed_formats, array_map( 'sanitize_key', $in_formats ) ) );
+		$clean[ 'filename' ]              = isset( $input[ 'filename' ] ) ? sanitize_text_field( wp_unslash( $input[ 'filename' ] ) ) : '{site}-{post_slug}-{format}';
+		$clean[ 'include_featured' ]      = ! empty( $input[ 'include_featured' ] ) ? 1 : 0;
+		$clean[ 'include_author' ]        = ! empty( $input[ 'include_author' ] ) ? 1 : 0;
+		$clean[ 'combine_bulk' ]          = ! empty( $input[ 'combine_bulk' ] ) ? 1 : 0;
+		$clean[ 'rest_public' ]           = ! empty( $input[ 'rest_public' ] ) ? 1 : 0;
+		$rate_limit                       = isset( $input[ 'rest_rate_limit' ] ) ? (int) $input[ 'rest_rate_limit' ] : 10;
+		$clean[ 'rest_rate_limit' ]       = max( 0, min( 1000, $rate_limit ) );
+		$window                           = isset( $input[ 'rest_rate_window' ] ) ? (int) $input[ 'rest_rate_window' ] : 60;
+		$clean[ 'rest_rate_window' ]      = max( 10, min( 86400, $window ) );
 		$clean[ 'cloudflare_account_id' ] = isset( $input[ 'cloudflare_account_id' ] ) ? sanitize_text_field( wp_unslash( $input[ 'cloudflare_account_id' ] ) ) : '';
 		$clean[ 'cloudflare_api_token' ]  = isset( $input[ 'cloudflare_api_token' ] ) ? sanitize_text_field( wp_unslash( $input[ 'cloudflare_api_token' ] ) ) : '';
 		return $clean;
@@ -838,16 +838,17 @@ class Read_Offline_Admin {
 									</label>
 									<div>
 										<?php if ( current_user_can( 'manage_options' ) ) : ?>
-										<input type="text" name="read_offline_settings_general[cloudflare_account_id]"
-											value="<?php echo esc_attr( $options[ 'cloudflare_account_id' ] ?? '' ); ?>"
-											class="regular-text"
-											placeholder="1234567890abcdef1234567890abcdef" />
-										<p class="read-offline-field-desc">
-											<?php _e( 'Find in Cloudflare Dashboard → Account ID', 'read-offline' ); ?>
-											(<a href="https://developers.cloudflare.com/fundamentals/get-started/basic-tasks/find-account-and-zone-ids/" target="_blank"><?php _e( 'How to find', 'read-offline' ); ?></a>)
-										</p>
+											<input type="text" name="read_offline_settings_general[cloudflare_account_id]"
+												value="<?php echo esc_attr( $options[ 'cloudflare_account_id' ] ?? '' ); ?>"
+												class="regular-text" placeholder="1234567890abcdef1234567890abcdef" />
+											<p class="read-offline-field-desc">
+												<?php _e( 'Find in Cloudflare Dashboard → Account ID', 'read-offline' ); ?>
+												(<a href="https://developers.cloudflare.com/fundamentals/get-started/basic-tasks/find-account-and-zone-ids/"
+													target="_blank"><?php _e( 'How to find', 'read-offline' ); ?></a>)
+											</p>
 										<?php else : ?>
-											<p><em><?php _e( 'Only administrators can configure Cloudflare settings.', 'read-offline' ); ?></em></p>
+											<p><em><?php _e( 'Only administrators can configure Cloudflare settings.', 'read-offline' ); ?></em>
+											</p>
 										<?php endif; ?>
 									</div>
 
@@ -858,31 +859,35 @@ class Read_Offline_Admin {
 									</label>
 									<div>
 										<?php if ( current_user_can( 'manage_options' ) ) : ?>
-										<input type="password" name="read_offline_settings_general[cloudflare_api_token]"
-											value="<?php echo esc_attr( $options[ 'cloudflare_api_token' ] ?? '' ); ?>"
-											class="regular-text"
-											placeholder="••••••••••••••••••••••••••••••••" />
-										<p class="read-offline-field-desc">
-											<?php _e( 'API token with Browser Rendering:Read permission.', 'read-offline' ); ?>
-											(<a href="https://developers.cloudflare.com/browser-rendering/get-started/" target="_blank"><?php _e( 'Setup guide', 'read-offline' ); ?></a>)
-										</p>
-										<?php if ( Read_Offline_Cloudflare::is_configured() ) : ?>
+											<input type="password" name="read_offline_settings_general[cloudflare_api_token]"
+												value="<?php echo esc_attr( $options[ 'cloudflare_api_token' ] ?? '' ); ?>"
+												class="regular-text" placeholder="••••••••••••••••••••••••••••••••" />
 											<p class="read-offline-field-desc">
-												<strong style="color:#1a7f37;">✓ <?php _e( 'Cloudflare is configured. PDFs will use Browser Rendering.', 'read-offline' ); ?></strong>
+												<?php _e( 'API token with Browser Rendering:Read permission.', 'read-offline' ); ?>
+												(<a href="https://developers.cloudflare.com/browser-rendering/get-started/"
+													target="_blank"><?php _e( 'Setup guide', 'read-offline' ); ?></a>)
 											</p>
-											<?php if ( $last_error = Read_Offline_Cloudflare::get_last_error() ) : ?>
-											<p class="read-offline-field-desc" style="color:#b32d2e;">
-												<strong><?php _e( 'Recent error:', 'read-offline' ); ?></strong> <?php echo esc_html( $last_error['message'] ); ?>
-												(<?php echo esc_html( human_time_diff( $last_error['time'] ) ); ?> <?php _e( 'ago', 'read-offline' ); ?>)
-											</p>
+											<?php if ( Read_Offline_Cloudflare::is_configured() ) : ?>
+												<p class="read-offline-field-desc">
+													<strong style="color:#1a7f37;">✓
+														<?php _e( 'Cloudflare is configured. PDFs will use Browser Rendering.', 'read-offline' ); ?></strong>
+												</p>
+												<?php if ( $last_error = Read_Offline_Cloudflare::get_last_error() ) : ?>
+													<p class="read-offline-field-desc" style="color:#b32d2e;">
+														<strong><?php _e( 'Recent error:', 'read-offline' ); ?></strong>
+														<?php echo esc_html( $last_error[ 'message' ] ); ?>
+														(<?php echo esc_html( human_time_diff( $last_error[ 'time' ] ) ); ?>
+														<?php _e( 'ago', 'read-offline' ); ?>)
+													</p>
+												<?php endif; ?>
+											<?php else : ?>
+												<p class="read-offline-field-desc">
+													<em><?php _e( 'Currently using mPDF for PDF generation.', 'read-offline' ); ?></em>
+												</p>
 											<?php endif; ?>
 										<?php else : ?>
-											<p class="read-offline-field-desc">
-												<em><?php _e( 'Currently using mPDF for PDF generation.', 'read-offline' ); ?></em>
+											<p><em><?php _e( 'Only administrators can configure Cloudflare settings.', 'read-offline' ); ?></em>
 											</p>
-										<?php endif; ?>
-										<?php else : ?>
-											<p><em><?php _e( 'Only administrators can configure Cloudflare settings.', 'read-offline' ); ?></em></p>
 										<?php endif; ?>
 									</div>
 
