@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.7
+- Feature: Add queue-aware REST hooks for background export processing
+- Enhancement: New capability gate via `read_offline_can_export` filter (default: Editor+)
+- Enhancement: Lifecycle signals for export operations (requested/completed/failed)
+- Enhancement: Short-circuit hook `read_offline_pre_export` for custom queue integration
+- Enhancement: Response shaping via `read_offline_rest_response` filter
+- Enhancement: Deduplication lock and cache key filters for concurrent requests
+
 ## 2.2.6
 - Minor fixes
 
