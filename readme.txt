@@ -1,10 +1,10 @@
 === Read Offline ===
 Contributors: PerS
 Tags: pdf, epub, export, offline, download, markdown, bulk-export, documents
-Requires at least: 6.5
-Tested up to: 6.8
-Requires PHP: 8.2
-Stable tag: 2.3.0
+Requires at least: 6.8
+Tested up to: 6.9
+Requires PHP: 8.3
+Stable tag: 2.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -132,6 +132,10 @@ Check out HOOKS.md for 50+ customization filters and actions.
 5. **EPUB Reader View** - Publishing-quality e-books compatible with all major e-readers
 
 == Changelog ==
+
+= 2.3.1 - Requirements Update =
+* **Update**: Requires WordPress 6.8+ (tested up to 6.9)
+* **Update**: Requires PHP 8.3+
 
 = 2.2.7 - Queue-Aware REST Hooks & Cloudflare PDF =
 **Enhanced Export Processing**
