@@ -4,7 +4,7 @@ Tags: pdf, epub, export, offline, download, markdown, bulk-export, documents
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 8.2
-Stable tag: 2.2.7
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -133,14 +133,18 @@ Check out HOOKS.md for 50+ customization filters and actions.
 
 == Changelog ==
 
-= 2.2.7 - Queue-Aware REST Hooks =
+= 2.2.7 - Queue-Aware REST Hooks & Cloudflare PDF =
 **Enhanced Export Processing**
 * **Feature**: Queue-aware REST hooks for background export processing
+* **Feature**: Cloudflare Browser Rendering integration for high-quality PDF generation
 * **New**: Capability gate via `read_offline_can_export` filter (default: Editor+)
 * **New**: Lifecycle signals for export operations (requested/completed/failed)
 * **New**: Short-circuit hook `read_offline_pre_export` for custom queue integration
 * **New**: Response shaping via `read_offline_rest_response` filter
+* **New**: Cloudflare Account ID and API Token settings with connection status
 * **Enhanced**: Deduplication lock and cache key filters for concurrent requests
+* **Enhanced**: Auto-detection and fallback for Cloudflare PDF generation
+* **Enhanced**: New filters for Cloudflare PDF options and HTML customization
 
 = 2.2.6 - Update Plugin =
 * Minor fixes
