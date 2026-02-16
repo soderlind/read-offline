@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.1
+- Update: Requires WordPress 6.8+ (tested up to 6.9)
+- Update: Requires PHP 8.3+
+
 ## 2.3.0
 - Feature: Cloudflare Browser Rendering integration for professional PDF generation via headless Chromium
 - Feature: Settings UI for Cloudflare Account ID and API Token with connection testing

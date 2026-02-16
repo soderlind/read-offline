@@ -93,10 +93,10 @@ Select multiple posts and pages from your admin area and export them as:
 
 ## 💻 System Requirements
 
-- ✅ **WordPress 6.5+**
-- ✅ **PHP 8.2+** 
+- ✅ **WordPress 6.8+**
+- ✅ **PHP 8.3+** 
 - ✅ **Zip extension** (for bulk exports)
-- ✅ **Tested up to WordPress 6.8**
+- ✅ **Tested up to WordPress 6.9**
 
 *All required libraries are bundled - no additional setup needed!*
 
