@@ -79,9 +79,28 @@ class Read_Offline_Frontend {
 				fetch(url + q, { credentials: 'same-origin' })
 					.then(function(r){ return r.json().catch(function(){ return { error: 'bad_response' }; }); })
 					.then(function(res){
-						if(res && res.url){ window.location.href = res.url; return; }
-						var msg = 'Export failed';
-						if (res && res.error) msg += ' (' + res.error + ')';
+						// Support both direct response (res.url) and queue hooks response (res.export.url)
+						var downloadUrl = res && (res.url || (res.export && res.export.url));
+						if(downloadUrl){ window.location.href = downloadUrl; return; }
+					
+					// Handle specific error codes
+					var errorCode = res && (res.code || res.error);
+					var errorMsg = res && (res.message || '');
+					var msg = 'Export failed';
+					
+					if (errorCode === 'read_offline_busy') {
+						msg = 'Please wait - an export is already in progress for this post. Try again in a moment.';
+					} else if (errorCode === 'rate_limited') {
+						msg = errorMsg || 'Rate limit exceeded. Please wait before trying again.';
+					} else if (errorCode === 'forbidden' || errorCode === 'rest_forbidden') {
+						msg = 'You do not have permission to export this content.';
+					} else if (errorMsg) {
+						msg = errorMsg;
+					} else if (errorCode) {
+						msg += ' (' + errorCode + ')';
+					}
+					
+						console.log('Export response:', res);
 						alert(msg);
 					})
 					.catch(function(){ alert('Export failed'); });
@@ -150,10 +169,10 @@ class Read_Offline_Frontend {
 
 		$opts = '';
 		foreach ( $formats as $fmt ) {
-			$label = ( 'md' === $fmt ) ? 'Markdown' : strtoupper( $fmt );
-			$opts .= '<option value="' . esc_attr( $fmt ) . '">' . esc_html( $label ) . '</option>';
+			$label  = ( 'md' === $fmt ) ? 'Markdown' : strtoupper( $fmt );
+			$opts  .= '<option value="' . esc_attr( $fmt ) . '">' . esc_html( $label ) . '</option>';
 		}
-		$html = '<div class="read-offline ' . esc_attr( $class ) . '">';
+		$html  = '<div class="read-offline ' . esc_attr( $class ) . '">';
 		$html .= '<label>' . esc_html__( 'Save as', 'read-offline' ) . ' ';
 		$html .= '<select data-read-offline-format>' . $opts . '</select></label> ';
 		$html .= '<a href="#" class="button" data-read-offline-btn data-post="' . intval( $post_id ) . '" data-nonce="' . esc_attr( $nonce ) . '">' . esc_html__( 'Download', 'read-offline' ) . '</a>';

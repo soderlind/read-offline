@@ -49,12 +49,13 @@ function is_read_offline_export_route( $request ): bool {
  * @return array{post_id:int,format:string,args:array}
  */
 function parse_request( WP_REST_Request $request ): array {
-	$post_id = (int) $request->get_param( 'id' );
+	// Support both 'postId' (current) and 'id' (legacy) parameter names.
+	$post_id = (int) ( $request->get_param( 'postId' ) ?? $request->get_param( 'id' ) ?? 0 );
 	$format  = (string) ( $request->get_param( 'format' ) ?? 'pdf' );
 
-	// Collect remaining params as $args (excluding id/format for clarity).
+	// Collect remaining params as $args (excluding postId/id/format for clarity).
 	$params = $request->get_params();
-	unset( $params[ 'id' ], $params[ 'format' ] );
+	unset( $params[ 'postId' ], $params[ 'id' ], $params[ 'format' ] );
 
 	return array(
 		'post_id' => $post_id,
@@ -80,14 +81,18 @@ add_filter(
 			return $result;
 		}
 
-		$parsed          = parse_request( $request );
-		$post_id         = $parsed[ 'post_id' ];
-		$format          = $parsed[ 'format' ];
-		$args            = $parsed[ 'args' ];
-		$current_allowed = current_user_can( 'edit_others_posts' ); // Editors+ on posts by default.
-	
+		$parsed  = parse_request( $request );
+		$post_id = $parsed[ 'post_id' ];
+		$format  = $parsed[ 'format' ];
+		$args    = $parsed[ 'args' ];
+
 		// Lifecycle: request observed.
 		do_action( 'read_offline_export_requested', $post_id, $format, $args, $request );
+
+		// Respect the rest_public setting from the plugin configuration.
+		$options         = get_option( 'read_offline_settings_general', array() );
+		$rest_public     = ! empty( $options[ 'rest_public' ] );
+		$current_allowed = $rest_public ? true : current_user_can( 'edit_others_posts' );
 
 		// Allow integrators to take over and enqueue to a queue, returning a 202 etc.
 		$short = apply_filters(
@@ -135,24 +140,39 @@ add_filter(
 					array( 'status' => 409 )
 				);
 			}
-			set_transient( $lock_key, 1, MINUTE_IN_SECONDS * 5 );
+			set_transient( $lock_key, 1, 30 );
 
-			// Clean up after the request finishes (success or error).
-			add_action(
-				'rest_request_after_callbacks',
-				function () use ($lock_key) {
-				delete_transient( $lock_key );
-			},
-				9999
-			);
+			// Note: Lock is cleared in rest_post_dispatch when export completes (success/failure).
+			// 30-second TTL serves as safety net if something crashes.
 		}
 
-		return $result; // Allow Read Offline’s internal controller to handle the export.
+		return $result; // Allow Read Offline's internal controller to handle the export.
 	},
 	10,
 	3
 );
 
+/**
+add_filter(
+	'rest_post_dispatch',
+	function ( $response, $server, $request ) {
+		if ( ! is_read_offline_export_route( $request ) ) {
+			return $response;
+		}
+
+		// Debug at priority 10 - very early.
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( '[Read Offline] rest_post_dispatch PRIORITY 10 - Response: ' . get_class( $response ) );
+			if ( method_exists( $response, 'get_data' ) ) {
+				error_log( '[Read Offline] rest_post_dispatch PRIORITY 10 - Data: ' . print_r( $response->get_data(), true ) );
+			}
+		}
+
+		return $response;
+	},
+	10,
+	3
+);
 /**
  * Shape the success response and emit completion signal.
  *
@@ -173,6 +193,17 @@ add_filter(
 		// Don't interfere with short-circuited 202 responses etc.
 		if ( $response instanceof WP_Error ) {
 			$parsed = parse_request( $request );
+			// Clear lock on failure so user can retry immediately
+			$lock_key = apply_filters(
+				'read_offline_export_lock_key',
+				"read_offline:lock:{$parsed[ 'format' ]}:{$parsed[ 'post_id' ]}",
+				$parsed[ 'post_id' ],
+				$parsed[ 'format' ],
+				$parsed[ 'args' ]
+			);
+			if ( $lock_key && ! is_wp_error( $lock_key ) ) {
+				delete_transient( $lock_key );
+			}
 			do_action( 'read_offline_export_failed', $parsed[ 'post_id' ], $parsed[ 'format' ], $parsed[ 'args' ], $response );
 			return $response;
 		}
@@ -180,18 +211,39 @@ add_filter(
 		$code = method_exists( $response, 'get_status' ) ? (int) $response->get_status() : 200;
 		if ( $code >= 400 ) {
 			$parsed = parse_request( $request );
+			// Clear lock on failure so user can retry immediately
+			$lock_key = apply_filters(
+				'read_offline_export_lock_key',
+				"read_offline:lock:{$parsed[ 'format' ]}:{$parsed[ 'post_id' ]}",
+				$parsed[ 'post_id' ],
+				$parsed[ 'format' ],
+				$parsed[ 'args' ]
+			);
+			if ( $lock_key && ! is_wp_error( $lock_key ) ) {
+				delete_transient( $lock_key );
+			}
 			do_action( 'read_offline_export_failed', $parsed[ 'post_id' ], $parsed[ 'format' ], $parsed[ 'args' ], $response );
 			return $response;
 		}
 
 		// Normalize and allow shaping of success payloads.
-		$parsed  = parse_request( $request );
-		$data    = method_exists( $response, 'get_data' ) ? $response->get_data() : null;
+		$parsed = parse_request( $request );
+		$data   = method_exists( $response, 'get_data' ) ? $response->get_data() : null;
+		if ( is_array( $data ) ) {
+			// Extract known export fields (url, file, path, size, filename).
+			$export_keys = array( 'url', 'file', 'path', 'size', 'filename' );
+			foreach ( $export_keys as $key ) {
+				if ( isset( $data[ $key ] ) ) {
+					$export_data[ $key ] = $data[ $key ];
+				}
+			}
+		}
+
 		$payload = array(
 			'status'  => 'ok',
 			'format'  => $parsed[ 'format' ],
 			'post_id' => $parsed[ 'post_id' ],
-			'export'  => is_array( $data ) ? array_intersect_key( $data, array_flip( array( 'file', 'path', 'url', 'size', 'filename' ) ) ) : $data,
+			'export'  => ! empty( $export_data ) ? $export_data : $data,
 		);
 
 		$payload = apply_filters(
@@ -209,7 +261,17 @@ add_filter(
 		} else {
 			$response = new WP_REST_Response( $payload, $code );
 		}
-
+		// Clear lock on success - PDF is ready
+		$lock_key = apply_filters(
+			'read_offline_export_lock_key',
+			"read_offline:lock:{$parsed[ 'format' ]}:{$parsed[ 'post_id' ]}",
+			$parsed[ 'post_id' ],
+			$parsed[ 'format' ],
+			$parsed[ 'args' ]
+		);
+		if ( $lock_key && ! is_wp_error( $lock_key ) ) {
+			delete_transient( $lock_key );
+		}
 		do_action( 'read_offline_export_completed', $parsed[ 'post_id' ], $parsed[ 'format' ], $parsed[ 'args' ], $payload[ 'export' ] ?? null );
 
 		return $response;

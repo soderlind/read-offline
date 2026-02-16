@@ -27,12 +27,22 @@ class Read_Offline_Export {
 	 */
 	/**
 	 * Format -> handler map for single & combined generation.
+	 *
 	 * @var array<string,array{single:string,combined:string}>
 	 */
 	protected static $format_handlers = array(
-		'pdf'  => array( 'single' => 'generate_pdf', 'combined' => 'generate_combined_pdf' ),
-		'epub' => array( 'single' => 'generate_epub', 'combined' => 'generate_combined_epub' ),
-		'md'   => array( 'single' => 'generate_markdown', 'combined' => 'generate_combined_markdown' ),
+		'pdf'  => array(
+			'single'   => 'generate_pdf',
+			'combined' => 'generate_combined_pdf',
+		),
+		'epub' => array(
+			'single'   => 'generate_epub',
+			'combined' => 'generate_combined_epub',
+		),
+		'md'   => array(
+			'single'   => 'generate_markdown',
+			'combined' => 'generate_combined_markdown',
+		),
 	);
 	/**
 	 * Per-request rate limiting context.
@@ -92,8 +102,8 @@ class Read_Offline_Export {
 		 * Behavior summary:
 		 * - When setting "public REST" is ON, unauthenticated users may export published posts
 		 *   subject to simple IP rate limiting.
-		 * - When OFF, a valid per‑post nonce (or sufficient capability) is required, enabling
-		 *   front-end UI exports to continue working while blocking blind anonymous hits.
+		 * - When OFF, logged-in users can export published posts and posts they can read.
+		 *   Non-logged-in users require a valid nonce for CSRF protection on published posts.
 		 */
 		self::$rate_context = array();
 		$options            = get_option( 'read_offline_settings_general', array() );
@@ -102,21 +112,65 @@ class Read_Offline_Export {
 		$nonce              = (string) $request->get_param( 'nonce' );
 		$post               = $post_id ? get_post( $post_id ) : null;
 
+
+
 		// If post missing, allow later callback to 404 (keep consistent with core pattern).
 		if ( ! $public ) {
-			// Admins bypass nonce.
+			// Admins bypass all checks.
 			if ( current_user_can( 'manage_options' ) ) {
 				return true;
 			}
-			// Require nonce for non-public mode. Accept if post is published and nonce valid OR user can read the post (private etc.).
-			if ( $post ) {
-				$nonce_ok = wp_verify_nonce( $nonce, 'read_offline_export_' . $post_id );
-				$can_read = current_user_can( 'read_post', $post_id );
-				if ( ( 'publish' === $post->post_status && $nonce_ok ) || $can_read ) {
+
+			if ( ! $post ) {
+				// Let the main callback handle 404.
+				return true;
+			}
+
+			// Logged-in users: Allow if they can read the post.
+			if ( is_user_logged_in() ) {
+				// For published posts, check read capability.
+				if ( 'publish' === $post->post_status ) {
+					// Published posts are readable by all logged-in users by default.
 					return true;
 				}
+				// For non-published posts (draft, private, etc.), check explicit capability.
+				if ( current_user_can( 'read_post', $post_id ) ) {
+					return true;
+				}
+				return new WP_Error(
+					'forbidden',
+					__( 'You do not have permission to export this post.', 'read-offline' ),
+					array( 'status' => 403 )
+				);
 			}
-			return new WP_Error( 'forbidden', __( 'REST export requires a valid nonce.', 'read-offline' ), array( 'status' => 403 ) );
+
+			// Non-logged-in users: Require valid nonce for published posts.
+			if ( 'publish' === $post->post_status ) {
+				$nonce_ok = wp_verify_nonce( $nonce, 'read_offline_export_' . $post_id );
+				if ( $nonce_ok ) {
+					return true;
+				}
+				// Log nonce failure for debugging.
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( sprintf(
+						'[Read Offline] Nonce verification failed for post #%d. Nonce: %s',
+						$post_id,
+						$nonce ? substr( $nonce, 0, 10 ) . '...' : '(empty)'
+					) );
+				}
+				return new WP_Error(
+					'forbidden',
+					__( 'Invalid or expired security token. Please refresh the page.', 'read-offline' ),
+					array( 'status' => 403 )
+				);
+			}
+
+			// Non-published posts require login.
+			return new WP_Error(
+				'forbidden',
+				__( 'You must be logged in to export this post.', 'read-offline' ),
+				array( 'status' => 403 )
+			);
 		}
 
 		// Public mode: apply rate limiting only to unauthenticated users.
@@ -132,7 +186,10 @@ class Read_Offline_Export {
 				}
 				$now = time();
 				if ( ! is_array( $record ) || $record[ 'expires' ] <= $now ) {
-					$record = array( 'count' => 0, 'expires' => $now + $window );
+					$record = array(
+						'count'   => 0,
+						'expires' => $now + $window,
+					);
 				}
 				if ( $record[ 'count' ] >= $limit ) {
 					$retry              = max( 1, $record[ 'expires' ] - $now );
@@ -141,9 +198,16 @@ class Read_Offline_Export {
 						'remaining' => 0,
 						'reset'     => $record[ 'expires' ],
 					);
-					return new WP_Error( 'rate_limited', sprintf( __( 'Rate limit exceeded. Retry in %d seconds.', 'read-offline' ), $retry ), array( 'status' => 429, 'retry_after' => $retry ) );
+					return new WP_Error(
+						'rate_limited',
+						sprintf( __( 'Rate limit exceeded. Retry in %d seconds.', 'read-offline' ), $retry ),
+						array(
+							'status'      => 429,
+							'retry_after' => $retry,
+						)
+					);
 				}
-				$record[ 'count' ]++;
+				++$record[ 'count' ];
 				wp_cache_set( $key, $record, 'read_offline', $record[ 'expires' ] - $now );
 				set_transient( $key, $record, $record[ 'expires' ] - $now );
 				self::$rate_context = array(
@@ -201,7 +265,12 @@ class Read_Offline_Export {
 		if ( is_wp_error( $response ) && 'rate_limited' === $response->get_error_code() ) {
 			$retry = (int) $response->get_error_data( 'retry_after' );
 			if ( $retry > 0 ) {
-				$rest_response = new WP_REST_Response( array( 'error' => 'rate_limited', 'retry_after' => $retry ) );
+				$rest_response = new WP_REST_Response(
+					array(
+						'error'       => 'rate_limited',
+						'retry_after' => $retry,
+					)
+				);
 				$rest_response->set_status( 429 );
 				$rest_response->header( 'Retry-After', (string) $retry );
 				if ( ! empty( $ctx ) ) {
@@ -276,9 +345,12 @@ class Read_Offline_Export {
 			return new WP_Error( 'invalid_format', 'Invalid format' );
 		}
 		$post_ids = array_values( array_unique( array_map( 'intval', (array) $post_ids ) ) );
-		$post_ids = array_filter( $post_ids, function ($pid) {
-			return get_post( $pid );
-		} );
+		$post_ids = array_filter(
+			$post_ids,
+			function ( $pid ) {
+				return get_post( $pid );
+			}
+		);
 		if ( empty( $post_ids ) ) {
 			return new WP_Error( 'not_found', 'No valid posts provided' );
 		}
@@ -295,21 +367,30 @@ class Read_Offline_Export {
 	/**
 	 * Generate Markdown file for a single post.
 	 * Basic conversion: strip HTML tags after applying filters, keep headings, links, images.
+	 *
 	 * @param WP_Post $post Post.
-	 * @param string $title Title.
-	 * @param string $html HTML content.
-	 * @param string $path Destination path (.md).
+	 * @param string  $title Title.
+	 * @param string  $html HTML content.
+	 * @param string  $path Destination path (.md).
 	 * @return string|WP_Error
 	 */
 	protected static function generate_markdown( WP_Post $post, $title, $html, $path ) {
 		$include_author = ! empty( get_option( 'read_offline_settings_general', array() )[ 'include_author' ] );
-		$md             = self::html_to_markdown( $title, $html, array( 'include_author' => $include_author ? $post->post_author : 0, 'date' => get_the_date( '', $post ) ) );
+		$md             = self::html_to_markdown(
+			$title,
+			$html,
+			array(
+				'include_author' => $include_author ? $post->post_author : 0,
+				'date'           => get_the_date( '', $post ),
+			)
+		);
 		return self::write_file( $path, $md ) ? $path : new WP_Error( 'md_write_failed', 'Could not write markdown file' );
 	}
 
 	/**
 	 * Generate combined Markdown file from multiple posts.
-	 * @param array $post_ids IDs.
+	 *
+	 * @param array  $post_ids IDs.
 	 * @param string $path Path.
 	 * @return string|WP_Error
 	 */
@@ -324,7 +405,14 @@ class Read_Offline_Export {
 			$title   = get_the_title( $post );
 			$html    = apply_filters( 'the_content', $post->post_content );
 			$html    = apply_filters( 'read_offline_content_html', $html, $post, 'md' );
-			$parts[] = self::html_to_markdown( $title, $html, array( 'include_author' => $include_author ? $post->post_author : 0, 'date' => get_the_date( '', $post ) ) );
+			$parts[] = self::html_to_markdown(
+				$title,
+				$html,
+				array(
+					'include_author' => $include_author ? $post->post_author : 0,
+					'date'           => get_the_date( '', $post ),
+				)
+			);
 		}
 		$md = implode( "\n\n---\n\n", $parts );
 		return self::write_file( $path, $md ) ? $path : new WP_Error( 'md_write_failed', 'Could not write markdown file' );
@@ -334,6 +422,7 @@ class Read_Offline_Export {
 	 * Convert filtered HTML into a simple Markdown representation.
 	 * NOTE: This is a lightweight, heuristic conversion – not a full HTML->MD parser.
 	 * Filters: read_offline_markdown_pre / read_offline_markdown_post
+	 *
 	 * @param string $title Document title (used to prepend as H1 if not present).
 	 * @param string $html  HTML markup.
 	 * @param array  $args  { include_author:int user_id, date:string }
@@ -347,58 +436,94 @@ class Read_Offline_Export {
 		// Basic normalisation.
 		$md = $html;
 		// Protect code blocks: convert <pre><code> ... </code></pre> to fenced blocks.
-		$md = preg_replace_callback( '#<pre[^>]*><code[^>]*>([\s\S]*?)</code></pre>#i', function ($m) {
-			$code = html_entity_decode( $m[ 1 ], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-			$code = preg_replace( "/\r?\n$/", '', $code );
-			return "\n```\n" . trim( $code ) . "\n```\n";
-		}, $md );
+		$md = preg_replace_callback(
+			'#<pre[^>]*><code[^>]*>([\s\S]*?)</code></pre>#i',
+			function ( $m ) {
+				$code = html_entity_decode( $m[ 1 ], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+				$code = preg_replace( "/\r?\n$/", '', $code );
+				return "\n```\n" . trim( $code ) . "\n```\n";
+			},
+			$md
+		);
 		// Headings h1-h6.
 		for ( $i = 6; $i >= 1; $i-- ) {
-			$md = preg_replace( '#<h' . $i . '[^>]*>(.*?)</h' . $i . '>#is', function ($m) use ($i) {
-				$text = trim( wp_strip_all_tags( $m[ 1 ] ) );
-				return "\n" . str_repeat( '#', $i ) . ' ' . $text . "\n\n";
-			}, $md );
+			$md = preg_replace(
+				'#<h' . $i . '[^>]*>(.*?)</h' . $i . '>#is',
+				function ( $m ) use ( $i ) {
+					$text = trim( wp_strip_all_tags( $m[ 1 ] ) );
+					return "\n" . str_repeat( '#', $i ) . ' ' . $text . "\n\n";
+				},
+				$md
+			);
 		}
 		// Bold / italics.
 		$md = preg_replace( '#<(strong|b)[^>]*>(.*?)</\1>#is', '**$2**', $md );
 		$md = preg_replace( '#<(em|i)[^>]*>(.*?)</\1>#is', '*$2*', $md );
 		// Links.
-		$md = preg_replace_callback( '#<a\s+[^>]*href=("|\')(.*?)\1[^>]*>(.*?)</a>#is', function ($m) {
-			$text = trim( wp_strip_all_tags( $m[ 3 ] ) );
-			$url = trim( $m[ 2 ] );
-			return '[' . $text . '](' . $url . ')';
-		}, $md );
+		$md = preg_replace_callback(
+			'#<a\s+[^>]*href=("|\')(.*?)\1[^>]*>(.*?)</a>#is',
+			function ( $m ) {
+				$text = trim( wp_strip_all_tags( $m[ 3 ] ) );
+				$url  = trim( $m[ 2 ] );
+				return '[' . $text . '](' . $url . ')';
+			},
+			$md
+		);
 		// Images.
-		$md = preg_replace_callback( '#<img\s+[^>]*src=("|\')(.*?)\1[^>]*>#i', function ($m) {
-			$alt = '';
-			if ( preg_match( '#alt=("|\')(.*?)\1#i', $m[ 0 ], $am ) ) {
-				$alt = $am[ 2 ];
-			}
-			return '![' . $alt . '](' . $m[ 2 ] . ')';
-		}, $md );
+		$md = preg_replace_callback(
+			'#<img\s+[^>]*src=("|\')(.*?)\1[^>]*>#i',
+			function ( $m ) {
+				$alt = '';
+				if ( preg_match( '#alt=("|\')(.*?)\1#i', $m[ 0 ], $am ) ) {
+					$alt = $am[ 2 ];
+				}
+				return '![' . $alt . '](' . $m[ 2 ] . ')';
+			},
+			$md
+		);
 		// Unordered lists.
-		$md = preg_replace_callback( '#<ul[^>]*>([\s\S]*?)</ul>#i', function ($m) {
-			$items = preg_replace( '#<li[^>]*>([\s\S]*?)</li>#i', function ($iMatch) {
-				return '* ' . trim( wp_strip_all_tags( $iMatch[ 1 ] ) ) . "\n";
-			}, $m[ 1 ] );
-			return "\n" . trim( $items ) . "\n";
-		}, $md );
+		$md = preg_replace_callback(
+			'#<ul[^>]*>([\s\S]*?)</ul>#i',
+			function ( $m ) {
+				$items = preg_replace(
+					'#<li[^>]*>([\s\S]*?)</li>#i',
+					function ( $iMatch ) {
+						return '* ' . trim( wp_strip_all_tags( $iMatch[ 1 ] ) ) . "\n";
+					},
+					$m[ 1 ]
+				);
+				return "\n" . trim( $items ) . "\n";
+			},
+			$md
+		);
 		// Ordered lists.
 		$listIndex = 0;
-		$md        = preg_replace_callback( '#<ol[^>]*>([\s\S]*?)</ol>#i', function ($m) use (&$listIndex) {
-			$listIndex = 0;
-			$items = preg_replace_callback( '#<li[^>]*>([\s\S]*?)</li>#i', function ($iMatch) use (&$listIndex) {
-				$listIndex++;
-				return $listIndex . '. ' . trim( wp_strip_all_tags( $iMatch[ 1 ] ) ) . "\n";
-			}, $m[ 1 ] );
-			return "\n" . trim( $items ) . "\n";
-		}, $md );
+		$md        = preg_replace_callback(
+			'#<ol[^>]*>([\s\S]*?)</ol>#i',
+			function ( $m ) use ( &$listIndex ) {
+				$listIndex = 0;
+				$items     = preg_replace_callback(
+					'#<li[^>]*>([\s\S]*?)</li>#i',
+					function ( $iMatch ) use ( &$listIndex ) {
+						$listIndex++;
+						return $listIndex . '. ' . trim( wp_strip_all_tags( $iMatch[ 1 ] ) ) . "\n";
+					},
+					$m[ 1 ]
+				);
+				return "\n" . trim( $items ) . "\n";
+			},
+			$md
+		);
 		// Blockquotes.
-		$md = preg_replace_callback( '#<blockquote[^>]*>([\s\S]*?)</blockquote>#i', function ($m) {
-			$text = trim( wp_strip_all_tags( $m[ 1 ] ) );
-			$text = preg_replace( '/^/m', '> ', $text );
-			return "\n" . $text . "\n";
-		}, $md );
+		$md = preg_replace_callback(
+			'#<blockquote[^>]*>([\s\S]*?)</blockquote>#i',
+			function ( $m ) {
+				$text = trim( wp_strip_all_tags( $m[ 1 ] ) );
+				$text = preg_replace( '/^/m', '> ', $text );
+				return "\n" . $text . "\n";
+			},
+			$md
+		);
 		// Line breaks & paragraphs.
 		$md = preg_replace( '#<br\s*/?>#i', "\n", $md );
 		$md = preg_replace( '#</p>#i', "\n\n", $md );
@@ -427,6 +552,7 @@ class Read_Offline_Export {
 	/**
 	 * Build TOC HTML for EPUB: returns array( updatedHtml, tocHtml )
 	 * Adds IDs to headings if missing.
+	 *
 	 * @param string $html
 	 * @param int $depth Max heading level.
 	 * @return array
@@ -460,7 +586,7 @@ class Read_Offline_Export {
 			if ( strcasecmp( $n->nodeName, $maxTag ) > 0 ) {
 				continue; // deeper than allowed depth.
 			}
-			$count++;
+			++$count;
 			$id = $n->getAttribute( 'id' );
 			if ( ! $id ) {
 				$id = 'toc-' . $count;
@@ -468,7 +594,11 @@ class Read_Offline_Export {
 			}
 			$level = (int) substr( $n->nodeName, 1 );
 			$text  = trim( preg_replace( '/\s+/', ' ', $n->textContent ) );
-			$toc[] = array( 'level' => $level, 'id' => $id, 'text' => $text );
+			$toc[] = array(
+				'level' => $level,
+				'id'    => $id,
+				'text'  => $text,
+			);
 		}
 		if ( empty( $toc ) ) {
 			return array( $html, '' );
@@ -480,20 +610,20 @@ class Read_Offline_Export {
 		foreach ( $toc as $entry ) {
 			$l = $entry[ 'level' ];
 			if ( $prev === 0 ) {
-				$out .= '<ul>';
-				$stack[] = 'ul';
+				$out     .= '<ul>';
+				$stack[]  = 'ul';
 			} elseif ( $l > $prev ) {
-				$out .= '<ul>';
-				$stack[] = 'ul';
+				$out     .= '<ul>';
+				$stack[]  = 'ul';
 			} elseif ( $l < $prev ) {
 				while ( ! empty( $stack ) && $l < $prev ) {
 					$out .= '</ul>';
 					array_pop( $stack );
-					$prev--;
+					--$prev;
 				}
 			}
-			$out .= '<li><a href="#' . esc_attr( $entry[ 'id' ] ) . '">' . esc_html( $entry[ 'text' ] ) . '</a></li>';
-			$prev = $l;
+			$out  .= '<li><a href="#' . esc_attr( $entry[ 'id' ] ) . '">' . esc_html( $entry[ 'text' ] ) . '</a></li>';
+			$prev  = $l;
 		}
 		while ( ! empty( $stack ) ) {
 			$out .= '</ul>';
@@ -560,10 +690,10 @@ class Read_Offline_Export {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param string          $html         Body HTML.
-	 * @param array           $epub_opts    EPUB settings.
-	 * @param WP_Post|null    $post_or_null Context post or null.
-	 * @param string          $lang         Language code.
+	 * @param string       $html         Body HTML.
+	 * @param array        $epub_opts    EPUB settings.
+	 * @param WP_Post|null $post_or_null Context post or null.
+	 * @param string       $lang         Language code.
 	 * @return string Amended HTML.
 	 */
 	protected static function epub_build_toc_and_body( $html, $epub_opts, $post_or_null, $lang ) {
@@ -705,15 +835,19 @@ class Read_Offline_Export {
 	protected static function xhtml_void_self_close( $html ) {
 		$voids = '(?:area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)';
 		// Replace occurrences lacking a trailing slash before >
-		return preg_replace_callback( '#<(' . $voids . ')(\s+[^>]*)?>#i', function ($m) {
-			$tag  = strtolower( $m[ 1 ] );
-			$attr = isset( $m[ 2 ] ) ? $m[ 2 ] : '';
-			// Already self-closed?
-			if ( preg_match( '/\/$/s', trim( $attr ) ) ) {
-				return '<' . $tag . $attr . '>';
-			}
-			return '<' . $tag . $attr . ' />';
-		}, $html );
+		return preg_replace_callback(
+			'#<(' . $voids . ')(\s+[^>]*)?>#i',
+			function ( $m ) {
+				$tag  = strtolower( $m[ 1 ] );
+				$attr = isset( $m[ 2 ] ) ? $m[ 2 ] : '';
+				// Already self-closed?
+				if ( preg_match( '/\/$/s', trim( $attr ) ) ) {
+					return '<' . $tag . $attr . '>';
+				}
+				return '<' . $tag . $attr . ' />';
+			},
+			$html
+		);
 	}
 
 	/* ================= PDF Generation ================= */
@@ -738,7 +872,63 @@ class Read_Offline_Export {
 	protected static function generate_pdf( WP_Post $post, $title, $html, $path ) {
 		$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
 		$gen_opts = get_option( 'read_offline_settings_general', array() );
-		$mpdf     = self::build_mpdf_instance( $pdf_opts, $gen_opts, $title, $post );
+
+		/**
+		 * Filter whether to use Cloudflare Browser Rendering for PDF generation.
+		 *
+		 * @since 2.2.8
+		 *
+		 * @param bool    $use_cloudflare Whether to use Cloudflare. Default is auto-detected based on credentials.
+		 * @param WP_Post $post            Post being exported.
+		 * @param array   $pdf_opts        PDF settings.
+		 * @param array   $gen_opts        General settings.
+		 */
+		$use_cloudflare = apply_filters(
+			'read_offline_use_cloudflare',
+			Read_Offline_Cloudflare::is_configured(),
+			$post,
+			$pdf_opts,
+			$gen_opts
+		);
+
+		// Use Cloudflare Browser Rendering if configured.
+		if ( $use_cloudflare ) {
+			$result = self::generate_pdf_cloudflare( $post, $title, $html, $path, $pdf_opts, $gen_opts );
+
+			// Fallback to mPDF on Cloudflare failure if filter allows.
+			if ( is_wp_error( $result ) ) {
+				/**
+				 * Filter whether to fallback to mPDF when Cloudflare fails.
+				 *
+				 * @since 2.2.8
+				 *
+				 * @param bool     $fallback Whether to fallback to mPDF. Default true.
+				 * @param WP_Error $error    The Cloudflare error.
+				 * @param WP_Post  $post     Post being exported.
+				 */
+				$fallback_enabled = apply_filters( 'read_offline_cloudflare_fallback', true, $result, $post );
+
+				if ( ! $fallback_enabled ) {
+					return $result; // Return Cloudflare error.
+				}
+
+				// Log fallback and continue with mPDF.
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log(
+						sprintf(
+							'[Read Offline] Cloudflare PDF failed for Post #%d: %s - Falling back to mPDF',
+							$post->ID,
+							$result->get_error_message()
+						)
+					);
+				}
+			} else {
+				return $result; // Cloudflare success!
+			}
+		}
+
+		// Standard mPDF generation (original logic).
+		$mpdf = self::build_mpdf_instance( $pdf_opts, $gen_opts, $title, $post );
 		if ( is_wp_error( $mpdf ) ) {
 			return $mpdf;
 		}
@@ -789,7 +979,52 @@ class Read_Offline_Export {
 		$pdf_opts = get_option( 'read_offline_settings_pdf', array() );
 		$gen_opts = get_option( 'read_offline_settings_general', array() );
 		$title    = get_bloginfo( 'name' ) . ' – ' . __( 'Combined Export', 'read-offline' );
-		$mpdf     = self::build_mpdf_instance( $pdf_opts, $gen_opts, $title, null );
+
+		/**
+		 * Filter whether to use Cloudflare for combined PDF generation.
+		 *
+		 * @since 2.2.8
+		 *
+		 * @param bool  $use_cloudflare Whether to use Cloudflare.
+		 * @param array $post_ids       Array of post IDs being combined.
+		 * @param array $pdf_opts       PDF settings.
+		 * @param array $gen_opts       General settings.
+		 */
+		$use_cloudflare = apply_filters(
+			'read_offline_use_cloudflare_combined',
+			Read_Offline_Cloudflare::is_configured(),
+			$post_ids,
+			$pdf_opts,
+			$gen_opts
+		);
+
+		// Use Cloudflare if configured (generates combined HTML).
+		if ( $use_cloudflare ) {
+			$result = self::generate_combined_pdf_cloudflare( $post_ids, $path, $pdf_opts, $gen_opts, $title );
+
+			if ( is_wp_error( $result ) ) {
+				$fallback_enabled = apply_filters( 'read_offline_cloudflare_fallback', true, $result, null );
+
+				if ( ! $fallback_enabled ) {
+					return $result;
+				}
+
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log(
+						sprintf(
+							'[Read Offline] Cloudflare combined PDF failed (%d posts): %s - Falling back to mPDF',
+							count( $post_ids ),
+							$result->get_error_message()
+						)
+					);
+				}
+			} else {
+				return $result;
+			}
+		}
+
+		// Standard mPDF generation.
+		$mpdf = self::build_mpdf_instance( $pdf_opts, $gen_opts, $title, null );
 		if ( is_wp_error( $mpdf ) ) {
 			return $mpdf;
 		}
@@ -838,6 +1073,285 @@ class Read_Offline_Export {
 		}
 	}
 
+	/**
+	 * Generate PDF using Cloudflare Browser Rendering.
+	 *
+	 * Creates a complete HTML document and sends it to Cloudflare's headless browser
+	 * for rendering. This provides better support for modern CSS, JavaScript, and
+	 * pixel-perfect browser rendering.
+	 *
+	 * @since 2.2.8
+	 *
+	 * @param WP_Post $post     Post object being exported.
+	 * @param string  $title    Export file title.
+	 * @param string  $html     Post content HTML.
+	 * @param string  $path     Absolute filesystem path to write PDF to.
+	 * @param array   $pdf_opts PDF settings.
+	 * @param array   $gen_opts General settings.
+	 * @return string|WP_Error Absolute path on success or WP_Error on failure.
+	 */
+	protected static function generate_pdf_cloudflare( WP_Post $post, $title, $html, $path, $pdf_opts, $gen_opts ) {
+		// Build a complete HTML document for Cloudflare.
+		$css         = self::assemble_pdf_css( $pdf_opts, $gen_opts, $post );
+		$site_name   = get_bloginfo( 'name' );
+		$doc_title   = esc_html( $title );
+		$doc_charset = get_bloginfo( 'charset' );
+
+		// Add metadata and author information if enabled.
+		$meta_html = '';
+		if ( ! empty( $gen_opts[ 'include_author' ] ) ) {
+			$author    = get_the_author_meta( 'display_name', $post->post_author );
+			$date      = get_the_date( '', $post );
+			$meta_html = sprintf(
+				'<div class="read-offline-meta" style="margin-bottom:2em;padding-bottom:1em;border-bottom:1px solid #ddd;"><p><strong>%s:</strong> %s<br><strong>%s:</strong> %s</p></div>',
+				esc_html__( 'Author', 'read-offline' ),
+				esc_html( $author ),
+				esc_html__( 'Published', 'read-offline' ),
+				esc_html( $date )
+			);
+		}
+
+		// Add featured image if enabled.
+		$featured_html = '';
+		if ( ! empty( $gen_opts[ 'include_featured' ] ) && has_post_thumbnail( $post ) ) {
+			$img_url       = get_the_post_thumbnail_url( $post, 'large' );
+			$featured_html = sprintf(
+				'<div class="read-offline-featured" style="margin-bottom:2em;"><img src="%s" alt="" style="max-width:100%%;height:auto;" /></div>',
+				esc_url( $img_url )
+			);
+		}
+
+		// Handle TOC if enabled.
+		$toc_html = '';
+		if ( ! empty( $pdf_opts[ 'toc' ] ) ) {
+			$depth                      = max( 1, min( 6, (int) ( $pdf_opts[ 'toc_depth' ] ?? 3 ) ) );
+			list( $html, $toc_content ) = self::build_epub_toc_html( $html, $depth );
+
+			if ( $toc_content ) {
+				$toc_title = self::get_toc_title( 'pdf' );
+				$toc_html  = sprintf(
+					'<div class="read-offline-toc" style="margin-bottom:2em;padding-bottom:1em;border-bottom:1px solid #ddd;"><h2>%s</h2>%s</div>',
+					esc_html( $toc_title ),
+					$toc_content
+				);
+				$toc_html  = apply_filters( 'read_offline_pdf_toc_html', $toc_html, $post, $depth );
+			}
+		}
+
+		// Build complete HTML document.
+		$full_html = sprintf(
+			'<!DOCTYPE html>
+<html lang="%s">
+<head>
+	<meta charset="%s">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>%s</title>
+	<style>
+		%s
+	</style>
+</head>
+<body>
+	<article>
+		<header>
+			<h1 class="entry-title">%s</h1>
+		</header>
+		%s
+		%s
+		%s
+		<div class="entry-content">
+			%s
+		</div>
+	</article>
+</body>
+</html>',
+			esc_attr( get_locale() ),
+			esc_attr( $doc_charset ),
+			$doc_title,
+			$css,
+			$doc_title,
+			$meta_html,
+			$featured_html,
+			$toc_html,
+			$html
+		);
+
+		/**
+		 * Filter the complete HTML document before sending to Cloudflare.
+		 *
+		 * @since 2.2.8
+		 *
+		 * @param string  $full_html Complete HTML document.
+		 * @param WP_Post $post      Post being exported.
+		 * @param string  $html      Original content HTML.
+		 * @param array   $pdf_opts  PDF settings.
+		 * @param array   $gen_opts  General settings.
+		 */
+		$full_html = apply_filters( 'read_offline_cloudflare_html', $full_html, $post, $html, $pdf_opts, $gen_opts );
+
+		// Prepare Cloudflare PDF options.
+		$cf_options = array(
+			'format'          => $pdf_opts[ 'size' ] ?? 'A4',
+			'margins'         => $pdf_opts[ 'margins' ] ?? array(
+				't' => 15,
+				'r' => 15,
+				'b' => 15,
+				'l' => 15,
+			),
+			'header'          => $pdf_opts[ 'header' ] ?? '',
+			'footer'          => $pdf_opts[ 'footer' ] ?? '',
+			'page_numbers'    => ! empty( $pdf_opts[ 'page_numbers' ] ),
+			'printBackground' => true,
+		);
+
+		// Call Cloudflare API.
+		return Read_Offline_Cloudflare::generate_pdf( $full_html, $path, $cf_options, $post );
+	}
+
+	/**
+	 * Generate combined PDF using Cloudflare Browser Rendering.
+	 *
+	 * Combines multiple posts into a single HTML document and renders via Cloudflare.
+	 *
+	 * @since 2.2.8
+	 *
+	 * @param int[]  $post_ids  Ordered list of post IDs.
+	 * @param string $path      Absolute path to output file.
+	 * @param array  $pdf_opts  PDF settings.
+	 * @param array  $gen_opts  General settings.
+	 * @param string $title     Document title.
+	 * @return string|WP_Error Path or WP_Error on failure.
+	 */
+	protected static function generate_combined_pdf_cloudflare( $post_ids, $path, $pdf_opts, $gen_opts, $title ) {
+		$css              = self::assemble_pdf_css( $pdf_opts, $gen_opts, null );
+		$doc_charset      = get_bloginfo( 'charset' );
+		$include_author   = ! empty( $gen_opts[ 'include_author' ] );
+		$include_featured = ! empty( $gen_opts[ 'include_featured' ] );
+
+		// Build sections for each post.
+		$sections = array();
+		foreach ( $post_ids as $pid ) {
+			$post = get_post( $pid );
+			if ( ! $post ) {
+				continue;
+			}
+
+			$p_title = get_the_title( $post );
+			$content = apply_filters( 'the_content', $post->post_content );
+			$content = apply_filters( 'read_offline_content_html', $content, $post, 'pdf' );
+
+			// Post header with title, metadata, featured image.
+			$section_html  = '<section class="read-offline-post" style="page-break-before:always;">';
+			$section_html .= sprintf( '<h1 class="post-title">%s</h1>', esc_html( $p_title ) );
+
+			if ( $include_author ) {
+				$author        = get_the_author_meta( 'display_name', $post->post_author );
+				$date          = get_the_date( '', $post );
+				$section_html .= sprintf(
+					'<div class="post-meta" style="margin-bottom:1.5em;padding-bottom:0.75em;border-bottom:1px solid #ddd;"><p><strong>%s:</strong> %s | <strong>%s:</strong> %s</p></div>',
+					esc_html__( 'Author', 'read-offline' ),
+					esc_html( $author ),
+					esc_html__( 'Published', 'read-offline' ),
+					esc_html( $date )
+				);
+			}
+
+			if ( $include_featured && has_post_thumbnail( $post ) ) {
+				$img_url       = get_the_post_thumbnail_url( $post, 'large' );
+				$section_html .= sprintf(
+					'<div class="post-featured" style="margin-bottom:1.5em;"><img src="%s" alt="" style="max-width:100%%;height:auto;" /></div>',
+					esc_url( $img_url )
+				);
+			}
+
+			$section_html .= '<div class="post-content">' . $content . '</div>';
+			$section_html .= '</section>';
+
+			$sections[] = $section_html;
+		}
+
+		$body = implode( "\n", $sections );
+
+		// Handle TOC if enabled.
+		$toc_html = '';
+		if ( ! empty( $pdf_opts[ 'toc' ] ) ) {
+			$depth                      = max( 1, min( 6, (int) ( $pdf_opts[ 'toc_depth' ] ?? 3 ) ) );
+			list( $body, $toc_content ) = self::build_epub_toc_html( $body, $depth );
+
+			if ( $toc_content ) {
+				$toc_title = self::get_toc_title( 'pdf' );
+				$toc_html  = sprintf(
+					'<div class="read-offline-toc" style="margin-bottom:2em;padding-bottom:1em;border-bottom:1px solid #ddd;"><h2>%s</h2>%s</div>',
+					esc_html( $toc_title ),
+					$toc_content
+				);
+				$toc_html  = apply_filters( 'read_offline_pdf_toc_html', $toc_html, null, $depth );
+			}
+		}
+
+		// Build complete HTML document.
+		$full_html = sprintf(
+			'<!DOCTYPE html>
+<html lang="%s">
+<head>
+	<meta charset="%s">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>%s</title>
+	<style>
+		%s
+	</style>
+</head>
+<body>
+	<article>
+		<header>
+			<h1 class="document-title">%s</h1>
+		</header>
+		%s
+		<div class="combined-content">
+			%s
+		</div>
+	</article>
+</body>
+</html>',
+			esc_attr( get_locale() ),
+			esc_attr( $doc_charset ),
+			esc_html( $title ),
+			$css,
+			esc_html( $title ),
+			$toc_html,
+			$body
+		);
+
+		/**
+		 * Filter the combined HTML document before sending to Cloudflare.
+		 *
+		 * @since 2.2.8
+		 *
+		 * @param string $full_html Complete HTML document.
+		 * @param array  $post_ids  Array of post IDs.
+		 * @param array  $pdf_opts  PDF settings.
+		 * @param array  $gen_opts  General settings.
+		 */
+		$full_html = apply_filters( 'read_offline_cloudflare_combined_html', $full_html, $post_ids, $pdf_opts, $gen_opts );
+
+		// Prepare Cloudflare PDF options.
+		$cf_options = array(
+			'format'          => $pdf_opts[ 'size' ] ?? 'A4',
+			'margins'         => $pdf_opts[ 'margins' ] ?? array(
+				't' => 15,
+				'r' => 15,
+				'b' => 15,
+				'l' => 15,
+			),
+			'header'          => $pdf_opts[ 'header' ] ?? '',
+			'footer'          => $pdf_opts[ 'footer' ] ?? '',
+			'page_numbers'    => ! empty( $pdf_opts[ 'page_numbers' ] ),
+			'printBackground' => true,
+		);
+
+		// Call Cloudflare API.
+		return Read_Offline_Cloudflare::generate_pdf( $full_html, $path, $cf_options, null );
+	}
+
 	/* Smoke test method (manual invocation) */
 	public static function debug_smoke_capabilities() {
 		if ( ! function_exists( 'get_option' ) ) {
@@ -852,6 +1366,7 @@ class Read_Offline_Export {
 
 	/**
 	 * Return TOC title (filterable) for a given format.
+	 *
 	 * @param string $format pdf|epub
 	 * @return string
 	 */
@@ -869,6 +1384,7 @@ class Read_Offline_Export {
 		$default = __( 'Contents', 'read-offline' );
 		/**
 		 * Filter the TOC title used for PDF/EPUB.
+		 *
 		 * @param string $default Default localized title.
 		 * @param string $format  Format slug (pdf|epub|md?).
 		 */
@@ -878,6 +1394,7 @@ class Read_Offline_Export {
 	/**
 	 * Inject <bookmark> tags before headings up to a depth for mPDF TOC generation.
 	 * Leaves original heading markup intact.
+	 *
 	 * @param string $html
 	 * @param int $depth
 	 * @return string Modified HTML
@@ -933,6 +1450,7 @@ class Read_Offline_Export {
 	/**
 	 * Invalidate generated cached files for a specific post and optional format.
 	 * Deletes matching files in uploads/read-offline/ for on-demand regeneration.
+	 *
 	 * @param int $post_id Post ID.
 	 * @param string|null $format 'pdf'|'epub'|'md' or null for all.
 	 * @return int Number of files removed.
@@ -967,7 +1485,7 @@ class Read_Offline_Export {
 		$removed = 0;
 		foreach ( $files as $f ) {
 			if ( @unlink( $f ) ) {
-				$removed++;
+				++$removed;
 			}
 		}
 		return $removed;
@@ -1167,13 +1685,15 @@ class Read_Offline_Export {
 			return new WP_Error( 'mpdf_missing', 'mPDF not available' );
 		}
 		$m    = $pdf_opts[ 'margins' ] ?? array();
-		$mpdf = new \Mpdf\Mpdf( array(
-			'format'        => self::parse_pdf_format_arg( $pdf_opts ),
-			'margin_left'   => (int) ( $m[ 'l' ] ?? 15 ),
-			'margin_right'  => (int) ( $m[ 'r' ] ?? 15 ),
-			'margin_top'    => (int) ( $m[ 't' ] ?? 15 ),
-			'margin_bottom' => (int) ( $m[ 'b' ] ?? 15 ),
-		) );
+		$mpdf = new \Mpdf\Mpdf(
+			array(
+				'format'        => self::parse_pdf_format_arg( $pdf_opts ),
+				'margin_left'   => (int) ( $m[ 'l' ] ?? 15 ),
+				'margin_right'  => (int) ( $m[ 'r' ] ?? 15 ),
+				'margin_top'    => (int) ( $m[ 't' ] ?? 15 ),
+				'margin_bottom' => (int) ( $m[ 'b' ] ?? 15 ),
+			)
+		);
 		$mpdf->SetTitle( $title );
 		$mpdf->SetAuthor( get_bloginfo( 'name' ) );
 		return $mpdf;
@@ -1348,7 +1868,7 @@ class Read_Offline_Export {
 				$body  = $header . $content;
 				$xhtml = self::wrap_epub_xhtml_document( $title, $meta[ 'lang' ], $body, $css );
 				$book->addChapter( sanitize_title( $title ), 'chapter' . $index . '.xhtml', $xhtml );
-				$index++;
+				++$index;
 			}
 			$book->finalize();
 			$dir      = dirname( $path );

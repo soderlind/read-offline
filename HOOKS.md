@@ -15,6 +15,7 @@ Each entry shows: Purpose • Arguments • Expected return (for filters) • Ex
      - [Bulk / UI](#7-bulk--ui)
      - [Internal Paths](#8-internal-paths)
  - [Actions](#actions)
+ - [Cloudflare Browser Rendering Filters & Actions](#cloudflare-browser-rendering-filters--actions)
  - [Validation Filter](#validation-filter)
  - [Download Integrity Headers](#download-integrity-headers)
  - [Helper Methods (Public)](#helper-methods-public)
@@ -211,6 +212,153 @@ Args: (string $path, WP_Post $post, array $epub_opts)
 add_action( 'read_offline_epub_generated', function( $path, $post ) {
     error_log( 'EPUB created: ' . $path );
 }, 10, 2 );
+```
+
+## Cloudflare Browser Rendering Filters & Actions
+
+### `read_offline_use_cloudflare`
+Filter whether to use Cloudflare Browser Rendering for single PDF generation. Defaults to true if Cloudflare credentials are configured.
+
+Args: (bool $use_cloudflare, WP_Post $post, array $pdf_opts, array $gen_opts)
+Return: bool
+
+```php
+add_filter( 'read_offline_use_cloudflare', function( $use, $post, $pdf_opts, $gen_opts ) {
+    // Always use mPDF for specific post types.
+    if ( 'product' === $post->post_type ) {
+        return false;
+    }
+    return $use;
+}, 10, 4 );
+```
+
+### `read_offline_use_cloudflare_combined`
+Filter whether to use Cloudflare Browser Rendering for combined PDF generation. Defaults to true if Cloudflare credentials are configured.
+
+Args: (bool $use_cloudflare, array $post_ids, array $pdf_opts, array $gen_opts)
+Return: bool
+
+```php
+add_filter( 'read_offline_use_cloudflare_combined', function( $use, $post_ids, $pdf_opts, $gen_opts ) {
+    // Use Cloudflare only for large exports (10+ posts).
+    return count( $post_ids ) >= 10;
+}, 10, 4 );
+```
+
+### `read_offline_cloudflare_fallback`
+Triggered when Cloudflare PDF generation fails. Return true to fallback to mPDF, false to propagate error.
+
+Args: (bool $fallback, WP_Error $error, WP_Post|null $post)
+Return: bool
+
+```php
+add_filter( 'read_offline_cloudflare_fallback', function( $fallback, $error, $post ) {
+    // Never fallback for premium content.
+    if ( $post && has_term( 'premium', 'category', $post ) ) {
+        return false; // Force Cloudflare, propagate error if it fails.
+    }
+    return $fallback; // Default behavior.
+}, 10, 3 );
+```
+
+### `read_offline_cloudflare_pdf_options`
+Filter Cloudflare PDF options before building Puppeteer script. Allows customization of format, margins, headers, footers, etc.
+
+Args: (array $options, WP_Post|null $post)
+Return: array
+
+```php
+add_filter( 'read_offline_cloudflare_pdf_options', function( $options, $post ) {
+    // Force landscape for specific posts.
+    if ( $post && has_tag( 'wide-content', $post ) ) {
+        $options['landscape'] = true;
+    }
+    return $options;
+}, 10, 2 );
+```
+
+### `read_offline_cloudflare_puppeteer_script`
+Filter the raw Puppeteer JavaScript sent to Cloudflare Browser Rendering API.
+
+Args: (string $script, array $options, WP_Post|null $post)
+Return: string
+
+```php
+add_filter( 'read_offline_cloudflare_puppeteer_script', function( $script, $options, $post ) {
+    // Add custom JavaScript before PDF generation.
+    $custom = "await page.evaluate(() => { console.log('Generating PDF...'); });";
+    return str_replace( 'await page.pdf(', $custom . "\n    await page.pdf(", $script );
+}, 10, 3 );
+```
+
+### `read_offline_cloudflare_html`
+Filter the complete HTML document before sending to Cloudflare for PDF rendering.
+
+Args: (string $full_html, WP_Post|null $post, array $pdf_opts, array $gen_opts)
+Return: string
+
+```php
+add_filter( 'read_offline_cloudflare_html', function( $html, $post, $pdf_opts, $gen_opts ) {
+    // Inject custom analytics or tracking scripts.
+    $tracking = '<script>console.log("PDF generated via Cloudflare");</script>';
+    return str_replace( '</body>', $tracking . '</body>', $html );
+}, 10, 4 );
+```
+
+### `read_offline_cloudflare_combined_html`
+Filter the combined HTML document for multi-post PDFs before sending to Cloudflare.
+
+Args: (string $full_html, array $post_ids, array $pdf_opts, array $gen_opts)
+Return: string
+
+```php
+add_filter( 'read_offline_cloudflare_combined_html', function( $html, $post_ids, $pdf_opts, $gen_opts ) {
+    // Add cover page for combined exports.
+    $cover = '<div style="page-break-after:always;"><h1>Combined Export</h1><p>' . count( $post_ids ) . ' posts</p></div>';
+    return str_replace( '<div class="combined-content">', $cover . '<div class="combined-content">', $html );
+}, 10, 4 );
+```
+
+### `read_offline_cloudflare_timeout`
+Filter the HTTP timeout for Cloudflare API requests (default: 60 seconds).
+
+Args: (int $timeout)
+Return: int
+
+```php
+add_filter( 'read_offline_cloudflare_timeout', function( $timeout ) {
+    // Increase timeout for large documents.
+    return 120; // 2 minutes
+} );
+```
+
+### `read_offline_cloudflare_pdf_generated`
+Action fired after successful Cloudflare PDF generation.
+
+Args: (string $path, WP_Post|null $post, array $response)
+
+```php
+add_action( 'read_offline_cloudflare_pdf_generated', function( $path, $post, $response ) {
+    // Log successful generation.
+    error_log( sprintf( 'Cloudflare PDF generated: %s (Post ID: %d)', basename( $path ), $post ? $post->ID : 0 ) );
+}, 10, 3 );
+```
+
+### `read_offline_cloudflare_pdf_failed`
+Action fired when Cloudflare PDF generation fails.
+
+Args: (WP_Error $error, WP_Post|null $post, string $html)
+
+```php
+add_action( 'read_offline_cloudflare_pdf_failed', function( $error, $post, $html ) {
+    // Alert admins of Cloudflare failures.
+    $admin_email = get_option( 'admin_email' );
+    wp_mail(
+        $admin_email,
+        'Cloudflare PDF Generation Failed',
+        sprintf( 'Error: %s\nPost ID: %d', $error->get_error_message(), $post ? $post->ID : 0 )
+    );
+}, 10, 3 );
 ```
 
 ## Validation Filter

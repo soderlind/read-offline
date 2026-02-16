@@ -170,15 +170,17 @@ class Read_Offline_Admin {
 			'read_offline_settings_general',
 			array(
 				'default'           => array(
-					'auto_insert'      => true,
-					'formats'          => array( 'pdf', 'epub' ),
-					'filename'         => '{site}-{post_slug}-{format}',
-					'include_featured' => true,
-					'include_author'   => true,
-					'combine_bulk'     => true,
-					'rest_public'      => false, // Default OFF: unauthenticated REST export disabled unless explicitly enabled.
-					'rest_rate_limit'  => 10,   // Requests per window.
-					'rest_rate_window' => 60,   // Window seconds.
+					'auto_insert'           => true,
+					'formats'               => array( 'pdf', 'epub' ),
+					'filename'              => '{site}-{post_slug}-{format}',
+					'include_featured'      => true,
+					'include_author'        => true,
+					'combine_bulk'          => true,
+					'rest_public'           => false, // Default OFF: unauthenticated REST export disabled unless explicitly enabled.
+					'rest_rate_limit'       => 10,   // Requests per window.
+					'rest_rate_window'      => 60,   // Window seconds.
+					'cloudflare_account_id' => '',   // Cloudflare account ID for Browser Rendering.
+					'cloudflare_api_token'  => '',   // Cloudflare API token.
 				),
 				'sanitize_callback' => array( __CLASS__, 'sanitize_general_settings' ),
 			)
@@ -255,6 +257,8 @@ class Read_Offline_Admin {
 		$clean[ 'rest_rate_limit' ]  = max( 0, min( 1000, $rate_limit ) );
 		$window                      = isset( $input[ 'rest_rate_window' ] ) ? (int) $input[ 'rest_rate_window' ] : 60;
 		$clean[ 'rest_rate_window' ] = max( 10, min( 86400, $window ) );
+		$clean[ 'cloudflare_account_id' ] = isset( $input[ 'cloudflare_account_id' ] ) ? sanitize_text_field( wp_unslash( $input[ 'cloudflare_account_id' ] ) ) : '';
+		$clean[ 'cloudflare_api_token' ]  = isset( $input[ 'cloudflare_api_token' ] ) ? sanitize_text_field( wp_unslash( $input[ 'cloudflare_api_token' ] ) ) : '';
 		return $clean;
 	}
 
@@ -820,6 +824,66 @@ class Read_Offline_Admin {
 										<p class="read-offline-field-desc">
 											<?php esc_html_e( 'Seconds per rate limit window.', 'read-offline' ); ?>
 										</p>
+									</div>
+
+									<!-- Cloudflare Browser Rendering Settings -->
+									<label style="grid-column:1/-1;margin-top:16px;padding-top:16px;border-top:1px solid #dcdcde;">
+										<strong><?php _e( 'Cloudflare Browser Rendering (Optional)', 'read-offline' ); ?></strong>
+									</label>
+
+									<label><?php _e( 'Cloudflare Account ID', 'read-offline' ); ?>
+										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
+											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
+											data-help="<?php echo esc_attr__( 'Your Cloudflare account ID. When both Account ID and API Token are configured, PDFs will be generated using Cloudflare Browser Rendering instead of mPDF for better modern CSS and JavaScript support.', 'read-offline' ); ?>">?</span>
+									</label>
+									<div>
+										<?php if ( current_user_can( 'manage_options' ) ) : ?>
+										<input type="text" name="read_offline_settings_general[cloudflare_account_id]"
+											value="<?php echo esc_attr( $options[ 'cloudflare_account_id' ] ?? '' ); ?>"
+											class="regular-text"
+											placeholder="1234567890abcdef1234567890abcdef" />
+										<p class="read-offline-field-desc">
+											<?php _e( 'Find in Cloudflare Dashboard → Account ID', 'read-offline' ); ?>
+											(<a href="https://developers.cloudflare.com/fundamentals/get-started/basic-tasks/find-account-and-zone-ids/" target="_blank"><?php _e( 'How to find', 'read-offline' ); ?></a>)
+										</p>
+										<?php else : ?>
+											<p><em><?php _e( 'Only administrators can configure Cloudflare settings.', 'read-offline' ); ?></em></p>
+										<?php endif; ?>
+									</div>
+
+									<label><?php _e( 'Cloudflare API Token', 'read-offline' ); ?>
+										<span class="read-offline-help-tip" role="button" tabindex="0" aria-haspopup="dialog"
+											aria-label="<?php echo esc_attr__( 'Help', 'read-offline' ); ?>"
+											data-help="<?php echo esc_attr__( 'API token with Browser Rendering permissions. Create at: Cloudflare Dashboard → My Profile → API Tokens.', 'read-offline' ); ?>">?</span>
+									</label>
+									<div>
+										<?php if ( current_user_can( 'manage_options' ) ) : ?>
+										<input type="password" name="read_offline_settings_general[cloudflare_api_token]"
+											value="<?php echo esc_attr( $options[ 'cloudflare_api_token' ] ?? '' ); ?>"
+											class="regular-text"
+											placeholder="••••••••••••••••••••••••••••••••" />
+										<p class="read-offline-field-desc">
+											<?php _e( 'API token with Browser Rendering:Read permission.', 'read-offline' ); ?>
+											(<a href="https://developers.cloudflare.com/browser-rendering/get-started/" target="_blank"><?php _e( 'Setup guide', 'read-offline' ); ?></a>)
+										</p>
+										<?php if ( Read_Offline_Cloudflare::is_configured() ) : ?>
+											<p class="read-offline-field-desc">
+												<strong style="color:#1a7f37;">✓ <?php _e( 'Cloudflare is configured. PDFs will use Browser Rendering.', 'read-offline' ); ?></strong>
+											</p>
+											<?php if ( $last_error = Read_Offline_Cloudflare::get_last_error() ) : ?>
+											<p class="read-offline-field-desc" style="color:#b32d2e;">
+												<strong><?php _e( 'Recent error:', 'read-offline' ); ?></strong> <?php echo esc_html( $last_error['message'] ); ?>
+												(<?php echo esc_html( human_time_diff( $last_error['time'] ) ); ?> <?php _e( 'ago', 'read-offline' ); ?>)
+											</p>
+											<?php endif; ?>
+										<?php else : ?>
+											<p class="read-offline-field-desc">
+												<em><?php _e( 'Currently using mPDF for PDF generation.', 'read-offline' ); ?></em>
+											</p>
+										<?php endif; ?>
+										<?php else : ?>
+											<p><em><?php _e( 'Only administrators can configure Cloudflare settings.', 'read-offline' ); ?></em></p>
+										<?php endif; ?>
 									</div>
 
 									<!-- Removed: PDF Custom CSS moved to PDF tab -->
